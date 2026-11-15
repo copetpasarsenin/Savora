@@ -7,12 +7,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
-	"github.com/savora/backend/database"
-	"github.com/savora/backend/handlers"
-	"github.com/savora/backend/middleware"
-	"github.com/savora/backend/models"
-	"github.com/savora/backend/routes"
-	"github.com/savora/backend/services"
+	"github.com/saveplate/backend/database"
+	"github.com/saveplate/backend/handlers"
+	"github.com/saveplate/backend/middleware"
+	"github.com/saveplate/backend/models"
+	"github.com/saveplate/backend/routes"
+	"github.com/saveplate/backend/services"
 )
 
 func main() {

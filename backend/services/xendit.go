@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/models"
 	"gorm.io/gorm"
 )
 
@@ -46,11 +46,11 @@ func (x *XenditService) CreateInvoice(tx *gorm.DB, order models.Order) (*models.
 	}
 
 	// Prepare Xendit Invoice payload
-	externalID := fmt.Sprintf("savora-order-%d", order.ID)
+	externalID := fmt.Sprintf("saveplate-order-%d", order.ID)
 	payload := map[string]interface{}{
 		"external_id":      externalID,
 		"amount":           order.TotalPrice,
-		"description":      fmt.Sprintf("Savora Order #%d", order.ID),
+		"description":      fmt.Sprintf("SavePlate Order #%d", order.ID),
 		"invoice_duration": expirySeconds,
 		"currency":         "IDR",
 		"success_redirect_url": fmt.Sprintf("%s/orders/%d/pay?status=success", frontendURL, order.ID),

@@ -1,4 +1,4 @@
-# Playwright E2E Testing Guide - Savora
+# Playwright E2E Testing Guide - SavePlate
 
 ## Setup
 
@@ -17,7 +17,7 @@ npx playwright install
 npx playwright test
 
 # Run specific test file
-npx playwright test tests/e2e/savora-happy-path.spec.js
+npx playwright test tests/e2e/saveplate-happy-path.spec.js
 
 # Run with headed browser (visible)
 npx playwright test --headed
@@ -40,12 +40,12 @@ export XENDIT_CALLBACK_TOKEN=your_test_token
 
 ## Test Files & Scenarios
 
-### File: savora-happy-path.spec.js (MUST Priority)
+### File: saveplate-happy-path.spec.js (MUST Priority)
 **Owner:** Nadi Azzada Akbar
-- **E2E-01:** Customer Checkout → Midtrans Payment → Order Paid
+- **E2E-01:** Customer Checkout → Xendit Payment → Order Paid
   - Marketplace browse, select product, checkout
   - Service fee 5% verified in breakdown
-  - Midtrans webhook payment (settlement)
+  - Xendit webhook payment (PAID)
   - Pickup code generated
 
 - **E2E-02:** UMKM Prepare Order → Validate Pickup Code
@@ -60,7 +60,7 @@ export XENDIT_CALLBACK_TOKEN=your_test_token
   - Keyword selection (enak, segar, dll)
   - Keywords classified & badge updated
 
-### File: savora-edge-cases.spec.js (MUST Priority)
+### File: saveplate-edge-cases.spec.js (MUST Priority)
 - **E2E-04:** Payment EXPIRED → Stock Returned
   - Order created, Payment Pending
   - 15+ minutes pass / expire webhook
@@ -89,7 +89,7 @@ export XENDIT_CALLBACK_TOKEN=your_test_token
   - Admin dashboard shows flag for moderation
   - UMKM badge downgrade pending admin verification
 
-### File: savora-auth-rbac.spec.js (MUST Priority - PRD REVISI #22)
+### File: saveplate-auth-rbac.spec.js (MUST Priority - PRD REVISI #22)
 **Authentication & Role-Based Access Control Tests**
 - **AUTH-01:** User Register as Customer → Account Created
 - **AUTH-02:** Login with Wrong Password → Error & No Session
@@ -104,7 +104,7 @@ export XENDIT_CALLBACK_TOKEN=your_test_token
 - **SESSION-01:** Logout Clears Token
 - **SESSION-02:** Expired Token Redirects to Login
 
-### File: savora-food-trust-score.spec.js (MUST Priority - PRD Section 12, 13)
+### File: saveplate-food-trust-score.spec.js (MUST Priority - PRD Section 12, 13)
 **Food Trust Index, Food Score Decay, Dynamic Discount**
 - **FTI-01:** UMKM Create Listing → Food Trust Index Calculated
   - Metadata: production time, shelf life, packaging, storage
@@ -143,24 +143,24 @@ export XENDIT_CALLBACK_TOKEN=your_test_token
   - UMKM chooses diskon in recommended range
   - Price always ≥ min_price guardrail
 
-### File: savora-midtrans-admin.spec.js (MUST Priority - PRD FR-14, #37)
-**Midtrans Webhook Signature Verification + Admin Verification/Moderation**
-- **MIDTRANS-01:** Valid Signature Webhook → Payment Status Updated
-  - SHA512(order_id + status_code + gross_amount + server_key) verified
+### File: saveplate-admin.spec.js (MUST Priority - PRD FR-14, #37, #40)
+**Xendit Webhook Callback Token Verification + Admin Verification/Moderation**
+- **XENDIT-01:** Valid Callback Token Webhook → Payment Status Updated
+  - Header `x-callback-token` verified in constant time
   - Order status updated to PAID
 
-- **MIDTRANS-02:** Invalid Signature → Webhook Rejected (400/401)
-  - Wrong signature_key rejected
-  - Payment NOT updated
+- **XENDIT-02:** Invalid Callback Token → Ignored Safely
+  - Wrong `x-callback-token` logged (`token_valid=false`)
+  - Payment & order NOT updated
 
-- **MIDTRANS-03:** No Signature → Rejected
-  - Webhook without signature_key
+- **XENDIT-03:** Missing `x-callback-token` → Rejected (400)
+  - Webhook without `x-callback-token` header rejected
 
-- **MIDTRANS-04:** Webhook Settlement → Pickup Code Generated
+- **XENDIT-04:** Webhook PAID → Pickup Code Generated
   - Order PAID, pickup_code created
 
-- **MIDTRANS-05:** Webhook Expire → Order Expired, Stock Returned
-  - status_code 202 or transaction_status = expire
+- **XENDIT-05:** Webhook EXPIRED → Order Expired, Stock Returned
+  - `status = EXPIRED`
   - Order → EXPIRED, stock reserved released
 
 - **ADMIN-01:** Admin Verify UMKM → UMKM Can Publish
@@ -191,7 +191,7 @@ export XENDIT_CALLBACK_TOKEN=your_test_token
   - Transaction list with filters
   - Payment status, order status, amount, etc.
 
-### File: savora-marketplace-review.spec.js (MUST Priority - FR-05, FR-09, FR-16)
+### File: saveplate-marketplace-review.spec.js (MUST Priority - FR-05, FR-09, FR-16)
 **Marketplace Filter, Review Validation, Keyword Classification**
 - **MKT-01:** Browse Marketplace → Products with Food Score & Badges
 - **MKT-02:** Filter by Category → Products Filtered Correctly
@@ -226,12 +226,12 @@ export XENDIT_CALLBACK_TOKEN=your_test_token
 - **BADGE-02:** Product Detail Shows UMKM Rating & Badge
   - UMKM info section with rating + keyword badge
 
-### File: savora-comprehensive.spec.js (MUST Priority - FR-10, FR-11)
+### File: saveplate-comprehensive.spec.js (MUST Priority - FR-10, FR-11)
 **Complete Order Flow, Help Tickets, Waste Log**
 - **FLOW-01:** Order → Payment → Pickup Code Generated
   - Full customer checkout flow
   - Service fee 5% displayed
-  - Midtrans webhook → Order PAID
+  - Xendit webhook → Order PAID
   - Pickup code generated & visible
 
 - **FLOW-02:** Customer Create Help Ticket

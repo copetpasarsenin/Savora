@@ -14,7 +14,7 @@ import { computeImpactSummary } from "@/lib/impact";
 import { useCart } from "@/lib/CartContext";
 import { apiGet } from "@/lib/api";
 import { getUser, logout } from "@/lib/auth";
-import SavoraNavbar from "@/components/navbar/SavoraNavbar";
+import SavePlateNavbar from "@/components/navbar/SavePlateNavbar";
 
 // ── Data demo lokal (fallback tanpa backend) ──────────────────────────────
 // 3-4 order contoh: campuran Completed & Paid, termasuk service fee 5%.
@@ -273,7 +273,7 @@ export default function AkunPage() {
 
   return (
     <div style={{ background: "#ffffff", fontFamily: '"Plus Jakarta Sans", sans-serif', minHeight: "100vh" }}>
-      <SavoraNavbar />
+      <SavePlateNavbar />
 
       <main className="beranda-akun-main">
         <h1 className="beranda-akun-title">Riwayat &amp; Impact</h1>
@@ -305,7 +305,7 @@ export default function AkunPage() {
       <footer className="beranda-footer">
         <div className="beranda-footer-container">
           <div className="beranda-footer-column-brand">
-            <div className="beranda-footer-wordmark">Savora</div>
+            <div className="beranda-footer-wordmark">SavePlate</div>
             <p className="beranda-footer-mission">
               Misi kami sederhana: Tidak boleh ada makanan enak yang terbuang sia-sia.
               Bergabunglah dengan ribuan penyelamat makanan lainnya di seluruh Indonesia.
@@ -321,7 +321,7 @@ export default function AkunPage() {
           </div>
         </div>
         <div className="beranda-footer-bottom">
-          <span>© 2026 Savora Platform. Proudly Made In Indonesia for the Earth.</span>
+          <span>© 2026 SavePlate Platform. Proudly Made In Indonesia for the Earth.</span>
         </div>
       </footer>
     </div>

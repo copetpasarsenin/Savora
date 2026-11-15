@@ -33,7 +33,7 @@ export default function AdminLayout({ children }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ color: 'var(--primary-color)', fontSize: '24px' }}>⚲</span>
           <span style={{ fontWeight: 700, fontSize: '1.25rem', color: 'var(--text-main)' }}>
-            Savora Admin
+            SavePlate Admin
           </span>
         </div>
         <button

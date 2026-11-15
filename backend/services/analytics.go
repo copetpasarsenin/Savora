@@ -1,7 +1,7 @@
 package services
 
 import (
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/models"
 )
 
 // Stub file - analytics implementation by Rifaidi

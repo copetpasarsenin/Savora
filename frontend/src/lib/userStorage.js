@@ -18,7 +18,7 @@ function getCurrentUserNamespace() {
   if (typeof window === 'undefined') return 'guest';
 
   try {
-    const userStr = window.localStorage.getItem('savora_user');
+    const userStr = window.localStorage.getItem('saveplate_user');
     if (!userStr) return 'guest';
 
     const user = JSON.parse(userStr);
@@ -33,8 +33,8 @@ function getCurrentUserNamespace() {
 
 /**
  * Buat kunci localStorage dengan namespace akun.
- * @param {string} baseKey - Kunci dasar (mis. "savora_cart")
- * @returns {string} - Kunci dengan namespace (mis. "savora_cart_user_123")
+ * @param {string} baseKey - Kunci dasar (mis. "saveplate_cart")
+ * @returns {string} - Kunci dengan namespace (mis. "saveplate_cart_user_123")
  */
 function getNamespacedKey(baseKey) {
   const namespace = getCurrentUserNamespace();
@@ -92,7 +92,7 @@ export function removeUserData(baseKey) {
  * Migrasi data lama dari kunci global ke namespace akun (sekali jalan).
  * Dipanggil otomatis saat aplikasi load pertama kali.
  *
- * @param {string} baseKey - Kunci dasar (mis. "savora_cart")
+ * @param {string} baseKey - Kunci dasar (mis. "saveplate_cart")
  */
 export function migrateOldData(baseKey) {
   if (typeof window === 'undefined') return;

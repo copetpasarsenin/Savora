@@ -133,8 +133,8 @@ export default function AdminSidebar({ onClose }) {
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('savora_token');
-      localStorage.removeItem('savora_user');
+      localStorage.removeItem('saveplate_token');
+      localStorage.removeItem('saveplate_user');
       window.location.href = '/login';
     }
   };
@@ -144,7 +144,7 @@ export default function AdminSidebar({ onClose }) {
       <div className="sidebar">
         <div className="sidebar-header">
           <span style={{ color: "var(--primary-color)", fontSize: "24px" }}>⚲</span>
-          <span style={{ fontWeight: 700 }}>Savora</span>
+          <span style={{ fontWeight: 700 }}>SavePlate</span>
           <span style={{
             marginLeft: '8px',
             fontSize: '10px',

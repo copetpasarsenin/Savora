@@ -325,7 +325,7 @@ Berdasarkan temuan audit, fitur berikut **disesuaikan/ditunda** untuk Fase 1:
      - Porsi Makanan Diselamatkan
      - Order Completed + ~~Waste Log~~ (skip)
    - ~~Estimasi Reduksi CO2~~ → skip
-   - Teks: "Dampak lingkungan Savora sejak awal" (label kecil muted)
+   - Teks: "Dampak lingkungan SavePlate sejak awal" (label kecil muted)
 
 8. ~~**Aktivitas Terbaru (feed 5–8 item + "Lihat Semua")**~~ → **SKIP Fase 1**
 
@@ -816,7 +816,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
      - Total Makanan Diselamatkan (kg) — `total_makanan_diselamatkan_kg`
      - Porsi Diselamatkan — `porsi_diselamatkan`
      - Order Diselesaikan — `order_completed_count`
-   - Label: "Dampak lingkungan Savora sejak awal"
+   - Label: "Dampak lingkungan SavePlate sejak awal"
    - Skip: Waste Log (tabel belum ada), Estimasi CO2 (formula belum ada, opsional per spec)
 
 **Seksi 8 (Aktivitas Terbaru)** — SKIP untuk Fase 1 sesuai plan (kompleks, tidak kritikal MVP)
@@ -1767,7 +1767,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 **Backend:**
 ```bash
-cd backend && go build -o savora-backend.exe main.go
+cd backend && go build -o saveplate-backend.exe main.go
 ```
 ✅ **PASSED** - no compilation errors, binary created successfully
 

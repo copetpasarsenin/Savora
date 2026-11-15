@@ -93,7 +93,7 @@ export default function AdminDashboardPage() {
       <div className="topbar">
           <div>
             <div className="page-title">Dashboard Admin</div>
-            <div className="page-subtitle">Ringkasan aktivitas platform Savora</div>
+            <div className="page-subtitle">Ringkasan aktivitas platform SavePlate</div>
           </div>
         </div>
 
@@ -636,7 +636,7 @@ export default function AdminDashboardPage() {
                 {/* Metrics */}
                 <div style={{ flex: 1, minWidth: '280px' }}>
                   <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                    Dampak lingkungan Savora sejak awal
+                    Dampak lingkungan SavePlate sejak awal
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '20px' }}>
                     {/* Metric 1: Total Makanan Diselamatkan */}

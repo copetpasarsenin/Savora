@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Tentang Page — Halaman "Tentang" / Pusat Bantuan Savora
+   Tentang Page — Halaman "Tentang" / Pusat Bantuan SavePlate
    Mengikuti design tokens dari globals.css & pola styling beranda.css
    ========================================================================== */
 
@@ -405,7 +405,7 @@
   line-height: 1.4;
 }
 
-/* ---- Section Kenapa Savora? ---- */
+/* ---- Section Kenapa SavePlate? ---- */
 .tentang-kenapa {
   background: #ffffff;
   padding: 80px 40px;

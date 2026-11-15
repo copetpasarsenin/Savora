@@ -20,7 +20,7 @@ import NotificationBell from "@/components/organisms/NotificationBell";
 const SHOW_LOCATION = true;
 
 /**
- * SavoraNavbar — Navbar global 2-state (guest vs logged-in)
+ * SavePlateNavbar — Navbar global 2-state (guest vs logged-in)
  *
  * State GUEST: [Logo+Nav] [Lokasi] [Keranjang] [Masuk] [Daftar]
  * State LOGGED-IN: [Logo+Nav] [Lokasi demo] [Keranjang] [Notifikasi] [Avatar+dropdown]
@@ -30,7 +30,7 @@ const SHOW_LOCATION = true;
  * - Styling baru (inline) HANYA untuk elemen baru: avatar, dropdown
  * - Hindari hydration mismatch: render guest dulu, update setelah mount
  */
-export default function SavoraNavbar() {
+export default function SavePlateNavbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { count } = useCart();
@@ -62,9 +62,9 @@ export default function SavoraNavbar() {
   useEffect(() => {
     if (mounted) {
       // Migrasi data lama sekali jalan (dari kunci global ke namespace per-akun)
-      migrateOldData("savora_address");
+      migrateOldData("saveplate_address");
 
-      const savedAddress = readUserData("savora_address");
+      const savedAddress = readUserData("saveplate_address");
       if (savedAddress) {
         setAddress(savedAddress);
       }
@@ -149,7 +149,7 @@ export default function SavoraNavbar() {
     const input = e.target.elements.addressInput;
     if (input && input.value.trim()) {
       const newAddress = input.value.trim();
-      writeUserData("savora_address", newAddress);
+      writeUserData("saveplate_address", newAddress);
       setAddress(newAddress);
       setAddressDropdownOpen(false);
     }
@@ -170,10 +170,10 @@ export default function SavoraNavbar() {
           <Link href="/" className="beranda-brand">
             <img
               src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png"
-              alt="Savora Logo"
+              alt="SavePlate Logo"
               className="beranda-logo-img"
             />
-            <span className="beranda-brand-text">Savora</span>
+            <span className="beranda-brand-text">SavePlate</span>
           </Link>
           <nav className="beranda-nav">
             <Link href="/">Home</Link>
@@ -219,10 +219,10 @@ export default function SavoraNavbar() {
           <Link href="/" className="beranda-brand">
             <img
               src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png"
-              alt="Savora Logo"
+              alt="SavePlate Logo"
               className="beranda-logo-img"
             />
-            <span className="beranda-brand-text">Savora</span>
+            <span className="beranda-brand-text">SavePlate</span>
           </Link>
 
           {/* Nav Links */}
@@ -544,10 +544,10 @@ export default function SavoraNavbar() {
         <Link href="/" className="beranda-brand">
           <img
             src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png"
-            alt="Savora Logo"
+            alt="SavePlate Logo"
             className="beranda-logo-img"
           />
-          <span className="beranda-brand-text">Savora</span>
+          <span className="beranda-brand-text">SavePlate</span>
         </Link>
 
         {/* Nav Links */}

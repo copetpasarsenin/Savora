@@ -1,11 +1,11 @@
-CLAUDE.md — Savora
-> **Versi: sinkron dengan PRD v3.7 + disesuaikan kondisi repo nyata** (update 21 Jul 2026 malam — struktur backend flat, prefix `/api`, tema `globals.css`, Next.js 16; **keputusan tim: skema data mengikuti PRD**, lihat Section 13).
-Panduan wajib bagi siapa pun/apa pun (termasuk Claude) yang mengerjakan kode di repo ini. Acuan tunggal adalah `docs/SAVORA_PRD.md`. Semua keputusan stack, business rules, dan scope di bawah ini diambil langsung dari PRD — tidak ada penyimpangan. Jika ada bagian PRD yang direvisi di masa depan, dokumen ini harus di-update mengikuti nomor revisi terbaru.
+CLAUDE.md — SavePlate
+> **Versi: sinkron dengan PRD v3.9 + disesuaikan kondisi repo nyata** (update 7 Nov 2026 — rebrand SavePlate, standardisasi Xendit Invoice Sandbox, struktur backend flat, prefix `/api`, tema `globals.css`, Next.js 16; **keputusan tim: skema data mengikuti PRD**, lihat Section 13).
+Panduan wajib bagi siapa pun/apa pun (termasuk Claude) yang mengerjakan kode di repo ini. Acuan tunggal adalah `docs/SavePlate_PRD_v3.9.md`. Semua keputusan stack, business rules, dan scope di bawah ini diambil langsung dari PRD — tidak ada penyimpangan. Jika ada bagian PRD yang direvisi di masa depan, dokumen ini harus di-update mengikuti nomor revisi terbaru.
 ---
 1. Project Overview
-Savora — food rescue marketplace yang menghubungkan UMKM kuliner (penjual makanan surplus masih layak konsumsi) dengan customer (pencari makanan terjangkau). Dibangun untuk lomba CODE 6.0 — Software Development (AMCC, Universitas Amikom Yogyakarta) oleh AmbaTeam (5 orang), deadline 25 Juli 2026.
-Fitur inti: Food Trust Index, Food Score Decay (urgensi real-time), Keyword Classification (badge keamanan dari review), checkout cashless via Midtrans sandbox, service fee 5%, pickup code + self-pickup.
-Batasan mendasar: self-pickup only (bukan delivery), cashless only via Midtrans sandbox (bukan uang asli, bukan COD), web responsive/PWA-ready (bukan native mobile app pada MVP).
+SavePlate — food rescue marketplace yang menghubungkan UMKM kuliner (penjual makanan surplus masih layak konsumsi) dengan customer (pencari makanan terjangkau). Dikembangkan untuk Proyek 3 Program Studi D4 Teknik Informatika ULBI Bandung (Richard Firmansyah 714240047 & Wa Ode Nur Alia 714240035), berawal dari prototipe lomba CODE 6.0.
+Fitur inti: Food Trust Index, Food Score Decay (urgensi real-time), Keyword Classification (badge keamanan dari review), checkout cashless via Xendit sandbox, service fee 5%, pickup code + self-pickup.
+Batasan mendasar: self-pickup only (bukan delivery), cashless only via Xendit sandbox (bukan uang asli, bukan COD), web responsive/PWA-ready (bukan native mobile app pada MVP).
 ---
 2. Tech Stack (sesuai PRD Section 17 — dikunci, bukan opsi)
 Komponen	Teknologi
@@ -13,7 +13,7 @@ Frontend	Next.js (React)
 Backend	Go + Fiber v2
 ORM	GORM
 Database	PostgreSQL — saat ini di-host di Supabase sebagai managed Postgres, diakses HANYA via GORM + `DATABASE_URL`. Jangan pakai Supabase client SDK/fitur BaaS
-Payment Gateway	Midtrans Snap (Sandbox) — bukan production
+Payment Gateway	Xendit Invoice (Sandbox) — bukan production
 Deployment	Vercel (frontend, sudah ada vercel.json) + Railway/Render (backend); database: Supabase managed Postgres
 Tools	Figma, GitHub, README
 Versi persis tiap framework/library ikuti `go.mod` / `package.json` yang nyata di repo — jangan hardcode nomor versi dari dokumen ini.
@@ -60,7 +60,7 @@ Konsistensi dengan kode yang ada > preferensi pribadi.
 Untuk dashboard admin, ikuti docs/design/admin-dashboard-spec.md (turunan PRD 5.3/FR-12/FR-13/16/19). Update docs/design/PROGRESS.md di akhir setiap sesi.
 ---
 5. Business Rules — Sumber Kebenaran Tunggal (PRD)
-Detail lengkap ada di `docs/SAVORA_PRD.md`. Aturan kritis berikut wajib diimplementasikan persis — jangan diubah:
+Detail lengkap ada di `docs/SAVEPLATE_PRD.md`. Aturan kritis berikut wajib diimplementasikan persis — jangan diubah:
 5.1 Food Score Decay (power decay, γ = 0,65)
 ```ts
 function hitungFoodScore(skorAwal: number, publishAt: Date, expiresAt: Date, now: Date): number {
@@ -95,14 +95,12 @@ UMKM menerima `subtotal` penuh; `service_fee` masuk ke `platform_revenue`. Berla
 Enum: `CREATED, PAYMENT_PENDING, PAID, PAYMENT_FAILED, READY_FOR_PICKUP, COMPLETED, NO_SHOW, CANCELLED, EXPIRED, HELP_REQUESTED`.
 Sukses: `Created (transien) → Payment Pending → Paid → Ready for Pickup → Completed` atau `No Show`.
 Gagal/expired: `Created → Payment Pending → Payment Failed` atau `Expired`.
-`Created` adalah status transien — langsung berpindah ke `Payment Pending` begitu transaksi Midtrans dibuat.
+`Created` adalah status transien — langsung berpindah ke `Payment Pending` begitu invoice Xendit dibuat.
 5.4 Reservasi Stok
-Batas waktu pembayaran 15 menit (angka pasti). Stok dirilis otomatis jika gagal/expired; tetap terkunci sampai batas waktu pickup jika sukses.
-5.5 Verifikasi Webhook Midtrans
-```
-signature = SHA512(order_id + status_code + gross_amount + server_key)
-```
-Notifikasi dengan signature tidak cocok diabaikan dan dicatat di payment log — jangan update status order dari webhook tanpa verifikasi ini.
+Batas waktu pembayaran 15 menit (`invoice_duration: 900` detik). Stok dirilis otomatis jika gagal/expired; tetap terkunci sampai batas waktu pickup jika sukses.
+5.5 Verifikasi Webhook Xendit
+Header `x-callback-token` diverifikasi secara constant-time (`crypto/subtle.ConstantTimeCompare`) terhadap `XENDIT_CALLBACK_TOKEN` dan seluruh event dicatat ke `payment_logs` (`token_valid`).
+Notifikasi dengan callback token tidak cocok diabaikan — jangan update status order dari webhook tanpa verifikasi ini.
 5.6 Keyword Classification & Badge
 Kamus keyword: Aman (enak, segar, fresh, hangat, bersih, layak, sesuai deskripsi), Warning (kurang segar, dingin, keras, agak asam, bau kurang sedap, kemasan rusak, porsi kurang), Gawat (basi, bau busuk, berjamur, berlendir, sakit perut, keracunan).
 Threshold badge per UMKM (rolling 30 hari, minimal 3 review):
@@ -122,7 +120,7 @@ Food Trust Index berbasis input metadata.
 Food Score Decay.
 Dynamic discount rule-based.
 Keyword Classification dari ulasan.
-Checkout cashless via Midtrans sandbox + service fee 5% + pickup code + batas waktu pickup.
+Checkout cashless via Xendit sandbox + service fee 5% + pickup code + batas waktu pickup.
 Order tracking.
 Dashboard Customer.
 Dashboard UMKM dasar (kelola listing, kelola pesanan, ringkasan penjualan sederhana).
@@ -163,7 +161,7 @@ Catatan: `reviews.keywords` = denormalisasi tampilan; source of truth klasifikas
 Enum penting:
 Field	Nilai MVP
 user_role	CUSTOMER, UMKM, ADMIN, MITRA_DONASI
-payment_method	MIDTRANS_SANDBOX
+payment_method	XENDIT_SANDBOX
 payment_status	UNPAID, PENDING, PAID, FAILED, EXPIRED
 order_status	CREATED, PAYMENT_PENDING, PAID, PAYMENT_FAILED, READY_FOR_PICKUP, COMPLETED, NO_SHOW, CANCELLED, EXPIRED, HELP_REQUESTED
 keyword_level	AMAN, WARNING, GAWAT
@@ -183,9 +181,9 @@ GET	/products/{id}	Detail produk	Public/Customer
 PATCH	/products/{id}	Edit listing	UMKM/Admin
 DELETE	/products/{id}	Hapus listing	UMKM/Admin
 POST	/food-trust/calculate	Hitung Food Trust Index	UMKM
-POST	/orders	Buat order cashless via Midtrans	Customer
-POST	/payments/midtrans-token	Token pembayaran Midtrans sandbox	Customer
-POST	/payments/midtrans-webhook	Notifikasi status pembayaran	System
+POST	/orders	Buat order cashless & invoice Xendit sandbox	Customer
+POST	/payments/xendit-webhook	Callback status pembayaran Xendit (`x-callback-token`)	System
+GET	/payments/{payment_id}/logs	Audit log notifikasi pembayaran	Admin
 GET	/orders	List order user	Customer/UMKM/Admin
 GET	/orders/{id}	Detail order	Related user/Admin
 PATCH	/orders/{id}/status	Update status order	UMKM/Admin
@@ -230,21 +228,21 @@ Jangan mengganti stack apa pun di Section 2 (mis. ke Vite, Node.js/Express) dan 
 Jangan mengganti model Food Score Decay dengan model lain (linear, step-based, dst.).
 Jangan mengubah threshold badge keyword ke worst-case.
 Jangan menambah status order di luar enum yang sudah ditetapkan.
-Jangan menambah metode pembayaran cash/COD atau payment gateway lain di luar Midtrans sandbox.
-Jangan update status order dari webhook tanpa verifikasi signature.
+Jangan menambah metode pembayaran cash/COD atau payment gateway lain di luar Xendit sandbox.
+Jangan update status order dari webhook tanpa verifikasi `x-callback-token`.
 Jangan menaikkan status fitur Demo Only jadi requirement resmi tanpa keputusan tim.
 Jangan menambah fitur di luar scope (Section 6) tanpa update PRD terlebih dahulu.
 Jika ada konflik antara PRD dan kode yang sudah ada di repo, tandai sebagai pertanyaan ke tim — jangan berasumsi salah satu otomatis benar.
 ---
 11. Referensi
-Requirement lengkap: `docs/SAVORA_PRD.md`. Setiap perubahan business rule atau stack harus disertai update PRD (nomor revisi baru) agar dokumen tetap sinkron dengan sumber kebenaran.
+Requirement lengkap: `docs/SavePlate_PRD_v3.9.md`. Setiap perubahan business rule atau stack harus disertai update PRD (nomor revisi baru) agar dokumen tetap sinkron dengan sumber kebenaran.
 ---
 12. Struktur Repo & Konvensi Sesi
 Struktur folder (tetap — jangan buat folder root baru)
 ```
-savora/
+saveplate/
 ├── docs/
-│   ├── SAVORA_PRD.md      # sumber kebenaran requirement
+│   ├── SavePlate_PRD_v3.9.md # sumber kebenaran requirement
 │   └── design/            # referensi tampilan per modul (01-login-register.png, dst.)
 ├── frontend/              # Next.js
 ├── backend/               # Go + Fiber v2 + GORM
@@ -284,6 +282,6 @@ Model/tabel: `users`, `mitra_donasi_profiles`, `advertisements`, `platform_reven
 Auth: belum ada JWT/bcrypt di go.mod — tambahkan `golang.org/x/crypto/bcrypt` + `github.com/golang-jwt/jwt/v5` di task Auth.
 Saat memasang RBAC: proteksi dulu route BARU (`/api/admin/*`, `/api/me`, dst.). JANGAN langsung membungkus route lama anggota lain dengan middleware — koordinasikan dulu dengan pemiliknya.
 Housekeeping
-`savora.db` sudah dihapus (21 Jul). Repo BELUM punya `.gitignore` — buat di root berisi minimal: `.env`, `*.db`, `node_modules/`, `.next/`.
+`saveplate.db` sudah dihapus (21 Jul). Repo BELUM punya `.gitignore` — buat di root berisi minimal: `.env`, `*.db`, `node_modules/`, `.next/`.
 `backend/.env` berisi kredensial database nyata — JANGAN pernah di-commit; sediakan `backend/.env.example` (isi: `PORT=3001` dan `DATABASE_URL=` kosong).
 

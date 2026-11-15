@@ -4,7 +4,7 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
-# Savora — Frontend (Customer Marketplace)
+# SavePlate — Frontend (Customer Marketplace)
 
 Marketplace food rescue untuk lomba CODE 6.0. Deadline submission: 25 Juli 2026.
 
@@ -35,7 +35,7 @@ Marketplace food rescue untuk lomba CODE 6.0. Deadline submission: 25 Juli 2026.
 ## Konvensi
 
 - JavaScript (bukan TypeScript), App Router, path alias `@/` → `src/`.
-- Styling: Tailwind v4 + kelas CSS `savora-*` di `globals.css`.
+- Styling: Tailwind v4 + kelas CSS `saveplate-*` di `globals.css`.
 - Data API selalu dinormalisasi lewat `normalize*` di `src/lib/` dengan
   fallback demo lokal agar UI tetap jalan tanpa backend.
 - Bahasa UI dan komentar: Indonesia.

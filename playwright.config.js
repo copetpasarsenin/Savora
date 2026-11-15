@@ -1,4 +1,4 @@
-// playwright.config.js - Savora E2E Test Configuration
+// playwright.config.js - SavePlate E2E Test Configuration
 const { defineConfig, devices } = require('@playwright/test');
 
 module.exports = defineConfig({
@@ -29,7 +29,7 @@ module.exports = defineConfig({
 
   webServer: [
     {
-      command: 'cd backend && ./savora-backend.exe',
+      command: 'cd backend && go run main.go',
       url: 'http://localhost:8000',
       reuseExistingServer: !process.env.CI,
       timeout: 30000,

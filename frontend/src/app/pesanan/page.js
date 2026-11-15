@@ -412,7 +412,7 @@ export default function PesananPage() {
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <button className="btn-primary" onClick={() => handleUpdateStatus("Didonasikan")} style={{ padding: '12px', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                Alihkan ke Donasi Savora
+                Alihkan ke Donasi SavePlate
               </button>
               <button className="btn-secondary" onClick={() => handleUpdateStatus("Dibatalkan")} style={{ padding: '12px', width: '100%', color: '#EF4444', borderColor: '#FEE2E2', backgroundColor: '#FEF2F2' }}>
                 Batalkan & Kembalikan ke Stok

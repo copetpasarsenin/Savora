@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
-import SavoraNavbar from "@/components/navbar/SavoraNavbar";
+import SavePlateNavbar from "@/components/navbar/SavePlateNavbar";
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -54,7 +54,7 @@ export default function CartPage() {
 
   return (
     <div style={{ background: "#ffffff", fontFamily: '"Plus Jakarta Sans", sans-serif', minHeight: "100vh" }}>
-      <SavoraNavbar />
+      <SavePlateNavbar />
 
       <main style={{ maxWidth: "1151px", margin: "0 auto", padding: "40px 32px", minHeight: "calc(100vh - 200px)" }}>
         {/* Page title */}
@@ -375,7 +375,7 @@ export default function CartPage() {
       <footer className="beranda-footer">
         <div className="beranda-footer-container">
           <div className="beranda-footer-column-brand">
-            <div className="beranda-footer-wordmark">Savora</div>
+            <div className="beranda-footer-wordmark">SavePlate</div>
             <p className="beranda-footer-mission">
               Misi kami sederhana: Tidak boleh ada makanan enak yang terbuang sia-sia. Bergabunglah dengan ribuan
               penyelamat makanan lainnya di seluruh Indonesia.
@@ -448,7 +448,7 @@ export default function CartPage() {
         </div>
 
         <div className="beranda-footer-bottom">
-          <span>© 2026 Savora Platform. Proudly Made In Indonesia for the Earth.</span>
+          <span>© 2026 SavePlate Platform. Proudly Made In Indonesia for the Earth.</span>
           <div className="beranda-footer-bottom-links">
             <span>SECURITY</span>
             <span>SITEMAP</span>

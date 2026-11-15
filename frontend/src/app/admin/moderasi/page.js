@@ -120,7 +120,7 @@ export default function ModerasiPage() {
       <div className="mobile-header">
         <button className="hamburger-btn" onClick={() => setSidebarOpen(true)}>☰</button>
         <div className="sidebar-header">
-          <span style={{ color: "var(--primary-color)" }}>⚲</span> Savora Admin
+          <span style={{ color: "var(--primary-color)" }}>⚲</span> SavePlate Admin
         </div>
       </div>
       {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}

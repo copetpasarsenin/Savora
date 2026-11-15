@@ -1,16 +1,16 @@
 /*
- * Savora Payment Page Styles
+ * SavePlate Payment Page Styles
  * Mengikuti design tokens dari globals.css
  */
 
 /* Layout */
-.savora-payment-page {
+.saveplate-payment-page {
   min-height: 100vh;
   background-color: var(--background, #F4F6F5);
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-.savora-topbar {
+.saveplate-topbar {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -22,7 +22,7 @@
   z-index: 10;
 }
 
-.savora-topbar h1 {
+.saveplate-topbar h1 {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--foreground, #1A1E1B);
@@ -30,7 +30,7 @@
   flex: 1;
 }
 
-.savora-back-button {
+.saveplate-back-button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -44,12 +44,12 @@
   font-weight: 500;
 }
 
-.savora-back-button:hover {
+.saveplate-back-button:hover {
   background-color: var(--muted, #F0F4F2);
   color: var(--foreground, #1A1E1B);
 }
 
-.savora-polling-indicator {
+.saveplate-polling-indicator {
   display: inline-flex;
   align-items: center;
   color: var(--primary, #1D6840);
@@ -70,13 +70,13 @@
   to { transform: rotate(360deg); }
 }
 
-.savora-payment-main {
+.saveplate-payment-main {
   max-width: 600px;
   margin: 2rem auto;
   padding: 0 1.5rem;
 }
 
-.savora-payment-container {
+.saveplate-payment-container {
   background-color: var(--card, #ffffff);
   border-radius: var(--radius, 0.75rem);
   border: 1px solid var(--border, #E2E8E4);
@@ -84,12 +84,12 @@
 }
 
 /* Payment States */
-.savora-payment-state {
+.saveplate-payment-state {
   padding: 3rem 2rem;
   text-align: center;
 }
 
-.savora-payment-icon {
+.saveplate-payment-icon {
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -99,29 +99,29 @@
   margin-bottom: 1.5rem;
 }
 
-.savora-payment-state.pending .savora-payment-icon {
+.saveplate-payment-state.pending .saveplate-payment-icon {
   background-color: var(--accent, #D4EDE0);
   color: var(--primary, #1D6840);
 }
 
-.savora-payment-state.success .savora-payment-icon {
+.saveplate-payment-state.success .saveplate-payment-icon {
   background-color: var(--accent, #D4EDE0);
   color: var(--primary, #1D6840);
 }
 
-.savora-payment-state.failed .savora-payment-icon {
+.saveplate-payment-state.failed .saveplate-payment-icon {
   background-color: rgba(220, 53, 69, 0.1);
   color: var(--destructive, #DC3545);
 }
 
-.savora-payment-state h2 {
+.saveplate-payment-state h2 {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--foreground, #1A1E1B);
   margin: 0 0 0.75rem 0;
 }
 
-.savora-payment-state p {
+.saveplate-payment-state p {
   font-size: 1rem;
   color: var(--muted-foreground, #6B7B72);
   margin: 0 0 2rem 0;
@@ -129,7 +129,7 @@
 }
 
 /* Buttons */
-.savora-payment-button {
+.saveplate-payment-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -145,28 +145,28 @@
   margin: 0.5rem;
 }
 
-.savora-payment-button.primary {
+.saveplate-payment-button.primary {
   background-color: var(--primary, #1D6840);
   color: var(--primary-foreground, #ffffff);
 }
 
-.savora-payment-button.primary:hover {
+.saveplate-payment-button.primary:hover {
   opacity: 0.9;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(29, 104, 64, 0.2);
 }
 
-.savora-payment-button.secondary {
+.saveplate-payment-button.secondary {
   background-color: var(--secondary, #E8F4EE);
   color: var(--secondary-foreground, #1D6840);
 }
 
-.savora-payment-button.secondary:hover {
+.saveplate-payment-button.secondary:hover {
   background-color: var(--accent, #D4EDE0);
 }
 
 /* Payment Breakdown */
-.savora-payment-breakdown {
+.saveplate-payment-breakdown {
   margin: 2rem 0;
   padding: 1.5rem;
   background-color: var(--muted, #F0F4F2);
@@ -174,14 +174,14 @@
   text-align: left;
 }
 
-.savora-payment-breakdown h3 {
+.saveplate-payment-breakdown h3 {
   font-size: 1rem;
   font-weight: 600;
   color: var(--foreground, #1A1E1B);
   margin: 0 0 1rem 0;
 }
 
-.savora-payment-line {
+.saveplate-payment-line {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -189,29 +189,29 @@
   font-size: 0.9375rem;
 }
 
-.savora-payment-line span:first-child {
+.saveplate-payment-line span:first-child {
   color: var(--muted-foreground, #6B7B72);
 }
 
-.savora-payment-line span:last-child {
+.saveplate-payment-line span:last-child {
   font-weight: 500;
   color: var(--foreground, #1A1E1B);
 }
 
-.savora-payment-line.total {
+.saveplate-payment-line.total {
   border-top: 1px solid var(--border, #E2E8E4);
   margin-top: 0.5rem;
   padding-top: 1rem;
   font-weight: 600;
 }
 
-.savora-payment-line.total span {
+.saveplate-payment-line.total span {
   font-size: 1.125rem;
   color: var(--foreground, #1A1E1B);
 }
 
 /* Payment Timer */
-.savora-payment-timer {
+.saveplate-payment-timer {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -224,7 +224,7 @@
   margin-top: 1.5rem;
 }
 
-.savora-payment-timer.urgent {
+.saveplate-payment-timer.urgent {
   background-color: rgba(245, 158, 11, 0.1);
   color: #F59E0B;
   animation: pulse-urgent 1.5s ease-in-out infinite;
@@ -235,13 +235,13 @@
   50% { opacity: 0.7; }
 }
 
-.savora-payment-timer.expired {
+.saveplate-payment-timer.expired {
   background-color: rgba(220, 53, 69, 0.1);
   color: var(--destructive, #DC3545);
 }
 
 /* Pickup Code */
-.savora-pickup-code {
+.saveplate-pickup-code {
   margin: 2rem 0;
   padding: 1.5rem;
   background-color: var(--muted, #F0F4F2);
@@ -249,7 +249,7 @@
   text-align: center;
 }
 
-.savora-pickup-code h3 {
+.saveplate-pickup-code h3 {
   font-size: 1rem;
   font-weight: 600;
   color: var(--muted-foreground, #6B7B72);
@@ -258,7 +258,7 @@
   letter-spacing: 0.5px;
 }
 
-.savora-code-display {
+.saveplate-code-display {
   font-size: 2.5rem;
   font-weight: 800;
   color: var(--primary, #1D6840);
@@ -267,14 +267,14 @@
   margin: 1rem 0;
 }
 
-.savora-code-instruction {
+.saveplate-code-instruction {
   font-size: 0.875rem;
   color: var(--muted-foreground, #6B7B72);
   margin: 1rem 0 0 0;
 }
 
 /* Product Summary */
-.savora-payment-product {
+.saveplate-payment-product {
   margin: 2rem 0;
   padding: 1.5rem;
   background-color: var(--muted, #F0F4F2);
@@ -282,20 +282,20 @@
   text-align: left;
 }
 
-.savora-payment-product h3 {
+.saveplate-payment-product h3 {
   font-size: 1rem;
   font-weight: 600;
   color: var(--foreground, #1A1E1B);
   margin: 0 0 1rem 0;
 }
 
-.savora-product-summary {
+.saveplate-product-summary {
   display: flex;
   gap: 1rem;
   align-items: start;
 }
 
-.savora-product-thumb {
+.saveplate-product-thumb {
   width: 60px;
   height: 60px;
   border-radius: 8px;
@@ -303,14 +303,14 @@
   flex-shrink: 0;
 }
 
-.savora-product-info h4 {
+.saveplate-product-info h4 {
   font-size: 1rem;
   font-weight: 600;
   color: var(--foreground, #1A1E1B);
   margin: 0 0 0.5rem 0;
 }
 
-.savora-product-info p {
+.saveplate-product-info p {
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -320,7 +320,7 @@
 }
 
 /* Pickup Deadline */
-.savora-pickup-deadline {
+.saveplate-pickup-deadline {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -334,7 +334,7 @@
 }
 
 /* Actions */
-.savora-payment-actions {
+.saveplate-payment-actions {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -342,33 +342,33 @@
 }
 
 /* Error State */
-.savora-error-container {
+.saveplate-error-container {
   padding: 3rem 2rem;
   text-align: center;
 }
 
-.savora-error-container p {
+.saveplate-error-container p {
   font-size: 1rem;
   color: var(--destructive, #DC3545);
   margin-bottom: 1.5rem;
 }
 
 /* Loading Skeleton */
-.savora-payment-skeleton {
+.saveplate-payment-skeleton {
   padding: 3rem 2rem;
 }
 
-.savora-skeleton-header {
+.saveplate-skeleton-header {
   margin-bottom: 2rem;
 }
 
-.savora-skeleton-content {
+.saveplate-skeleton-content {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.savora-skeleton-line {
+.saveplate-skeleton-line {
   height: 1rem;
   background: linear-gradient(
     90deg,
@@ -388,25 +388,25 @@
 
 /* Responsive */
 @media (max-width: 640px) {
-  .savora-payment-main {
+  .saveplate-payment-main {
     margin: 1rem auto;
     padding: 0 1rem;
   }
 
-  .savora-payment-state {
+  .saveplate-payment-state {
     padding: 2rem 1.5rem;
   }
 
-  .savora-code-display {
+  .saveplate-code-display {
     font-size: 2rem;
     letter-spacing: 0.25rem;
   }
 
-  .savora-topbar {
+  .saveplate-topbar {
     padding: 1rem;
   }
 
-  .savora-payment-button {
+  .saveplate-payment-button {
     width: 100%;
   }
 }

@@ -1,4 +1,4 @@
-// tests/e2e/savora-xendit-transaction.spec.js
+// tests/e2e/saveplate-xendit-transaction.spec.js
 // End-to-End Testing: Complete Xendit Transaction Flow
 // Covers: Checkout → Payment → Webhook → Paid → Pickup Code
 
@@ -57,7 +57,7 @@ test.describe('Xendit Transaction Flow', () => {
     expect(page.url()).toContain('qty=');
 
     // Step 6: Verify checkout page loads with product summary
-    await waitForElement(page, '.savora-checkout-summary, .savora-product-thumb');
+    await waitForElement(page, '.saveplate-checkout-summary, .saveplate-product-thumb');
     
     // Verify price breakdown
     const subtotalText = await page.locator('text=Subtotal').textContent();
@@ -85,7 +85,7 @@ test.describe('Xendit Transaction Flow', () => {
     expect(orderId).toBeGreaterThan(0);
 
     // Step 10: Verify payment page loads with pending status
-    await waitForElement(page, '.savora-payment-state, text=Menunggu Pembayaran');
+    await waitForElement(page, '.saveplate-payment-state, text=Menunggu Pembayaran');
 
     // Verify "Bayar Sekarang" button exists
     const payButton = await page.locator('button:has-text("Bayar"), a:has-text("Bayar")');
@@ -113,7 +113,7 @@ test.describe('Xendit Transaction Flow', () => {
     await waitForElement(page, 'text=Pembayaran Berhasil, text=Kode Pickup');
 
     // Verify pickup code is visible
-    const pickupCodeElement = await page.locator('.savora-code-display, text=/^[0-9]{6,8}$/');
+    const pickupCodeElement = await page.locator('.saveplate-code-display, text=/^[0-9]{6,8}$/');
     const pickupCode = await pickupCodeElement.textContent();
     expect(pickupCode).toMatch(/^[0-9]{6,8}$/);
 

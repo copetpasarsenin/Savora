@@ -3,7 +3,7 @@ package handlers
 import (
 	"testing"
 
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/models"
 )
 
 // Test validation logic for VerifyUMKM request

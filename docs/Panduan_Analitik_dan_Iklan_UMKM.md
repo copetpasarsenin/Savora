@@ -1,6 +1,6 @@
-# Panduan Analitik & Iklan UMKM (Savora)
+# Panduan Analitik & Iklan UMKM (SavePlate)
 
-Dokumen ini membantu pemilik UMKM membaca insight penjualan dan memasang iklan produk pada platform Savora. Melengkapi [Panduan Singkat Kelola Produk UMKM](Panduan_Kelola_Produk_UMKM.md).
+Dokumen ini membantu pemilik UMKM membaca insight penjualan dan memasang iklan produk pada platform SavePlate. Melengkapi [Panduan Singkat Kelola Produk UMKM](Panduan_Kelola_Produk_UMKM.md).
 
 ## Bagian A — Membaca Insight & Analitik
 

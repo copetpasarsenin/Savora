@@ -22,7 +22,7 @@ const formatRupiah = (number) =>
 // Badge type mengikuti komponen atoms/Badge (success / warning / critical / dll).
 const statusBadgeType = (status) => {
   if (status === AD_STATUS.Aktif.key) return "success";
-  if (status === AD_STATUS.Kadaluarsa.key) return "critical";
+  if (status === AD_STATUS.Kedaluwarsa?.key || status === "Kadaluarsa") return "critical";
   return "warning"; // Draft
 };
 

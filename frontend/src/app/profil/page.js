@@ -58,14 +58,14 @@ function ProfilContent() {
           {activeTab === 'bantuan' && (
             <div>
               <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#111827', margin: '0 0 8px 0' }}>Bantuan & Informasi</h2>
-              <p style={{ color: '#6B7280', fontSize: '14px', margin: '0 0 32px 0' }}>Temukan jawaban atau hubungi tim dukungan Savora kapan saja.</p>
+              <p style={{ color: '#6B7280', fontSize: '14px', margin: '0 0 32px 0' }}>Temukan jawaban atau hubungi tim dukungan SavePlate kapan saja.</p>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                <HelpItem icon={<HelpCircle size={20} color="#10B981" />} title="Pusat Bantuan" subtitle="FAQ dan panduan lengkap penggunaan Savora" />
-                <HelpItem icon={<Phone size={20} color="#10B981" />} title="Hubungi Tim Savora" subtitle="Senin–Jumat, 08.00–17.00 WIB" badge="Online" />
-                <HelpItem icon={<FileCheck size={20} color="#10B981" />} title="Syarat & Ketentuan" subtitle="Perjanjian layanan platform Savora" />
+                <HelpItem icon={<HelpCircle size={20} color="#10B981" />} title="Pusat Bantuan" subtitle="FAQ dan panduan lengkap penggunaan SavePlate" />
+                <HelpItem icon={<Phone size={20} color="#10B981" />} title="Hubungi Tim SavePlate" subtitle="Senin–Jumat, 08.00–17.00 WIB" badge="Online" />
+                <HelpItem icon={<FileCheck size={20} color="#10B981" />} title="Syarat & Ketentuan" subtitle="Perjanjian layanan platform SavePlate" />
                 <HelpItem icon={<Eye size={20} color="#10B981" />} title="Kebijakan Privasi" subtitle="Cara kami melindungi data Anda" />
-                <HelpItem icon={<Lock size={20} color="#10B981" />} title="Versi Website" subtitle="Savora UMKM Dashboard v2.4.1" badge="Terbaru" noArrow />
+                <HelpItem icon={<Lock size={20} color="#10B981" />} title="Versi Website" subtitle="SavePlate UMKM Dashboard v2.4.1" badge="Terbaru" noArrow />
               </div>
             </div>
           )}

@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/savora/backend/services"
+	"github.com/saveplate/backend/services"
 )
 
 type PaymentHandler struct {

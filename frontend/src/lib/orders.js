@@ -1,12 +1,12 @@
 /**
  * Orders API Helper
- * Handles order creation and retrieval for Savora checkout flow
+ * Handles order creation and retrieval for SavePlate checkout flow
  */
 
 import { apiFetch } from './api.js';
 
 /**
- * Create order and get Midtrans payment token
+ * Create order and get Xendit invoice URL
  * @param {Object} orderData - Order data from checkout form
  * @returns {Promise<Object>} Order response with payment URL
  */

@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { createOrder, normalizeOrder } from "@/lib/orders";
 import { fetchMarketplaceProduct } from "@/lib/marketplace";
-import SavoraNavbar from "@/components/navbar/SavoraNavbar";
+import SavePlateNavbar from "@/components/navbar/SavePlateNavbar";
 import { getToken, isAuthenticated } from "@/lib/auth";
 
 function formatRupiah(value) {
@@ -97,7 +97,7 @@ function ProductSummary({ product, quantity }) {
   const rescuePrice = product.rescue_price ?? product.rescuePrice ?? 0;
   const originalPrice = product.original_price ?? product.originalPrice ?? 0;
   const photoUrl = product.photo_url ?? product.photoUrl;
-  const vendorName = product.vendor ?? product.businessName ?? "UMKM Savora";
+  const vendorName = product.vendor ?? product.businessName ?? "UMKM SavePlate";
   const pickupAddress = product.pickup_address ?? product.pickupAddress ?? "Lokasi pickup dikonfirmasi setelah order dibuat.";
 
   const subtotal = rescuePrice * quantity;
@@ -469,7 +469,7 @@ function CheckoutPageContent() {
   if (loading) {
     return (
       <div style={{ background: "#ffffff", fontFamily: '"Plus Jakarta Sans", sans-serif', minHeight: "100vh" }}>
-        <SavoraNavbar />
+        <SavePlateNavbar />
         <CheckoutSkeleton />
       </div>
     );
@@ -478,7 +478,7 @@ function CheckoutPageContent() {
   if (error || !product) {
     return (
       <div style={{ background: "#ffffff", fontFamily: '"Plus Jakarta Sans", sans-serif', minHeight: "100vh" }}>
-        <SavoraNavbar />
+        <SavePlateNavbar />
         <main style={{ maxWidth: "600px", margin: "0 auto", padding: "80px 32px", textAlign: "center" }}>
           <h1 style={{ fontSize: "28px", fontWeight: "700", color: "#1d1d1d", marginBottom: "16px" }}>{error || "Produk tidak ditemukan"}</h1>
           <p style={{ fontSize: "15px", color: "#6b7280", marginBottom: "32px", lineHeight: "1.6" }}>
@@ -510,7 +510,7 @@ function CheckoutPageContent() {
 
   return (
     <div style={{ background: "#ffffff", fontFamily: '"Plus Jakarta Sans", sans-serif', minHeight: "100vh" }}>
-      <SavoraNavbar />
+      <SavePlateNavbar />
 
       <main style={{ maxWidth: "1151px", margin: "0 auto", padding: "32px 32px 64px" }}>
         {/* Navigation Breadcrumb */}
@@ -574,7 +574,7 @@ function CheckoutPageContent() {
               <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
                 <ShieldCheck size={20} color="#16a34a" style={{ flexShrink: 0, marginTop: "2px" }} />
                 <div>
-                  <strong style={{ fontSize: "14px", color: "#1d1d1d", display: "block", marginBottom: "2px" }}>Jaminan Kualitas Savora</strong>
+                  <strong style={{ fontSize: "14px", color: "#1d1d1d", display: "block", marginBottom: "2px" }}>Jaminan Kualitas SavePlate</strong>
                   <p style={{ fontSize: "13px", color: "#6b7280", margin: 0, lineHeight: "1.5" }}>Makanan siap diambil hari ini sesuai jadwal UMKM. Pembayaran aman & transparan.</p>
                 </div>
               </div>

@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/models"
 	"gorm.io/gorm"
 )
 

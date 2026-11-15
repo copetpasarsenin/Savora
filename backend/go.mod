@@ -1,4 +1,4 @@
-module github.com/savora/backend
+module github.com/saveplate/backend
 
 go 1.26.2
 

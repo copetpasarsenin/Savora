@@ -1,4 +1,4 @@
-// tests/e2e/savora-food-trust-score.spec.js
+// tests/e2e/saveplate-food-trust-score.spec.js
 // Food Trust Index, Food Score Decay, Dynamic Discount Tests
 // Priority: MUST (PRD Section 12, 13, FR-04, FR-15, FR-23)
 
@@ -28,7 +28,7 @@ async function getAuthToken(page) {
   });
 }
 
-test.describe('Savora E2E - Food Trust Index', () => {
+test.describe('SavePlate E2E - Food Trust Index', () => {
   
   test('FTI-01: UMKM Membuat Listing Lengkap → Food Trust Index Tampil', async ({ page }) => {
     await login(page, testUmkm.email, testUmkm.password);
@@ -172,7 +172,7 @@ test.describe('Savora E2E - Food Trust Index', () => {
   });
 });
 
-test.describe('Savora E2E - Food Score Decay', () => {
+test.describe('SavePlate E2E - Food Score Decay', () => {
   
   test('FSD-01: Food Score Menurun Seiring Waktu (Power Decay)', async ({ page }) => {
     await page.goto(`${BASE_URL}/marketplace`);
@@ -313,7 +313,7 @@ test.describe('Savora E2E - Food Score Decay', () => {
   });
 });
 
-test.describe('Savora E2E - Dynamic Discount', () => {
+test.describe('SavePlate E2E - Dynamic Discount', () => {
   
   test('DD-01: Produk Segera Dijual → Rekomendasi Diskon 35-50%', async ({ page }) => {
     await login(page, testUmkm.email, testUmkm.password);

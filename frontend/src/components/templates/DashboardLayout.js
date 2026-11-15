@@ -28,9 +28,9 @@ export default function DashboardLayout({ children }) {
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-40 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 flex items-center justify-center overflow-hidden rounded-lg bg-emerald-50">
-            <img src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png" alt="Savora Logo" className="w-full h-full object-cover" />
+            <img src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png" alt="SavePlate Logo" className="w-full h-full object-cover" />
           </div>
-          <span className="font-bold text-slate-900 text-lg">Savora</span>
+          <span className="font-bold text-slate-900 text-lg">SavePlate</span>
         </div>
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)} 

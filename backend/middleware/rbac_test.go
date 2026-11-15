@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/savora/backend/handlers"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/handlers"
+	"github.com/saveplate/backend/models"
 )
 
 // Test: RequireRole - No user context (401)

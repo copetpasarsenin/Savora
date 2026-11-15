@@ -388,10 +388,10 @@ function Sidebar() {
       <div className="px-5 py-5 border-b border-sidebar-border">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
-            <img src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png" alt="Savora Logo" className="w-full h-full object-cover" />
+            <img src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png" alt="SavePlate Logo" className="w-full h-full object-cover" />
           </div>
           <div>
-            <div className="text-sm font-bold text-foreground" style={{ fontFamily: "Manrope, sans-serif" }}>Savora</div>
+            <div className="text-sm font-bold text-foreground" style={{ fontFamily: "Manrope, sans-serif" }}>SavePlate</div>
             <div className="text-[10px] text-muted-foreground leading-none">Food Rescue Platform</div>
           </div>
         </div>
@@ -1658,7 +1658,7 @@ function Step2Assessment({
               {data.confirmSafe && <Check className="w-3 h-3 text-white" />}
             </div>
             <p className="text-sm text-foreground leading-relaxed">
-              Saya memastikan makanan masih aman dan layak dikonsumsi sesuai standar Savora Food Rescue Platform.
+              Saya memastikan makanan masih aman dan layak dikonsumsi sesuai standar SavePlate Food Rescue Platform.
             </p>
           </label>
         </div>
@@ -1968,7 +1968,7 @@ function Step3Results({
                 <p className="text-sm font-semibold text-primary mb-1">Insight Otomatis</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {trustResult.status === "Fresh"
-                    ? "Produk dalam kondisi prima! Segera publikasikan untuk mendapatkan eksposur maksimal di platform Savora."
+                    ? "Produk dalam kondisi prima! Segera publikasikan untuk mendapatkan eksposur maksimal di platform SavePlate."
                     : trustResult.status === "Layak Dijual"
                     ? "Produk masih memiliki daya tarik yang baik dan layak untuk dipublikasikan. Potensi terjual tinggi."
                     : trustResult.status === "Segera Dijual"
@@ -2007,7 +2007,7 @@ function Step3Results({
               </p>
               <p className="text-xs text-muted-foreground">
                 {trustResult.canPublish
-                  ? "Semua data telah diverifikasi dan produk memenuhi standar Savora Food Rescue Platform."
+                  ? "Semua data telah diverifikasi dan produk memenuhi standar SavePlate Food Rescue Platform."
                   : "Produk tidak memenuhi standar kelayakan. Pertimbangkan jalur recovery lain."}
               </p>
             </div>
@@ -2063,7 +2063,7 @@ function SuccessModal({ onClose }) {
           Produk Berhasil Dipublikasikan!
         </h3>
         <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-          Produk kamu sudah tampil di platform Savora dan siap ditemukan pembeli.
+          Produk kamu sudah tampil di platform SavePlate dan siap ditemukan pembeli.
         </p>
         <div className="flex gap-3">
           <button

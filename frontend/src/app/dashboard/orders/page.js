@@ -127,7 +127,7 @@ export default function DashboardOrdersPage() {
   });
 
   return (
-    <div className="savora-marketplace" style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+    <div className="saveplate-marketplace" style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Manajemen Pesanan UMKM</h1>
         <Link href="/analitik" style={{ color: '#10B981', textDecoration: 'none', fontWeight: 500 }}>

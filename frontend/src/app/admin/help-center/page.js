@@ -128,8 +128,8 @@ export default function HelpCenterPage() {
     'UMKM tidak merespons': 'UMKM tidak merespons',
     'Terjadi kendala saat pickup': 'Terjadi kendala saat pickup',
     'Order dibatalkan sepihak': 'Order dibatalkan sepihak',
-    'Pembayaran Midtrans sandbox berhasil tetapi pickup code tidak muncul': 'Pembayaran Midtrans sandbox berhasil tetapi pickup code tidak muncul',
-    'Pembayaran Midtrans sandbox gagal/expired atau status tidak berubah': 'Pembayaran Midtrans sandbox gagal/expired atau status tidak berubah'
+    'Pembayaran Xendit sandbox berhasil tetapi pickup code tidak muncul': 'Pembayaran Xendit sandbox berhasil tetapi pickup code tidak muncul',
+    'Pembayaran Xendit sandbox gagal/expired atau status tidak berubah': 'Pembayaran Xendit sandbox gagal/expired atau status tidak berubah'
   };
 
   // Columns definition for help tickets DataTable (extracted from inline for BUG 3 fix)

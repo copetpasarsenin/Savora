@@ -1,4 +1,4 @@
-# SMOKE TEST RESULTS - SAVORA ADMIN MODULE
+# SMOKE TEST RESULTS - SAVEPLATE ADMIN MODULE
 **Date:** 2026-07-24 10:25:00 WIB  
 **Type:** READ-ONLY (No modifications made)  
 **Backend:** http://localhost:3001 (PID 1576, RUNNING)  
@@ -30,7 +30,7 @@
 ```
 HTTP/1.1 200 OK
 Token: eyJhbGci... (extracted successfully)
-User: id=1, name="Admin Savora", role="ADMIN", status="ACTIVE"
+User: id=1, name="Admin SavePlate", role="ADMIN", status="ACTIVE"
 ```
 
 ---

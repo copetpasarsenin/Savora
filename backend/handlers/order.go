@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/savora/backend/models"
-	"github.com/savora/backend/services"
+	"github.com/saveplate/backend/models"
+	"github.com/saveplate/backend/services"
 )
 
 type OrderHandler struct {

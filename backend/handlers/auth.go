@@ -6,8 +6,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/savora/backend/database"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/database"
+	"github.com/saveplate/backend/models"
 )
 
 // Response format seragam (CLAUDE.md Section 12)
@@ -387,7 +387,7 @@ func UpdateProfileHandler(c *fiber.Ctx) error {
 func generateJWT(user models.User) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		secret = "savora-secret-key-change-in-production" // Default untuk development
+		secret = "saveplate-secret-key-change-in-production" // Default untuk development
 	}
 
 	claims := JWTClaims{

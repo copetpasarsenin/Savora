@@ -5,7 +5,7 @@ import (
 )
 
 // UMKMProfile represents UMKM registration/profile
-// Pendaftaran UMKM sebagai penjual di platform Savora
+// Pendaftaran UMKM sebagai penjual di platform SavePlate
 type UMKMProfile struct {
 	ID                   uint       `gorm:"primaryKey" json:"id"`
 	UserID               uint       `gorm:"not null;uniqueIndex" json:"user_id"`

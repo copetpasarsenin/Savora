@@ -43,7 +43,7 @@ import { foodScoreBand, rescueTimeColor, rescueTimeParts } from "@/lib/foodScore
 import { classifyReviewText, deriveRestaurantSafety } from "@/lib/reviews";
 import { computeCheckoutPricing } from "@/lib/pricing";
 import { useCart } from "@/lib/CartContext";
-import SavoraNavbar from "@/components/navbar/SavoraNavbar";
+import SavePlateNavbar from "@/components/navbar/SavePlateNavbar";
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value);
@@ -78,7 +78,7 @@ function TimerDisplay({ seconds }) {
   // band skor, keduanya boleh berbeda.
   const timeColor = rescueTimeColor(seconds);
   return (
-    <div className={`savora-rescue-timer ${timeColor.className}`}>
+    <div className={`saveplate-rescue-timer ${timeColor.className}`}>
       <span><Clock3 size={14} color="#e17100" aria-hidden="true" /> Smart Rescue Timer</span>
       <div><b>{time.hours}</b><small>jam</small><b>{time.minutes}</b><small>menit</small><b>{time.seconds}</b><small>detik</small></div>
     </div>
@@ -99,7 +99,7 @@ function ReviewComment({ comment }) {
         if (!part) return null;
         if (unique.includes(part.toLowerCase())) {
           const className = classifyReviewText(part).level.className;
-          return <mark key={index} className={`savora-kw ${className}`}>{part}</mark>;
+          return <mark key={index} className={`saveplate-kw ${className}`}>{part}</mark>;
         }
         return <span key={index}>{part}</span>;
       })}
@@ -174,17 +174,17 @@ export default function ProductDetailPage() {
   if (isLoading) {
     return (
       <div style={{ background: '#ffffff', minHeight: '100vh' }}>
-        <SavoraNavbar />
+        <SavePlateNavbar />
         <main style={{ maxWidth: '1151px', margin: '0 auto', padding: '24px 32px' }}>
-          <div className="savora-skeleton-line" style={{ width: "120px", height: "20px", marginBottom: "25px", background: '#e5e7eb' }} />
+          <div className="saveplate-skeleton-line" style={{ width: "120px", height: "20px", marginBottom: "25px", background: '#e5e7eb' }} />
           <div style={{ display: 'flex', gap: '40px' }}>
             <div style={{ width: '639px' }}>
-              <div className="savora-skeleton-pulse" style={{ width: "100%", height: "479px", borderRadius: "18px", background: '#f3f4f6' }} />
+              <div className="saveplate-skeleton-pulse" style={{ width: "100%", height: "479px", borderRadius: "18px", background: '#f3f4f6' }} />
             </div>
             <div style={{ width: '408px' }}>
-              <div className="savora-skeleton-line" style={{ width: "70%", height: "32px", marginBottom: "12px", background: '#e5e7eb' }} />
-              <div className="savora-skeleton-line" style={{ width: "90%", height: "16px", marginBottom: "8px", background: '#e5e7eb' }} />
-              <div className="savora-skeleton-line" style={{ width: "60%", height: "24px", background: '#e5e7eb' }} />
+              <div className="saveplate-skeleton-line" style={{ width: "70%", height: "32px", marginBottom: "12px", background: '#e5e7eb' }} />
+              <div className="saveplate-skeleton-line" style={{ width: "90%", height: "16px", marginBottom: "8px", background: '#e5e7eb' }} />
+              <div className="saveplate-skeleton-line" style={{ width: "60%", height: "24px", background: '#e5e7eb' }} />
             </div>
           </div>
         </main>
@@ -195,7 +195,7 @@ export default function ProductDetailPage() {
   if (!product) {
     return (
       <div style={{ background: '#ffffff', minHeight: '100vh', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-        <SavoraNavbar />
+        <SavePlateNavbar />
         <main style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 32px', textAlign: 'center' }}>
           <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#1d1d1d', marginBottom: '16px' }}>Produk tidak ditemukan</h1>
           <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '32px', lineHeight: '1.6' }}>Rescue deal ini mungkin sudah habis atau tidak aktif.</p>
@@ -216,7 +216,7 @@ export default function ProductDetailPage() {
   if (expired) {
     return (
       <div style={{ background: '#ffffff', minHeight: '100vh', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-        <SavoraNavbar />
+        <SavePlateNavbar />
         <main style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 32px', textAlign: 'center' }}>
           <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#1d1d1d', marginBottom: '16px' }}>Rescue deal telah berakhir</h1>
           <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '8px', lineHeight: '1.6' }}>
@@ -267,8 +267,8 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="savora-marketplace savora-detail-page" style={{ background: '#ffffff', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
-      <SavoraNavbar />
+    <div className="saveplate-marketplace saveplate-detail-page" style={{ background: '#ffffff', fontFamily: '"Plus Jakarta Sans", sans-serif' }}>
+      <SavePlateNavbar />
 
       <main style={{ maxWidth: '1151px', margin: '0 auto', padding: '24px 32px' }}>
         {/* Breadcrumb */}
@@ -492,7 +492,7 @@ export default function ProductDetailPage() {
               if (product.pickup_address) {
                 details.push({
                   label: 'Instruksi Pengambilan',
-                  text: `Tunjukkan konfirmasi pesanan Savora Anda. Lokasi pengambilan: ${product.pickup_address}`
+                  text: `Tunjukkan konfirmasi pesanan SavePlate Anda. Lokasi pengambilan: ${product.pickup_address}`
                 });
               }
 
@@ -744,7 +744,7 @@ export default function ProductDetailPage() {
       <footer className="beranda-footer">
         <div className="beranda-footer-container">
           <div className="beranda-footer-column-brand">
-            <div className="beranda-footer-wordmark">Savora</div>
+            <div className="beranda-footer-wordmark">SavePlate</div>
             <p className="beranda-footer-mission">
               Misi kami sederhana: Tidak boleh ada makanan enak yang terbuang sia-sia.
               Bergabunglah dengan ribuan penyelamat makanan lainnya di seluruh Indonesia.
@@ -809,7 +809,7 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="beranda-footer-bottom">
-          <span>© 2026 Savora Platform. Proudly Made In Indonesia for the Earth.</span>
+          <span>© 2026 SavePlate Platform. Proudly Made In Indonesia for the Earth.</span>
           <div className="beranda-footer-bottom-links">
             <span>SECURITY</span>
             <span>SITEMAP</span>
@@ -818,7 +818,7 @@ export default function ProductDetailPage() {
         </div>
       </footer>
 
-      {notice && <div className="savora-toast" role="status">✓ {notice}</div>}
+      {notice && <div className="saveplate-toast" role="status">✓ {notice}</div>}
     </div>
   );
 }

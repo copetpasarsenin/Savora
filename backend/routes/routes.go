@@ -2,9 +2,9 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/savora/backend/handlers"
-	"github.com/savora/backend/middleware"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/handlers"
+	"github.com/saveplate/backend/middleware"
+	"github.com/saveplate/backend/models"
 )
 
 func SetupRoutes(app *fiber.App) {

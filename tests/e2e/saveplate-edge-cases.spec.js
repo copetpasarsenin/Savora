@@ -1,4 +1,4 @@
-// tests/e2e/savora-edge-cases.spec.js
+// tests/e2e/saveplate-edge-cases.spec.js
 // Edge Cases: Payment failures, no-show, help tickets, invalid tokens
 
 const { test, expect } = require('@playwright/test');
@@ -27,7 +27,7 @@ async function triggerWebhook(orderId, status, token = 'test_token') {
   }
 }
 
-test.describe('Savora E2E - Edge Cases', () => {
+test.describe('SavePlate E2E - Edge Cases', () => {
   
   test('E2E-04: Payment EXPIRED → Stok Dikembalikan', async ({ page }) => {
     // Navigate to marketplace

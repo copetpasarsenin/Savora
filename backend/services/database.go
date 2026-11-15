@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -13,19 +13,38 @@ import (
 var DB *gorm.DB
 
 func InitDB() error {
-	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_NAME"),
-	)
+	var db *gorm.DB
+	var err error
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	dbUrl := os.Getenv("DATABASE_URL")
+	host := os.Getenv("DB_HOST")
+
+	if dbUrl != "" {
+		db, err = gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
+	} else if host != "" {
+		port := os.Getenv("DB_PORT")
+		if port == "" {
+			port = "5432"
+		}
+		user := os.Getenv("DB_USER")
+		password := os.Getenv("DB_PASSWORD")
+		dbname := os.Getenv("DB_NAME")
+		sslmode := os.Getenv("DB_SSLMODE")
+		if sslmode == "" {
+			if host == "localhost" || host == "127.0.0.1" {
+				sslmode = "disable"
+			} else {
+				sslmode = "require"
+			}
+		}
+		dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s TimeZone=Asia/Jakarta", host, port, user, password, dbname, sslmode)
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	} else {
+		return fmt.Errorf("database configuration missing: please create backend/.env with DATABASE_URL or DB_HOST")
+	}
+
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
-		return err
+		return fmt.Errorf("failed to connect to database: %w", err)
 	}
 
 	DB = db

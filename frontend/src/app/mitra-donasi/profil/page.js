@@ -206,7 +206,7 @@ function ProfilMitraContent() {
     <>
       <TopHeader 
         title="Profil Mitra"
-        subtitle={mitraProfile?.org_name || user?.name || 'Mitra Savora'}
+        subtitle={mitraProfile?.org_name || user?.name || 'Mitra SavePlate'}
       />
 
       <div className="content-area">

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Search, ChevronDown } from "lucide-react";
-import SavoraNavbar from "@/components/navbar/SavoraNavbar";
+import SavePlateNavbar from "@/components/navbar/SavePlateNavbar";
 import {
   sidebarMenu,
   articles,
@@ -14,28 +14,28 @@ import {
 } from "./data/help-articles";
 import "./tentang.css";
 
-// Kenapa Savora zigzag data (unchanged)
-const kenapaSavoraCards = [
+// Kenapa SavePlate zigzag data (unchanged)
+const kenapaSavePlateCards = [
   {
-    title: "UMKM Kuliner Terbaik, Ada di Savora",
+    title: "UMKM Kuliner Terbaik, Ada di SavePlate",
     description:
-      "Savora menghubungkanmu dengan UMKM kuliner di sekitarmu yang berkomitmen mengurangi food waste. Setiap pembelianmu membantu mereka tetap untung — dan tidak ada makanan layak yang berakhir di tempat sampah.",
+      "SavePlate menghubungkanmu dengan UMKM kuliner di sekitarmu yang berkomitmen mengurangi food waste. Setiap pembelianmu membantu mereka tetap untung — dan tidak ada makanan layak yang berakhir di tempat sampah.",
     image: "/tentang/karakter-umkm.png",
-    alt: "Ilustrasi karakter Savora bersama UMKM kuliner",
+    alt: "Ilustrasi karakter SavePlate bersama UMKM kuliner",
   },
   {
     title: "Ribuan Pilihan Menu Surplus Setiap Hari",
     description:
       "Temukan aneka makanan dan minuman berkualitas dari mitra UMKM dengan harga hingga 50% lebih hemat. Rasanya sama enaknya, harganya jauh lebih bersahabat — tinggal pilih menu favoritmu sebelum kehabisan.",
     image: "/tentang/karakter-surplus.png",
-    alt: "Ilustrasi karakter Savora dengan berbagai pilihan menu surplus",
+    alt: "Ilustrasi karakter SavePlate dengan berbagai pilihan menu surplus",
   },
   {
     title: "Bisa Makan sambil Berkontribusi",
     description:
-      "Dari jajanan hingga makanan berat, setiap transaksi di Savora adalah aksi nyata: mengurangi limbah makanan, memperkuat ekonomi UMKM lokal, dan memangkas jejak karbon. Kenyang di perut, baik untuk bumi.",
+      "Dari jajanan hingga makanan berat, setiap transaksi di SavePlate adalah aksi nyata: mengurangi limbah makanan, memperkuat ekonomi UMKM lokal, dan memangkas jejak karbon. Kenyang di perut, baik untuk bumi.",
     image: "/tentang/karakter-kontribusi.png",
-    alt: "Ilustrasi karakter Savora berkontribusi untuk lingkungan",
+    alt: "Ilustrasi karakter SavePlate berkontribusi untuk lingkungan",
   },
 ];
 
@@ -241,7 +241,7 @@ function TentangInner() {
   return (
     <div className="beranda-page">
       {/* 1. Navbar */}
-      <SavoraNavbar />
+      <SavePlateNavbar />
 
       {/* 2. Hero Bantuan */}
       <section className="tentang-hero">
@@ -370,12 +370,12 @@ function TentangInner() {
         </div>
       </section>
 
-      {/* 4. Section "Kenapa Savora?" (unchanged) */}
+      {/* 4. Section "Kenapa SavePlate?" (unchanged) */}
       <section className="tentang-kenapa">
         <div className="tentang-kenapa-container">
-          <h2>Kenapa Savora?</h2>
+          <h2>Kenapa SavePlate?</h2>
 
-          {kenapaSavoraCards.map((card, index) => (
+          {kenapaSavePlateCards.map((card, index) => (
             <div
               key={card.title}
               ref={(el) => {
@@ -399,7 +399,7 @@ function TentangInner() {
       <footer className="beranda-footer">
         <div className="beranda-footer-container">
           <div className="beranda-footer-column-brand">
-            <div className="beranda-footer-wordmark">Savora</div>
+            <div className="beranda-footer-wordmark">SavePlate</div>
             <p className="beranda-footer-mission">
               Misi kami sederhana: Tidak boleh ada makanan enak yang terbuang
               sia-sia. Bergabunglah dengan ribuan penyelamat makanan lainnya di
@@ -499,7 +499,7 @@ function TentangInner() {
 
         <div className="beranda-footer-bottom">
           <span>
-            © 2026 Savora Platform. Proudly Made In Indonesia for the Earth.
+            © 2026 SavePlate Platform. Proudly Made In Indonesia for the Earth.
           </span>
           <div className="beranda-footer-bottom-links">
             <span>SECURITY</span>
@@ -520,7 +520,7 @@ export default function TentangPage() {
     <Suspense
       fallback={
         <div className="beranda-page">
-          <SavoraNavbar />
+          <SavePlateNavbar />
           <section className="tentang-hero">
             <h1>Hai, ada yang bisa kami bantu?</h1>
           </section>

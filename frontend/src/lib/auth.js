@@ -7,7 +7,7 @@
  */
 export function getToken() {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('savora_token');
+  return localStorage.getItem('saveplate_token');
 }
 
 /**
@@ -16,7 +16,7 @@ export function getToken() {
  */
 export function setToken(token) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('savora_token', token);
+  localStorage.setItem('saveplate_token', token);
 }
 
 /**
@@ -24,8 +24,8 @@ export function setToken(token) {
  */
 export function removeToken() {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem('savora_token');
-  localStorage.removeItem('savora_user');
+  localStorage.removeItem('saveplate_token');
+  localStorage.removeItem('saveplate_user');
 }
 
 /**
@@ -34,7 +34,7 @@ export function removeToken() {
  */
 export function getUser() {
   if (typeof window === 'undefined') return null;
-  const userStr = localStorage.getItem('savora_user');
+  const userStr = localStorage.getItem('saveplate_user');
   if (!userStr) return null;
 
   try {
@@ -50,7 +50,7 @@ export function getUser() {
  */
 export function setUser(user) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('savora_user', JSON.stringify(user));
+  localStorage.setItem('saveplate_user', JSON.stringify(user));
 }
 
 /**

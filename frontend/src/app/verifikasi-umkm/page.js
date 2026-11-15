@@ -115,7 +115,7 @@ export default function VerifikasiUmkmPage() {
         {isPending && (
           <div style={{ marginBottom: '32px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
             <p style={{ margin: '0 0 12px' }}>
-              Akun UMKM Anda sedang dalam proses peninjauan oleh tim admin Savora.
+              Akun UMKM Anda sedang dalam proses peninjauan oleh tim admin SavePlate.
             </p>
             <p style={{ margin: 0 }}>
               Anda akan mendapatkan notifikasi segera setelah akun Anda diverifikasi. Mohon bersabar, proses ini biasanya memakan waktu 1-2 hari kerja.
@@ -129,7 +129,7 @@ export default function VerifikasiUmkmPage() {
               Mohon maaf, pengajuan UMKM Anda tidak dapat disetujui.
             </p>
             <p style={{ margin: 0, color: '#7F1D1D', fontSize: '14px', lineHeight: '1.6' }}>
-              Silakan hubungi admin Savora melalui email support@savora.com untuk informasi lebih lanjut atau ajukan ulang dengan data yang lebih lengkap.
+              Silakan hubungi admin SavePlate melalui email support@saveplate.com untuk informasi lebih lanjut atau ajukan ulang dengan data yang lebih lengkap.
             </p>
           </div>
         )}

@@ -75,7 +75,7 @@ function PaymentTimer({ expiresAt, onExpired }) {
 
   if (!timeLeft || timeLeft.expired) {
     return (
-      <div className="savora-payment-timer expired">
+      <div className="saveplate-payment-timer expired">
         <Clock size={16} aria-hidden="true" />
         <span>Waktu pembayaran habis</span>
       </div>
@@ -85,7 +85,7 @@ function PaymentTimer({ expiresAt, onExpired }) {
   const isUrgent = timeLeft.minutes < 5;
 
   return (
-    <div className={`savora-payment-timer ${isUrgent ? "urgent" : ""}`}>
+    <div className={`saveplate-payment-timer ${isUrgent ? "urgent" : ""}`}>
       <Clock size={16} aria-hidden="true" />
       <span>
         Bayar dalam {timeLeft.minutes.toString().padStart(2, "0")}:
@@ -98,14 +98,14 @@ function PaymentTimer({ expiresAt, onExpired }) {
 // Loading skeleton
 function PaymentSkeleton() {
   return (
-    <div className="savora-payment-skeleton">
-      <div className="savora-skeleton-header">
-        <div className="savora-skeleton-line" style={{ width: "200px" }}></div>
+    <div className="saveplate-payment-skeleton">
+      <div className="saveplate-skeleton-header">
+        <div className="saveplate-skeleton-line" style={{ width: "200px" }}></div>
       </div>
-      <div className="savora-skeleton-content">
-        <div className="savora-skeleton-line" style={{ width: "100%" }}></div>
-        <div className="savora-skeleton-line" style={{ width: "80%" }}></div>
-        <div className="savora-skeleton-line" style={{ width: "60%" }}></div>
+      <div className="saveplate-skeleton-content">
+        <div className="saveplate-skeleton-line" style={{ width: "100%" }}></div>
+        <div className="saveplate-skeleton-line" style={{ width: "80%" }}></div>
+        <div className="saveplate-skeleton-line" style={{ width: "60%" }}></div>
       </div>
     </div>
   );
@@ -114,8 +114,8 @@ function PaymentSkeleton() {
 // Payment pending state
 function PaymentPendingState({ order, onRefresh }) {
   return (
-    <div className="savora-payment-state pending">
-      <div className="savora-payment-icon">
+    <div className="saveplate-payment-state pending">
+      <div className="saveplate-payment-icon">
         <Clock size={48} aria-hidden="true" />
       </div>
       <h2>Menunggu Pembayaran</h2>
@@ -126,7 +126,7 @@ function PaymentPendingState({ order, onRefresh }) {
           href={order.paymentUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="savora-payment-button primary"
+          className="saveplate-payment-button primary"
         >
           <CreditCard size={20} aria-hidden="true" />
           Bayar Sekarang
@@ -134,26 +134,26 @@ function PaymentPendingState({ order, onRefresh }) {
         </a>
       )}
 
-      <button onClick={onRefresh} className="savora-payment-button secondary">
+      <button onClick={onRefresh} className="saveplate-payment-button secondary">
         <RefreshCw size={18} aria-hidden="true" />
         Refresh Status
       </button>
 
-      <div className="savora-payment-breakdown">
+      <div className="saveplate-payment-breakdown">
         <h3>Detail Pembayaran</h3>
-        <div className="savora-payment-line">
+        <div className="saveplate-payment-line">
           <span>Order ID</span>
           <span>#{order.id}</span>
         </div>
-        <div className="savora-payment-line">
+        <div className="saveplate-payment-line">
           <span>Subtotal</span>
           <span>{formatRupiah(order.subtotal)}</span>
         </div>
-        <div className="savora-payment-line">
+        <div className="saveplate-payment-line">
           <span>Service Fee (5%)</span>
           <span>{formatRupiah(order.serviceFee)}</span>
         </div>
-        <div className="savora-payment-line total">
+        <div className="saveplate-payment-line total">
           <span>Total Pembayaran</span>
           <span>{formatRupiah(order.totalPrice)}</span>
         </div>
@@ -169,37 +169,37 @@ function PaymentPendingState({ order, onRefresh }) {
 // Payment success (paid) state
 function PaymentSuccessState({ order }) {
   return (
-    <div className="savora-payment-state success">
-      <div className="savora-payment-icon">
+    <div className="saveplate-payment-state success">
+      <div className="saveplate-payment-icon">
         <CheckCircle size={48} aria-hidden="true" />
       </div>
       <h2>Pembayaran Berhasil!</h2>
       <p>Pesanan Anda sudah dikonfirmasi. Silakan ambil pesanan sesuai jadwal.</p>
 
       {order.pickupCode && (
-        <div className="savora-pickup-code">
+        <div className="saveplate-pickup-code">
           <h3>Kode Pickup</h3>
-          <div className="savora-code-display">{order.pickupCode}</div>
-          <p className="savora-code-instruction">
+          <div className="saveplate-code-display">{order.pickupCode}</div>
+          <p className="saveplate-code-instruction">
             Tunjukkan kode ini ke UMKM saat mengambil pesanan
           </p>
         </div>
       )}
 
       {order.product && (
-        <div className="savora-payment-product">
+        <div className="saveplate-payment-product">
           <h3>Detail Pesanan</h3>
-          <div className="savora-product-summary">
+          <div className="saveplate-product-summary">
             {order.product.photoUrl && (
               <Image
                 src={order.product.photoUrl}
                 alt={order.product.name}
                 width={60}
                 height={60}
-                className="savora-product-thumb"
+                className="saveplate-product-thumb"
               />
             )}
-            <div className="savora-product-info">
+            <div className="saveplate-product-info">
               <h4>{order.product.name}</h4>
               <p>
                 <Store size={14} aria-hidden="true" /> UMKM
@@ -214,13 +214,13 @@ function PaymentSuccessState({ order }) {
       )}
 
       {order.pickupDeadline && (
-        <div className="savora-pickup-deadline">
+        <div className="saveplate-pickup-deadline">
           <Clock size={16} aria-hidden="true" />
           <span>Ambil sebelum: {formatDateTime(order.pickupDeadline)}</span>
         </div>
       )}
 
-      <Link href="/marketplace" className="savora-payment-button secondary">
+      <Link href="/marketplace" className="saveplate-payment-button secondary">
         Kembali ke Marketplace
       </Link>
     </div>
@@ -236,8 +236,8 @@ function PaymentFailedState({ order, status }) {
     : "Pembayaran tidak dapat diproses. Silakan coba lagi.";
 
   return (
-    <div className="savora-payment-state failed">
-      <div className="savora-payment-icon">
+    <div className="saveplate-payment-state failed">
+      <div className="saveplate-payment-icon">
         {isExpired ? (
           <AlertTriangle size={48} aria-hidden="true" />
         ) : (
@@ -247,14 +247,14 @@ function PaymentFailedState({ order, status }) {
       <h2>{title}</h2>
       <p>{message}</p>
 
-      <div className="savora-payment-actions">
+      <div className="saveplate-payment-actions">
         <Link
           href={`/marketplace/${order.product?.id || ""}`}
-          className="savora-payment-button primary"
+          className="saveplate-payment-button primary"
         >
           Pesan Lagi
         </Link>
-        <Link href="/marketplace" className="savora-payment-button secondary">
+        <Link href="/marketplace" className="saveplate-payment-button secondary">
           Kembali ke Marketplace
         </Link>
       </div>
@@ -363,9 +363,9 @@ export default function PaymentPage() {
   // Loading state
   if (loading && !order) {
     return (
-      <div className="savora-payment-page">
-        <header className="savora-topbar">
-          <Link href="/marketplace" className="savora-back-button">
+      <div className="saveplate-payment-page">
+        <header className="saveplate-topbar">
+          <Link href="/marketplace" className="saveplate-back-button">
             <ArrowLeft size={20} aria-hidden="true" /> Marketplace
           </Link>
         </header>
@@ -377,15 +377,15 @@ export default function PaymentPage() {
   // Error state
   if (error && !order) {
     return (
-      <div className="savora-payment-page">
-        <header className="savora-topbar">
-          <Link href="/marketplace" className="savora-back-button">
+      <div className="saveplate-payment-page">
+        <header className="saveplate-topbar">
+          <Link href="/marketplace" className="saveplate-back-button">
             <ArrowLeft size={20} aria-hidden="true" /> Kembali
           </Link>
         </header>
-        <div className="savora-error-container">
+        <div className="saveplate-error-container">
           <p>{error}</p>
-          <Link href="/marketplace" className="savora-payment-button">
+          <Link href="/marketplace" className="saveplate-payment-button">
             Kembali ke Marketplace
           </Link>
         </div>
@@ -412,21 +412,21 @@ export default function PaymentPage() {
   };
 
   return (
-    <div className="savora-payment-page">
-      <header className="savora-topbar">
-        <Link href="/marketplace" className="savora-back-button">
+    <div className="saveplate-payment-page">
+      <header className="saveplate-topbar">
+        <Link href="/marketplace" className="saveplate-back-button">
           <ArrowLeft size={20} aria-hidden="true" /> Marketplace
         </Link>
         <h1>Status Pembayaran</h1>
         {polling && (
-          <span className="savora-polling-indicator" title="Memperbarui status...">
+          <span className="saveplate-polling-indicator" title="Memperbarui status...">
             <RefreshCw size={16} className="spin" aria-hidden="true" />
           </span>
         )}
       </header>
 
-      <main className="savora-payment-main">
-        <div className="savora-payment-container">{renderContent()}</div>
+      <main className="saveplate-payment-main">
+        <div className="saveplate-payment-container">{renderContent()}</div>
       </main>
     </div>
   );

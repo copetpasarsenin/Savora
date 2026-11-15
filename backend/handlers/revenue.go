@@ -9,8 +9,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jung-kurt/gofpdf"
-	"github.com/savora/backend/database"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/database"
+	"github.com/saveplate/backend/models"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -308,7 +308,7 @@ func exportRevenuePDF(c *fiber.Ctx, revenues []models.PlatformRevenue, startDate
 
 	// Set font
 	pdf.SetFont("Arial", "B", 16)
-	pdf.Cell(0, 10, "Laporan Keuangan Platform Savora")
+	pdf.Cell(0, 10, "Laporan Keuangan Platform SavePlate")
 	pdf.Ln(12)
 
 	// Date range info

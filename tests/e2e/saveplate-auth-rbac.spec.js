@@ -1,4 +1,4 @@
-// tests/e2e/savora-auth-rbac.spec.js
+// tests/e2e/saveplate-auth-rbac.spec.js
 // Authentication & Role-Based Access Control Tests
 // Priority: MUST (PRD Section 23, REVISI #22)
 
@@ -31,7 +31,7 @@ async function getAuthToken(page) {
   return token;
 }
 
-test.describe('Savora E2E - Authentication', () => {
+test.describe('SavePlate E2E - Authentication', () => {
   
   test('AUTH-01: User Register sebagai Customer', async ({ page }) => {
     await page.goto(`${BASE_URL}/register`);
@@ -105,7 +105,7 @@ test.describe('Savora E2E - Authentication', () => {
   });
 });
 
-test.describe('Savora E2E - RBAC (Role-Based Access Control)', () => {
+test.describe('SavePlate E2E - RBAC (Role-Based Access Control)', () => {
   
   test('RBAC-01: UMKM Akses Endpoint Admin → 403 Forbidden', async ({ page, request }) => {
     // Login as UMKM
@@ -248,7 +248,7 @@ test.describe('Savora E2E - RBAC (Role-Based Access Control)', () => {
   });
 });
 
-test.describe('Savora E2E - Session & Token Management', () => {
+test.describe('SavePlate E2E - Session & Token Management', () => {
   
   test('SESSION-01: Logout Menghapus Token', async ({ page }) => {
     // Login

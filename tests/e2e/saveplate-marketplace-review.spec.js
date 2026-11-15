@@ -1,4 +1,4 @@
-// tests/e2e/savora-marketplace-review.spec.js
+// tests/e2e/saveplate-marketplace-review.spec.js
 // Marketplace Filter, Review Validation, Keyword Classification
 // Priority: MUST (PRD FR-05, FR-09, FR-16, Section 23)
 
@@ -28,7 +28,7 @@ async function getAuthToken(page) {
   });
 }
 
-test.describe('Savora E2E - Marketplace Browse & Filter', () => {
+test.describe('SavePlate E2E - Marketplace Browse & Filter', () => {
   
   test('MKT-01: Customer Browse Marketplace → Tampil Produk dengan Food Score', async ({ page }) => {
     await page.goto(`${BASE_URL}/marketplace`);
@@ -191,7 +191,7 @@ test.describe('Savora E2E - Marketplace Browse & Filter', () => {
   });
 });
 
-test.describe('Savora E2E - Review & Keyword Classification', () => {
+test.describe('SavePlate E2E - Review & Keyword Classification', () => {
   
   test('REVIEW-01: Customer Cannot Review Sebelum Order Completed', async ({ page, request }) => {
     await login(page, testCustomer.email, testCustomer.password);
@@ -429,7 +429,7 @@ test.describe('Savora E2E - Review & Keyword Classification', () => {
   });
 });
 
-test.describe('Savora E2E - Keyword Safety Badge Display', () => {
+test.describe('SavePlate E2E - Keyword Safety Badge Display', () => {
   
   test('BADGE-01: Marketplace Menampilkan Keyword Safety Badge per UMKM', async ({ page }) => {
     await page.goto(`${BASE_URL}/marketplace`);

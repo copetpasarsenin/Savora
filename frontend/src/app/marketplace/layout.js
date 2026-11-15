@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Savora — Food Rescue",
+  title: "SavePlate — Food Rescue",
   description: "Marketplace food rescue untuk UMKM kuliner lokal.",
 };
 

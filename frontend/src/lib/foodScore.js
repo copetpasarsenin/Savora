@@ -13,7 +13,7 @@
 // klaim pengukuran lab):
 // - FreshTrack: an innovative IoT-sensor-driven food freshness estimation
 //   framework integrating blockchain (Scientific Reports, 2026 —
-//   nature.com/articles/s41598-026-44579-1). Savora mengadopsi prinsip
+//   nature.com/articles/s41598-026-44579-1). SavePlate mengadopsi prinsip
 //   non-linear-nya secara heuristik berbasis waktu, tanpa sensor.
 // - Literatur kinetic shelf-life makanan perishable (Food Chemistry, 2023).
 

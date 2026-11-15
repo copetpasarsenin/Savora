@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { fetchMarketplaceProducts, computeProductScore, filterMarketplaceProducts } from "@/lib/marketplace";
 import { useCart } from "@/lib/CartContext";
-import SavoraNavbar from "@/components/navbar/SavoraNavbar";
+import SavePlateNavbar from "@/components/navbar/SavePlateNavbar";
 
 export default function BerandaPage() {
   const { count } = useCart();
@@ -135,7 +135,7 @@ export default function BerandaPage() {
   return (
     <div className="beranda-page">
       {/* 1. Navbar */}
-      <SavoraNavbar />
+      <SavePlateNavbar />
 
 
 
@@ -561,7 +561,7 @@ export default function BerandaPage() {
             <div className="beranda-faq-left">
               <h2>Pertanyaan yang sering diajukan</h2>
               <p className="beranda-faq-subtitle">
-                Semua yang perlu kamu ketahui tentang menyelamatkan makanan di Savora.
+                Semua yang perlu kamu ketahui tentang menyelamatkan makanan di SavePlate.
               </p>
               <Link href="/marketplace" className="beranda-link">
                 Hubungi support <ChevronRight size={16} />
@@ -583,7 +583,7 @@ export default function BerandaPage() {
       <footer className="beranda-footer">
         <div className="beranda-footer-container">
           <div className="beranda-footer-column-brand">
-            <div className="beranda-footer-wordmark">Savora</div>
+            <div className="beranda-footer-wordmark">SavePlate</div>
             <p className="beranda-footer-mission">
               Misi kami sederhana: Tidak boleh ada makanan enak yang terbuang sia-sia.
               Bergabunglah dengan ribuan penyelamat makanan lainnya di seluruh Indonesia.
@@ -648,7 +648,7 @@ export default function BerandaPage() {
         </div>
 
         <div className="beranda-footer-bottom">
-          <span>© 2026 Savora Platform. Proudly Made In Indonesia for the Earth.</span>
+          <span>© 2026 SavePlate Platform. Proudly Made In Indonesia for the Earth.</span>
           <div className="beranda-footer-bottom-links">
             <span>SECURITY</span>
             <span>SITEMAP</span>

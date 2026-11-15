@@ -54,7 +54,7 @@ All admin endpoints require:
   "data": {
     "user": {
       "id": 1,
-      "name": "Admin Savora",
+      "name": "Admin SavePlate",
       "email": "admin@savora.com",
       "role": "ADMIN",
       "status": "ACTIVE"
@@ -94,7 +94,7 @@ Authorization: Bearer <token>
   "success": true,
   "data": {
     "id": 1,
-    "name": "Admin Savora",
+    "name": "Admin SavePlate",
     "email": "admin@savora.com",
     "role": "ADMIN",
     "status": "ACTIVE",
@@ -428,7 +428,7 @@ Authorization: Bearer <token>
 
 ## 5. Help Center, Advertisements, Revenue
 
-See full documentation at: https://github.com/savora-platform/docs/admin-api
+See full documentation at: https://github.com/saveplate-platform/docs/admin-api
 
 **Help Tickets:** POST `/help-tickets`, GET `/help-tickets`, PATCH `/help-tickets/{id}/status`
 **Advertisements:** POST `/advertisements`, GET `/advertisements`, PATCH `/advertisements/{id}/status`

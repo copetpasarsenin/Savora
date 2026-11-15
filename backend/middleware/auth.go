@@ -6,7 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/savora/backend/handlers"
+	"github.com/saveplate/backend/handlers"
 )
 
 // AuthMiddleware verifies JWT token and sets user claims in context
@@ -36,7 +36,7 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	// Parse and validate token
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		secret = "savora-secret-key-change-in-production" // Default untuk development
+		secret = "saveplate-secret-key-change-in-production" // Default untuk development
 	}
 
 	token, err := jwt.ParseWithClaims(tokenString, &handlers.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -87,7 +87,7 @@ func OptionalAuthMiddleware(c *fiber.Ctx) error {
 	tokenString := tokenParts[1]
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		secret = "savora-secret-key-change-in-production"
+		secret = "saveplate-secret-key-change-in-production"
 	}
 
 	token, err := jwt.ParseWithClaims(tokenString, &handlers.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {

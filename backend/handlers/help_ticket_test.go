@@ -11,8 +11,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
-	"github.com/savora/backend/database"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/database"
+	"github.com/saveplate/backend/models"
 )
 
 // setupHelpTicketTestDB initializes test database connection
@@ -103,7 +103,7 @@ func TestCreateHelpTicket_OrderStatusChange(t *testing.T) {
 	var orderID uint
 	err := database.DB.Raw(`
 		INSERT INTO orders (product_id, customer_id, customer_name, quantity, total_amount, payment_method, payment_status, status)
-		VALUES (1, ?, 'Customer Test', 1, 50000, 'MIDTRANS_SANDBOX', 'PAID', 'Selesai')
+		VALUES (1, ?, 'Customer Test', 1, 50000, 'XENDIT_SANDBOX', 'PAID', 'Selesai')
 		RETURNING id
 	`, customerUser.ID).Row().Scan(&orderID)
 

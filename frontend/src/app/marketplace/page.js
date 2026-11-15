@@ -19,7 +19,7 @@ import { fetchMarketplaceProducts, computeProductScore, filterMarketplaceProduct
 import { fetchAds, AD_TYPES } from "@/lib/ads";
 import { deriveRestaurantSafety } from "@/lib/reviews";
 import { useCart } from "@/lib/CartContext";
-import SavoraNavbar from "@/components/navbar/SavoraNavbar";
+import SavePlateNavbar from "@/components/navbar/SavePlateNavbar";
 
 function MarketplaceContent() {
   const searchParams = useSearchParams();
@@ -206,7 +206,7 @@ function MarketplaceContent() {
 
   return (
     <div className="beranda-page">
-      <SavoraNavbar />
+      <SavePlateNavbar />
 
       <section className="beranda-section">
         <div className="beranda-container">
@@ -901,7 +901,7 @@ function MarketplaceContent() {
       <footer className="beranda-footer">
         <div className="beranda-footer-container">
           <div className="beranda-footer-column-brand">
-            <div className="beranda-footer-wordmark">Savora</div>
+            <div className="beranda-footer-wordmark">SavePlate</div>
             <p className="beranda-footer-mission">
               Misi kami sederhana: Tidak boleh ada makanan enak yang terbuang sia-sia.
               Bergabunglah dengan ribuan penyelamat makanan lainnya di seluruh Indonesia.
@@ -966,7 +966,7 @@ function MarketplaceContent() {
         </div>
 
         <div className="beranda-footer-bottom">
-          <span>© 2026 Savora Platform. Proudly Made In Indonesia for the Earth.</span>
+          <span>© 2026 SavePlate Platform. Proudly Made In Indonesia for the Earth.</span>
           <div className="beranda-footer-bottom-links">
             <span>SECURITY</span>
             <span>SITEMAP</span>

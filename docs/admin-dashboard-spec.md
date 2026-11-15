@@ -1,7 +1,7 @@
-# Savora — Admin Dashboard Design Spec
+# SavePlate — Admin Dashboard Design Spec
 
 > **Status:** Disepakati (sesi desain 23 Jul 2026) · **Branch:** `alia` · **Deadline submission:** 25 Jul 2026
-> **Dokumen ini adalah turunan dari `docs/SAVORA_PRD.md` (v3.7)** — khususnya **Section 5.3** (modul Admin), **FR-12/FR-13/FR-20/FR-21**, **Section 16** (Screen List), **Section 18** (Data Model), **Section 19** (API). PRD TIDAK diubah; jika ada konflik, PRD yang menang untuk *requirement*, dokumen ini yang menang untuk *tampilan & struktur UI*.
+> **Dokumen ini adalah turunan dari `docs/SAVEPLATE_PRD.md` (v3.7)** — khususnya **Section 5.3** (modul Admin), **FR-12/FR-13/FR-20/FR-21**, **Section 16** (Screen List), **Section 18** (Data Model), **Section 19** (API). PRD TIDAK diubah; jika ada konflik, PRD yang menang untuk *requirement*, dokumen ini yang menang untuk *tampilan & struktur UI*.
 >
 > **Aturan keras implementasi:**
 > 1. Semua angka WAJIB dari database — tidak ada nilai hardcode/dummy.
@@ -14,7 +14,7 @@
 ## 1. Struktur Sidebar (final)
 
 ```
-SAVORA ADMIN PANEL
+SAVEPLATE ADMIN PANEL
 │
 ├── UTAMA
 │   └── Dashboard
@@ -294,7 +294,7 @@ Item PRD sudah terjawab (lihat §12). Sisa yang hanya bisa dicek di kode:
 > Tree ini SUDAH disinkronkan dengan hasil verifikasi PRD v3.7 (§12): ada Moderasi Listing, kolom donasi mitra dibuang, parameter fee/expired dibuang, dan metrik health/impact mengikuti data yang benar-benar ada di data model PRD 18.
 
 ```
-SAVORA ADMIN PANEL
+SAVEPLATE ADMIN PANEL
 │
 ├── UTAMA
 │   └── Dashboard                                  (PRD 5.3 + FR-13; data: GET /admin/reports/summary — PRD 19)

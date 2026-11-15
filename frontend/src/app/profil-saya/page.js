@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import { useAuthGuard } from '@/lib/useAuthGuard';
 import { getUser } from '@/lib/auth';
 import { apiGet } from '@/lib/api';
-import SavoraNavbar from '@/components/navbar/SavoraNavbar';
+import SavePlateNavbar from '@/components/navbar/SavePlateNavbar';
 
 /**
  * F4: Halaman /profil-saya — Profil untuk semua role (milik Alia)
  * Guard: useAuthGuard tanpa allowedRoles (cuma cek authenticated)
- * Data: dari savora_user (localStorage) dengan optional fetch /api/me untuk data segar
+ * Data: dari saveplate_user (localStorage) dengan optional fetch /api/me untuk data segar
  */
 
 // Helper: role label ramah user (case-insensitive input)
@@ -77,7 +77,7 @@ export default function ProfilSayaPage() {
 
   useEffect(() => {
     const loadUserData = async () => {
-      // 1. Ambil dari localStorage dulu (savora_user)
+      // 1. Ambil dari localStorage dulu (saveplate_user)
       const localUser = getUser();
 
       if (!localUser) {
@@ -113,7 +113,7 @@ export default function ProfilSayaPage() {
   if (authLoading || dataLoading) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: '#F9FAFB' }}>
-        <SavoraNavbar />
+        <SavePlateNavbar />
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -132,7 +132,7 @@ export default function ProfilSayaPage() {
   if (fetchError || !userData) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: '#F9FAFB' }}>
-        <SavoraNavbar />
+        <SavePlateNavbar />
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -155,7 +155,7 @@ export default function ProfilSayaPage() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F9FAFB' }}>
-      <SavoraNavbar />
+      <SavePlateNavbar />
 
       {/* Main Content */}
       <div style={{

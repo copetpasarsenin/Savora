@@ -1,15 +1,15 @@
 # PRODUCT REQUIREMENTS DOCUMENT (PRD)
-# Savora — Food Rescue Marketplace untuk UMKM
+# SavePlate — Food Rescue Marketplace untuk UMKM
 
-**Versi:** 3.7 — Konsistensi Final & Presisi Teknis  
-**Tanggal:** 20 Juli 2026  
-**Tim:** AmbaTeam — 5 orang (Himatif S4)  
-**Deadline:** 25 Juli 2026  
-**Lomba:** CODE 6.0 — Software Development (AMCC, Universitas Amikom Yogyakarta)
+**Versi:** 3.9 — Rebrand SavePlate & Standardisasi Xendit Sandbox (Proyek 3)  
+**Tanggal:** 7 November 2026  
+**Tim Proyek 3:** Richard Firmansyah (714240047), Wa Ode Nur Alia (714240035)  
+**Program Studi:** D4 Teknik Informatika — Universitas Logistik & Bisnis Internasional (ULBI) Bandung  
+**Periode Proyek 3:** 6 November 2026 – 6 Januari 2027 (berawal dari prototipe lomba CODE 6.0)
 
 > 📝 **Catatan Revisi v3.1 (20 Juli 2026):** Dokumen direvisi untuk konsistensi (hapus sisa COD, seragamkan model service fee, koreksi FR-06, batas waktu pembayaran 15 menit, RBAC + Mitra Donasi) dan penambahan spesifikasi (Food Score Decay, Keyword Classification, trigger Ready for Pickup, endpoint iklan, perbaikan data model). Setiap perubahan ditandai komentar 📝 **[REVISI #n]** sesuai nomor poin revisi.
 
-> 📝 **Catatan Revisi v3.2 (20 Juli 2026):** Penyelarasan PRD dengan proposal Savora — (1) rumus Food Score Decay diubah dari linear menjadi power decay (γ=0,65) + band skor agar sama dengan proposal Bab 9.3; (2) bagian urgensi masalah dilengkapi data terukur beserta sumber; (3) data model dikelompokkan menjadi Inti MVP vs Perluasan agar ERD mencerminkan cakupan yang benar-benar dibangun. Perubahan ditandai 📝 **[REVISI #11–#13]**.
+> 📝 **Catatan Revisi v3.2 (20 Juli 2026):** Penyelarasan PRD dengan proposal SavePlate — (1) rumus Food Score Decay diubah dari linear menjadi power decay (γ=0,65) + band skor agar sama dengan proposal Bab 9.3; (2) bagian urgensi masalah dilengkapi data terukur beserta sumber; (3) data model dikelompokkan menjadi Inti MVP vs Perluasan agar ERD mencerminkan cakupan yang benar-benar dibangun. Perubahan ditandai 📝 **[REVISI #11–#13]**.
 
 > 📝 **Catatan Revisi v3.3 (21 Juli 2026):** Sinkronisasi lanjutan PRD ↔ proposal — (1) Section 17 di-lock ke satu stack pasti (Next.js+React, Go+Fiber, PostgreSQL+GORM), bukan opsional lagi; (2) tabel kompetitor 8.1 diselaraskan ke pembanding lokal Indonesia (Surplus Indonesia, Garda Pangan) + Too Good To Go sebagai pembanding global; (3) aturan badge keyword 12.7 ditetapkan sebagai acuan tunggal (threshold, bukan worst-case); (4) checklist status implementasi ditambahkan di 18; (5) modul Reward & Badge ditetapkan sebagai Demo Only. Perubahan ditandai 📝 **[REVISI #14–#18]**.
 
@@ -19,26 +19,28 @@
 
 > 📝 **Catatan Revisi v3.6 (21 Juli 2026):** Perbaikan konsistensi final hasil review menyeluruh — (1) sisa "Supabase" di Section 27 dihapus, stack sudah di-lock ke PostgreSQL sejak [REVISI #14]; (2) timeline W2 (21.3) disamakan dengan sinkronisasi scope [REVISI #19]: Help Center & Waste Log dikeluarkan dari core features; (3) rumus verifikasi signature webhook Midtrans ditulis eksplisit di FR-14 dan 14.6; (4) status order Created diperjelas sebagai status transien agar konsisten dengan flow 10.1; (5) field `reviews.keywords` ditetapkan sebagai denormalisasi — sumber kebenaran adalah tabel `review_keywords`; (6) hubungan color indicator (jam absolut) vs band skor (fraksi) dijelaskan eksplisit di 12.6; (7) atribusi angka 8–10% emisi GRK diperjelas (IPCC 2019 sebagaimana dikutip UNEP 2024). Perubahan ditandai 📝 **[REVISI #26–#32]**.
 
-> 📝 **Catatan Revisi v3.7 (21 Juli 2026):** Perbaikan hasil review eksternal menyeluruh — (1) enum order_status dilengkapi `PAYMENT_FAILED` yang sudah dipakai di 14.1/14.2 tetapi tertinggal dari enum [REVISI #33]; (2) field `min_price` ditambahkan ke tabel products sebagai penopang guardrail harga minimum 13.3/FR-23 [REVISI #34]; (3) catatan implementasi expiry Midtrans ditambahkan di 14.5: batas 15 menit wajib diset via parameter `expiry` Snap token (default 24 jam) dan auto-expire order dilakukan scheduler Savora sendiri karena Midtrans tidak mengirim webhook saat halaman pembayaran expired [REVISI #35]; (4) ambiguitas FR-23 diputuskan mengikuti 5.2/13.1: sistem menghitung rekomendasi diskon otomatis, keputusan final tetap di UMKM dalam rentang aturan 13.2 + guardrail 13.3 [REVISI #36]; (5) Testing Plan: skenario webhook Midtrans dinaikkan Should → Must (konsisten dengan FR-14 P0) dan skenario moderasi listing (FR-12 P0) ditambahkan [REVISI #37]; (6) Food Rescue Score (5.2) diberi status Demo Only, metrik Help Ticket diberi label Should Have, dan catatan input FTI yang tidak memengaruhi aturan 12.4 ditambahkan di 12.2 [REVISI #38].
+> 📝 **Catatan Revisi v3.7 (21 Juli 2026):** Perbaikan hasil review eksternal menyeluruh — (1) enum order_status dilengkapi `PAYMENT_FAILED` yang sudah dipakai di 14.1/14.2 tetapi tertinggal dari enum [REVISI #33]; (2) field `min_price` ditambahkan ke tabel products sebagai penopang guardrail harga minimum 13.3/FR-23 [REVISI #34]; (3) catatan implementasi expiry Midtrans ditambahkan di 14.5: batas 15 menit wajib diset via parameter `expiry` Snap token (default 24 jam) dan auto-expire order dilakukan scheduler SavePlate sendiri karena Midtrans tidak mengirim webhook saat halaman pembayaran expired [REVISI #35]; (4) ambiguitas FR-23 diputuskan mengikuti 5.2/13.1: sistem menghitung rekomendasi diskon otomatis, keputusan final tetap di UMKM dalam rentang aturan 13.2 + guardrail 13.3 [REVISI #36]; (5) Testing Plan: skenario webhook Midtrans dinaikkan Should → Must (konsisten dengan FR-14 P0) dan skenario moderasi listing (FR-12 P0) ditambahkan [REVISI #37]; (6) Food Rescue Score (5.2) diberi status Demo Only, metrik Help Ticket diberi label Should Have, dan catatan input FTI yang tidak memengaruhi aturan 12.4 ditambahkan di 12.2 [REVISI #38].
 
 > 📝 **Catatan Revisi v3.8 (24 Juli 2026):** Penambahan fitur Keranjang Belanja Customer — (1) Customer dapat mengumpulkan beberapa produk ke dalam keranjang sebelum checkout; (2) implementasi frontend-only dengan persistence di localStorage; (3) checkout tetap melalui alur order existing (1 order per item); (4) validasi stok tetap di backend saat order dibuat; (5) service fee 5% ditampilkan di ringkasan keranjang. Fitur ini dikategorikan sebagai Should Have dan tidak mengubah happy path inti MVP. Perubahan ditandai 📝 **[REVISI #39]**.
+
+> 📝 **Catatan Revisi v3.9 (7 November 2026):** Penyelarasan dengan Proposal Proyek 3 D4 Teknik Informatika ULBI — (1) rebranding menyeluruh dari *Savora* menjadi **SavePlate** pada produk, UI, dokumentasi, dan suite pengujian; (2) standardisasi tunggal payment gateway cashless ke **Xendit Invoice (Sandbox)** mengikuti implementasi aktual backend (`XENDIT_SANDBOX`, pembuatan invoice via `POST /api/orders` ke Xendit Invoice v2 dengan `invoice_duration = 900` detik / 15 menit, verifikasi webhook `POST /api/payments/xendit-webhook` menggunakan header `x-callback-token` secara constant-time + pencatatan `payment_logs`); (3) penambahan tabel `payment_logs` pada Data Model Ringkas agar selaras dengan kode dan proposal Bab 3.4; (4) sinkronisasi penuh `docs/SavePlate_PRD_v3.9.md` dan `frontend/docs/PRD.md`. Perubahan ditandai 📝 **[REVISI #40]**.
 
 ---
 
 ## 1. Ringkasan Produk
 
 ### 1.1 Nama Produk
-**Savora**
+**SavePlate**
 
 ### 1.2 Tagline
 "Selamatkan Makanan, Hemat Biaya, Kurangi Limbah."
 
 ### 1.3 Deskripsi Singkat
-Savora adalah platform web responsive/mobile-first yang membantu UMKM kuliner menjual makanan surplus yang masih layak konsumsi dengan harga lebih terjangkau. Customer dapat melihat daftar rescue deal, mengecek informasi kelayakan makanan melalui Food Trust Index, melihat Food Score yang menurun seiring waktu mendekati expired, membaca badge keamanan restoran berbasis keyword ulasan, melakukan pembayaran cashless via Midtrans sandbox, lalu mengambil makanan langsung ke lokasi UMKM dalam batas waktu yang ditentukan. Platform menerapkan service fee 5% yang ditambahkan ke total pembayaran customer pada setiap transaksi sebagai model pendapatan.
+SavePlate adalah platform web responsive/mobile-first yang membantu UMKM kuliner menjual makanan surplus yang masih layak konsumsi dengan harga lebih terjangkau. Customer dapat melihat daftar rescue deal, mengecek informasi kelayakan makanan melalui Food Trust Index, melihat Food Score yang menurun seiring waktu mendekati expired, membaca badge keamanan restoran berbasis keyword ulasan, melakukan pembayaran cashless via Xendit sandbox, lalu mengambil makanan langsung ke lokasi UMKM dalam batas waktu yang ditentukan. Platform menerapkan service fee 5% yang ditambahkan ke total pembayaran customer pada setiap transaksi sebagai model pendapatan.
 
 > 📝 **[REVISI #2]** Model service fee diseragamkan: fee 5% DITAMBAHKAN ke total pembayaran customer (bukan dipotong dari pendapatan UMKM), mengikuti mayoritas bagian dokumen (5.1, FR-06, 14.3).
 
-Savora juga menyediakan fitur iklan untuk UMKM (premium listing) dan iklan pihak ketiga, analitik penjualan & insight performa UMKM, serta dashboard admin untuk manajemen keuangan platform, verifikasi mitra donasi, dan manajemen iklan. Untuk makanan yang sudah tidak layak dijual, Savora menyediakan fitur Waste Log agar UMKM dapat mencatat makanan tidak terjual sebagai bahan evaluasi produksi. Pada MVP lomba, Savora tidak mencakup pengelolaan limbah eksternal, tidak menyediakan layanan delivery, dan tidak menyediakan pembayaran tunai (cashless only).
+SavePlate juga menyediakan fitur iklan untuk UMKM (premium listing) dan iklan pihak ketiga, analitik penjualan & insight performa UMKM, serta dashboard admin untuk manajemen keuangan platform, verifikasi mitra donasi, dan manajemen iklan. Untuk makanan yang sudah tidak layak dijual, SavePlate menyediakan fitur Waste Log agar UMKM dapat mencatat makanan tidak terjual sebagai bahan evaluasi produksi. Pada MVP lomba, SavePlate tidak mencakup pengelolaan limbah eksternal, tidak menyediakan layanan delivery, dan tidak menyediakan pembayaran tunai (cashless only).
 
 ### 1.4 Visi Produk
 Menjadi solusi digital sederhana dan realistis yang membantu UMKM mengurangi makanan terbuang sekaligus memberi customer akses makanan layak konsumsi dengan harga lebih hemat.
@@ -54,24 +56,24 @@ Menjadi solusi digital sederhana dan realistis yang membantu UMKM mengurangi mak
 
 ## 2. Konteks Lomba dan Batasan Dokumen
 
-PRD ini disusun sebagai acuan internal tim dalam membangun Savora untuk lomba CODE 6.0. Struktur dan fokus dokumen disesuaikan dengan arahan RuleBook dan Template Proposal CODE 6.0, terutama pada aspek urgensi masalah, inovasi, business viability, metodologi pengembangan, arsitektur sistem, UI/UX, implementasi teknis, dan pengujian.
+PRD ini disusun sebagai acuan internal tim dalam membangun SavePlate untuk lomba CODE 6.0. Struktur dan fokus dokumen disesuaikan dengan arahan RuleBook dan Template Proposal CODE 6.0, terutama pada aspek urgensi masalah, inovasi, business viability, metodologi pengembangan, arsitektur sistem, UI/UX, implementasi teknis, dan pengujian.
 
-Sebagai karya lomba mahasiswa, Savora diposisikan sebagai pengembangan ide menjadi inovasi produk digital yang dapat diprototipekan dan diuji melalui MVP. Dokumen ini tidak mengklaim bahwa Savora sudah menjadi bisnis berjalan, sudah memiliki kerja sama resmi, atau sudah menyelesaikan masalah food waste secara menyeluruh.
+Sebagai karya lomba mahasiswa, SavePlate diposisikan sebagai pengembangan ide menjadi inovasi produk digital yang dapat diprototipekan dan diuji melalui MVP. Dokumen ini tidak mengklaim bahwa SavePlate sudah menjadi bisnis berjalan, sudah memiliki kerja sama resmi, atau sudah menyelesaikan masalah food waste secara menyeluruh.
 
-Pendekatan inovasi Savora adalah menggabungkan beberapa fitur yang dapat didemonstrasikan secara realistis dalam konteks lomba mahasiswa: Food Trust Index rule-based, Food Score Decay, Keyword Classification, Smart Rescue Timer, Dynamic Pricing Recommendation, Cashless Payment via Midtrans Sandbox, Service Fee 5%, Pickup Code Verification, Slot Iklan, Analitik & Insight UMKM, Mitra Donasi, Help Center, Waste Log Insight, dan Impact Tracking estimatif.
+Pendekatan inovasi SavePlate adalah menggabungkan beberapa fitur yang dapat didemonstrasikan secara realistis dalam konteks lomba mahasiswa: Food Trust Index rule-based, Food Score Decay, Keyword Classification, Smart Rescue Timer, Dynamic Pricing Recommendation, Cashless Payment via Xendit Sandbox, Service Fee 5%, Pickup Code Verification, Slot Iklan, Analitik & Insight UMKM, Mitra Donasi, Help Center, Waste Log Insight, dan Impact Tracking estimatif.
 
 ### 2.1 Prinsip Penyusunan
 - Fokus pada ide yang realistis untuk dikembangkan dalam durasi lomba.
 - Menghindari klaim berlebihan seperti sertifikasi lingkungan, program pengolahan limbah skala besar, atau kerja sama besar yang belum tervalidasi.
 - Menjelaskan fitur sebagai rancangan dan MVP yang dapat diuji, bukan sebagai klaim keberhasilan operasional.
-- Menggunakan Midtrans sandbox sebagai payment gateway cashless yang dapat diuji tanpa transaksi uang asli, dengan service fee 5% per transaksi sebagai model pendapatan platform.
+- Menggunakan Xendit sandbox sebagai payment gateway cashless yang dapat diuji tanpa transaksi uang asli, dengan service fee 5% per transaksi sebagai model pendapatan platform.
 
 ### 2.2 Batasan MVP
 - Platform berbasis web responsive/PWA-ready, bukan native mobile app.
 - Order menggunakan self-pickup, bukan delivery.
-- Pembayaran cashless only melalui Midtrans sandbox (tidak ada pembayaran tunai/COD).
+- Pembayaran cashless only melalui Xendit sandbox (tidak ada pembayaran tunai/COD).
 - Service fee 5% otomatis ditambahkan ke total pembayaran customer per transaksi.
-- Order memiliki batas waktu pembayaran untuk Midtrans, batas waktu pickup, dan pickup code agar stok UMKM tidak tertahan terlalu lama.
+- Order memiliki batas waktu pembayaran untuk Xendit, batas waktu pickup, dan pickup code agar stok UMKM tidak tertahan terlalu lama.
 - Waste management dibatasi sebagai pencatatan internal/Waste Log.
 - Data UMKM, customer, produk, dan transaksi dapat menggunakan dummy data realistis untuk kebutuhan demo.
 - Role Mitra Donasi terbatas pada registrasi dan verifikasi oleh admin.
@@ -124,7 +126,7 @@ Solusi digital yang sederhana, mudah digunakan, dan sesuai kebiasaan pengguna lo
 >    Waste Management. Alasan: (a) menghindari isu martabat penerima donasi makanan ber-food-
 >    score rendah; (b) jalur "feed people" sudah dipenuhi rescue deals; sisa tak terjual masuk
 >    hierarki pengolahan limbah; (c) selaras Pergub DKI 102/2021 (kewajiban horeka mengelola
->    food waste mandiri) — Savora menjadi jalur kepatuhan UMKM kuliner.
+>    food waste mandiri) — SavePlate menjadi jalur kepatuhan UMKM kuliner.
 > 4. **Implementasi bertahap.** Pendaftaran & dashboard Mitra berstatus "Segera hadir" pada
 >    rilis lomba; verifikasi Admin memakai halaman existing. Nama teknis lama
 >    (mitra_donasi_profiles, /mitra-donasi/*, role `mitra`) DIPERTAHANKAN dulu — rename adalah
@@ -136,7 +138,7 @@ Sumber donasi: surplus acara/katering/hajatan milik UMKM maupun Customer — BUK
 produk tidak laku (produk tidak layak jual tetap ke jalur mitra pengolah via Waste Log).
 Syarat kelayakan donasi (v2): makanan disiapkan < 4 jam & disimpan layak, bukan pangan
 berisiko tinggi tanpa rantai dingin, porsi minimum, jendela waktu penjemputan.
-Hierarki SAVORA: (1) jual berdiskon → (2) layak makan: donasikan → (3) tidak layak:
+Hierarki SAVEPLATE: (1) jual berdiskon → (2) layak makan: donasikan → (3) tidak layak:
 olah (kompos/maggot/daur ulang). Form donasi + matching mitra = backlog v2.
 Dashboard: SATU dashboard mitra untuk semua kategori (tidak ada dashboard terpisah).
 
@@ -176,7 +178,7 @@ Customer berperan sebagai Food Rescuer, yaitu pengguna yang membantu mengurangi 
 | Food Trust Index | Menampilkan tingkat kepercayaan makanan berdasarkan Food Eligibility Assessment yang diinput oleh UMKM. |
 | Food Score & Rescue Timer | Menampilkan Food Score (0-100) yang **menurun seiring waktu** mendekati expired, beserta hitung mundur sisa waktu makanan masih layak dijual dan batas waktu pickup. Dilengkapi **color indicator** (merah < 1 jam, kuning 1-3 jam, hijau > 3 jam). |
 | Badge Keyword Safety | Menampilkan badge **Aman / Warning / Gawat** per restoran/UMKM berdasarkan akumulasi keyword dari review customer. |
-| Checkout & Pembayaran | Customer melakukan pembelian dengan metode **cashless only** melalui Midtrans sandbox. Service fee 5% otomatis ditambahkan ke total pembayaran. |
+| Checkout & Pembayaran | Customer melakukan pembelian dengan metode **cashless only** melalui Xendit sandbox. Service fee 5% otomatis ditambahkan ke total pembayaran. |
 | Tracking Pesanan | Customer melihat status pesanan, pickup code, dan instruksi pengambilan secara real-time. |
 | Rating & Ulasan | Customer memberi penilaian dan ulasan terhadap produk/UMKM setelah transaksi selesai, dengan **input keyword** (enak, segar, basi, bau, dll) yang terhubung ke mesin klasifikasi. |
 | Impact Tracking | Menampilkan estimasi jumlah makanan yang berhasil diselamatkan dan estimasi dampak lingkungan berbasis data transaksi. Estimasi ini bukan klaim karbon resmi. Status scope: ringkasan sederhana berbasis data riil = FR-13 (P1); grafik impact agregat & monthly impact story = Demo Only dengan data dummy (lihat 9.3). |
@@ -227,7 +229,7 @@ Admin bertugas menjaga kualitas ekosistem aplikasi, mengelola keuangan platform,
 - Menyediakan marketplace makanan surplus yang mudah digunakan oleh UMKM dan customer.
 - Membantu customer mendapatkan makanan layak konsumsi dengan harga lebih hemat.
 - Memberikan informasi Food Trust Index agar customer dapat mengambil keputusan dengan lebih percaya diri.
-- Mengurangi risiko stok tertahan melalui batas waktu pembayaran untuk Midtrans, batas waktu pickup, pickup code, dan pencatatan riwayat order.
+- Mengurangi risiko stok tertahan melalui batas waktu pembayaran untuk Xendit, batas waktu pickup, pickup code, dan pencatatan riwayat order.
 - Membantu UMKM mencatat makanan tidak layak jual melalui Waste Log.
 
 ### 6.2 Manfaat Langsung
@@ -257,19 +259,19 @@ Admin bertugas menjaga kualitas ekosistem aplikasi, mengelola keuangan platform,
 
 ### 7.1 Inovasi Utama
 1. **Marketplace khusus makanan surplus UMKM**  
-   Savora tidak menjadi marketplace makanan umum, tetapi fokus pada makanan surplus yang masih layak konsumsi.
+   SavePlate tidak menjadi marketplace makanan umum, tetapi fokus pada makanan surplus yang masih layak konsumsi.
 
 2. **Food Trust Index berbasis metadata**  
    Sistem memberi indikator kelayakan berdasarkan input seperti jenis makanan, waktu masak, metode penyimpanan, kemasan, dan kondisi makanan. Food Trust Index bersifat transparan dan explainable.
 
 3. **Food Score Decay**  
-   Skor kelayakan makanan (0-100) yang **menurun secara otomatis seiring waktu** mendekati expired, memberikan visualisasi real-time kepada customer tentang urgensi pembelian. Rumus mengikuti spesifikasi 12.6 (power decay, γ=0,65); pendekatan non-linear ini sejalan dengan literatur estimasi kesegaran/shelf-life makanan, a.l. *FreshTrack: an innovative IoT-sensor-driven food freshness estimation framework integrating blockchain* (Scientific Reports, 2026 — nature.com/articles/s41598-026-44579-1). Catatan: FreshTrack memodelkan kesegaran berbasis **sensor IoT** (suhu/kelembapan, kinetika Arrhenius); Savora mengadopsi prinsip non-linear tersebut secara **heuristik berbasis waktu, tanpa sensor** — sitasi ini mendukung klaim umum non-linearitas, bukan kesamaan metodologi. 📝 *[REVISI #20: sitasi placeholder "MDPI Foods, 2020" dihapus dan diganti referensi spesifik; REVISI #25: pembeda metodologi ditambahkan.]*
+   Skor kelayakan makanan (0-100) yang **menurun secara otomatis seiring waktu** mendekati expired, memberikan visualisasi real-time kepada customer tentang urgensi pembelian. Rumus mengikuti spesifikasi 12.6 (power decay, γ=0,65); pendekatan non-linear ini sejalan dengan literatur estimasi kesegaran/shelf-life makanan, a.l. *FreshTrack: an innovative IoT-sensor-driven food freshness estimation framework integrating blockchain* (Scientific Reports, 2026 — nature.com/articles/s41598-026-44579-1). Catatan: FreshTrack memodelkan kesegaran berbasis **sensor IoT** (suhu/kelembapan, kinetika Arrhenius); SavePlate mengadopsi prinsip non-linear tersebut secara **heuristik berbasis waktu, tanpa sensor** — sitasi ini mendukung klaim umum non-linearitas, bukan kesamaan metodologi. 📝 *[REVISI #20: sitasi placeholder "MDPI Foods, 2020" dihapus dan diganti referensi spesifik; REVISI #25: pembeda metodologi ditambahkan.]*
 
 4. **Keyword Classification dari Ulasan**  
    Sistem mengklasifikasikan keyword dari review customer (rule-based) ke level **Aman** (enak, segar), **Warning** (bau), dan **Gawat** (basi, berjamur). Skor kegawatan dihitung per restoran berdasarkan akumulasi keyword.
 
-5. **Cashless payment via Midtrans dengan service fee 5%**  
-   Semua transaksi bersifat cashless melalui Midtrans sandbox, dengan service fee 5% otomatis ditambahkan ke total pembayaran customer sebagai model pendapatan platform. Pengambilan makanan tetap dilakukan self-pickup ke lokasi UMKM dengan validasi pickup code.
+5. **Cashless payment via Xendit dengan service fee 5%**  
+   Semua transaksi bersifat cashless melalui Xendit sandbox, dengan service fee 5% otomatis ditambahkan ke total pembayaran customer sebagai model pendapatan platform. Pengambilan makanan tetap dilakukan self-pickup ke lokasi UMKM dengan validasi pickup code.
 
    > 📝 **[REVISI #2]** Kata "dipotong" diubah menjadi "ditambahkan ke total pembayaran customer" untuk konsistensi model service fee di seluruh dokumen.
 
@@ -293,20 +295,20 @@ Admin bertugas menjaga kualitas ekosistem aplikasi, mengelola keuangan platform,
 - Informasi kelayakan makanan ditampilkan secara transparan melalui Food Trust Index dan Food Score Decay.
 - Food Score yang menurun seiring waktu memberikan urgensi visual yang mendorong customer segera membeli.
 - Keyword classification dari review memberikan informasi keamanan restoran secara crowdsourced.
-- Flow pembayaran cashless via Midtrans sandbox dengan service fee 5% menunjukkan kesiapan model bisnis.
+- Flow pembayaran cashless via Xendit sandbox dengan service fee 5% menunjukkan kesiapan model bisnis.
 - Ada fitur bantuan customer untuk menjaga trust.
 - Slot iklan dan analitik menunjukkan model bisnis yang sustainable.
 - Scope MVP realistis untuk dibangun dalam waktu lomba.
 
 ### 7.3 Batas Klaim Inovasi
-Savora tidak mengklaim sebagai sistem sertifikasi keamanan pangan, tidak mengklaim menghilangkan food waste sepenuhnya, dan tidak mengklaim memiliki kerja sama pengelolaan limbah. Fokus inovasi adalah pada digitalisasi rescue deal, transparansi informasi makanan melalui Food Score Decay dan keyword classification, model pendapatan platform via service fee dan iklan, serta pencatatan sederhana untuk evaluasi UMKM.
+SavePlate tidak mengklaim sebagai sistem sertifikasi keamanan pangan, tidak mengklaim menghilangkan food waste sepenuhnya, dan tidak mengklaim memiliki kerja sama pengelolaan limbah. Fokus inovasi adalah pada digitalisasi rescue deal, transparansi informasi makanan melalui Food Score Decay dan keyword classification, model pendapatan platform via service fee dan iklan, serta pencatatan sederhana untuk evaluasi UMKM.
 
 ---
 
 ## 8. Analisis Kompetitor dan Business Viability
 
 ### 8.1 Tabel Kompetitor
-| Aspek | Savora | Surplus Indonesia | Garda Pangan | Too Good To Go (global) |
+| Aspek | SavePlate | Surplus Indonesia | Garda Pangan | Too Good To Go (global) |
 |---|---|---|---|---|
 | Fokus makanan surplus | Ya | Ya | Ya | Ya |
 | Fokus UMKM lokal | Ya | Sebagian (retail/hotel/resto) | Terbatas (donasi) | Terbatas |
@@ -323,7 +325,7 @@ Savora tidak mengklaim sebagai sistem sertifikasi keamanan pangan, tidak mengkla
 > 📝 **[REVISI #15]** Tabel kompetitor diselaraskan dengan riset proposal (Bab 4.1): pembanding lokal Indonesia adalah **Surplus Indonesia** (aplikasi food rescue pertama di Indonesia) dan **Garda Pangan**. **Too Good To Go** dipertahankan hanya sebagai **pembanding global** dan diberi label karena belum beroperasi di Indonesia; Olio dan "Marketplace Umum" dihapus agar tabel akurat dan tidak menyesatkan juri.
 
 ### 8.2 Diferensiasi Produk
-Savora berbeda karena menggabungkan marketplace makanan surplus, Food Trust Index, Food Score Decay, Keyword Classification, cashless payment via Midtrans sandbox dengan service fee 5%, pickup code, slot iklan, analitik & insight UMKM, mitra donasi, Help Center, dan Waste Log dalam satu flow yang sederhana. Diferensiasi ini relevan untuk konteks UMKM lokal yang membutuhkan solusi ringan, bukan sistem operasional besar.
+SavePlate berbeda karena menggabungkan marketplace makanan surplus, Food Trust Index, Food Score Decay, Keyword Classification, cashless payment via Xendit sandbox dengan service fee 5%, pickup code, slot iklan, analitik & insight UMKM, mitra donasi, Help Center, dan Waste Log dalam satu flow yang sederhana. Diferensiasi ini relevan untuk konteks UMKM lokal yang membutuhkan solusi ringan, bukan sistem operasional besar.
 
 ### 8.3 SWOT Singkat
 **Strengths:**
@@ -333,11 +335,11 @@ Savora berbeda karena menggabungkan marketplace makanan surplus, Food Trust Inde
 - Food Score Decay memberikan urgensi visual real-time.
 - Keyword Classification dari review memberikan crowdsourced safety information.
 - Model pendapatan jelas: service fee 5% + iklan.
-- Cashless via Midtrans sandbox menunjukkan kesiapan integrasi payment gateway secara realistis.
+- Cashless via Xendit sandbox menunjukkan kesiapan integrasi payment gateway secara realistis.
 
 **Weaknesses:**
 - Bergantung pada kejujuran input data UMKM.
-- Integrasi Midtrans masih sandbox.
+- Integrasi Xendit masih sandbox.
 - Validasi data real masih terbatas pada demo/pilot.
 
 **Opportunities:**
@@ -352,7 +354,7 @@ Savora berbeda karena menggabungkan marketplace makanan surplus, Food Trust Inde
 - Customer no-show dapat merugikan UMKM jika tidak dimitigasi.
 
 ### 8.4 Model Bisnis (Model Pendapatan Platform)
-- **Service Fee 5%:** ditambahkan otomatis ke total pembayaran customer pada setiap transaksi produk saat pembayaran cashless via Midtrans; UMKM menerima subtotal harga produk secara penuh.
+- **Service Fee 5%:** ditambahkan otomatis ke total pembayaran customer pada setiap transaksi produk saat pembayaran cashless via Xendit; UMKM menerima subtotal harga produk secara penuh.
 - **Iklan UMKM:** UMKM membayar untuk mengiklankan produknya (premium listing / slot iklan di marketplace).
 - **Iklan Pihak Ketiga:** Aplikasi/brand luar memasang iklan pada platform; dikenakan service fee juga.
 - **Partnership lokal future:** kerja sama promosi dengan kampus, komunitas, atau pelaku UMKM.
@@ -377,7 +379,7 @@ Cakupan wajib = fitur yang didukung 10 tabel **"Inti MVP"** di Section 18 dan FR
 5. Food Score Decay (skor menurun seiring waktu mendekati expired, power decay sesuai 12.6).
 6. Dynamic discount rule-based.
 7. Keyword Classification dari ulasan (Aman / Warning / Gawat).
-8. Checkout cashless via Midtrans sandbox, dengan service fee 5%, pickup code, dan batas waktu pickup.
+8. Checkout cashless via Xendit sandbox, dengan service fee 5%, pickup code, dan batas waktu pickup.
 9. Order tracking.
 10. Dashboard Customer.
 11. Dashboard UMKM dasar (kelola listing, kelola pesanan, ringkasan penjualan sederhana).
@@ -419,14 +421,14 @@ Cakupan wajib = fitur yang didukung 10 tabel **"Inti MVP"** di Section 18 dan FR
 
 ## 10. User Flow Utama
 
-### 10.1 Flow Customer — Cashless via Midtrans Sandbox
+### 10.1 Flow Customer — Cashless via Xendit Sandbox
 1. Customer membuka marketplace.
 2. Customer mencari/filter rescue deal, melihat Food Score, Rescue Time, dan badge keyword safety.
 3. Customer membuka detail produk.
 4. Customer membaca Food Trust Index, Food Score, keyword safety, waktu pickup, harga (termasuk service fee 5%), dan informasi UMKM.
-5. Customer checkout dengan metode cashless via Midtrans sandbox.
+5. Customer checkout dengan metode cashless via Xendit sandbox.
 6. Sistem membuat order dengan status Payment Pending, reserve stok sementara, dan menambahkan service fee 5%.
-7. Customer menyelesaikan simulasi pembayaran melalui Midtrans sandbox.
+7. Customer menyelesaikan simulasi pembayaran melalui Xendit sandbox.
 8. Jika payment status menjadi Paid, sistem membuat pickup code dan batas waktu pickup.
 9. UMKM menekan tombol "Siapkan Pesanan" di dashboard; status order berubah dari Paid menjadi Ready for Pickup.
 10. Customer datang ke lokasi UMKM.
@@ -471,7 +473,7 @@ Cakupan wajib = fitur yang didukung 10 tabel **"Inti MVP"** di Section 18 dan FR
 | FR-03 | UMKM dapat membuat listing | P0 | Listing berisi nama, foto, kategori, harga, stok, berat, lokasi pickup, dan metadata kelayakan |
 | FR-04 | Sistem menghitung Food Trust Index | P0 | Badge Fresh/Layak Dijual/Segera Dijual/Tidak Disarankan Dijual/Tidak Layak Konsumsi muncul berdasarkan input metadata |
 | FR-05 | Customer dapat browse marketplace | P0 | Produk aktif, belum expired, dan stok tersedia tampil di marketplace dengan Food Score, Rescue Time, dan badge keyword |
-| FR-06 | Customer dapat checkout cashless via Midtrans | P0 | Sistem Savora membuat pickup code setelah payment status Paid; service fee 5% otomatis ditambahkan ke total pembayaran customer |
+| FR-06 | Customer dapat checkout cashless via Xendit | P0 | Sistem SavePlate membuat invoice Xendit sandbox (`invoice_duration` 15 menit) dan membuat pickup code setelah payment status Paid; service fee 5% otomatis ditambahkan ke total pembayaran customer 📝 *[REVISI #40]* |
 | FR-07 | UMKM dapat validasi pickup code | P0 | Order berubah menjadi completed jika pickup code valid |
 | FR-08 | UMKM dapat menandai no-show | P0 | Order menjadi expired/no-show jika customer tidak datang |
 | FR-09 | Customer dapat memberi rating/review dengan keyword | P0 | Review hanya dapat diberikan setelah order completed; keyword terdeteksi dan diklasifikasikan |
@@ -479,7 +481,7 @@ Cakupan wajib = fitur yang didukung 10 tabel **"Inti MVP"** di Section 18 dan FR
 | FR-11 | UMKM dapat membuat Waste Log | P1 | Catatan makanan tidak layak tersimpan dan tampil di dashboard |
 | FR-12 | Admin dapat moderasi listing/user | P0 | Admin dapat approve, reject, suspend, atau memberi warning |
 | FR-13 | Dashboard menampilkan impact sederhana | P1 | Customer, UMKM, dan Admin dapat melihat ringkasan aktivitas |
-| FR-14 | Sistem menerima webhook Midtrans sandbox | P0 | Status pembayaran hanya diperbarui setelah signature valid — `SHA512(order_id + status_code + gross_amount + server_key)` sesuai 14.6 — dan status transaksi terverifikasi |
+| FR-14 | Sistem menerima webhook Xendit sandbox | P0 | Status pembayaran hanya diperbarui setelah header `x-callback-token` terverifikasi secara constant-time terhadap `XENDIT_CALLBACK_TOKEN` sesuai 14.6 dan tercatat di `payment_logs` 📝 *[REVISI #40]* |
 | FR-15 | Food Score menurun seiring waktu (decay) | P0 | Skor 0-100 berkurang mengikuti power decay (γ=0,65) berdasarkan sisa waktu menuju expired sesuai spesifikasi 12.6 |
 | FR-16 | Sistem mengklasifikasikan keyword ulasan | P0 | Keyword dari review dipetakan ke level Aman/Warning/Gawat per restoran sesuai spesifikasi 12.7 |
 | FR-17 | UMKM dapat memasang iklan produk | P1 | Iklan di-submit dan menunggu approval admin sebelum tayang |
@@ -491,7 +493,7 @@ Cakupan wajib = fitur yang didukung 10 tabel **"Inti MVP"** di Section 18 dan FR
 | FR-23 | Sistem menghitung dynamic discount rule-based | P0 | Sistem otomatis menghitung rekomendasi diskon sesuai aturan per status kelayakan (13.2); UMKM menetapkan diskon final dalam rentang tersebut dan harga tidak pernah melanggar guardrail harga minimum (13.3) 📝 *[REVISI #36]* |
 | FR-24 | Customer dapat mengelola keranjang belanja | P1 | Customer dapat menambah produk ke keranjang, mengubah kuantitas item (dibatasi stok tersedia), menghapus item dari keranjang, melihat ringkasan total harga termasuk service fee 5%, dan melakukan checkout dari keranjang; data keranjang persisten di localStorage (frontend-only); checkout tetap melalui alur order existing (1 order per item) dengan validasi stok di backend 📝 *[REVISI #39]* |
 
-> 📝 **[REVISI #3]** FR-06: pembuat pickup code dikoreksi dari "Midtrans" menjadi "Sistem Savora"; Midtrans hanya mengirim status pembayaran.
+> 📝 **[REVISI #3]** FR-06: pembuat pickup code dikoreksi dari "Midtrans" menjadi "Sistem SavePlate"; Midtrans hanya mengirim status pembayaran.
 > 📝 **[REVISI #6 & #7]** FR-15 dan FR-16 kini merujuk ke spesifikasi baru di subbab 12.6 dan 12.7.
 > 📝 **[REVISI #19]** Prioritas disinkronkan dengan 9.1 dan Section 18: **P0 = happy path inti** (didukung tabel Inti MVP), **P1 = perluasan/Should Have**. FR-10 (help ticket) dan FR-19 (verifikasi mitra donasi) diturunkan dari P0 ke P1 karena tabel pendukungnya (help_tickets, mitra_donasi_profiles) berstatus Perluasan. FR-15 dikoreksi: acceptance criteria masih menulis "linear" padahal 12.6 sudah power decay.
 > 📝 **[REVISI #23]** FR-09 dinaikkan P1 → P0: rating/review dengan keyword adalah bagian happy path inti (9.1 poin 13), tabel pendukungnya (reviews, review_keywords, keyword_scores) berstatus Inti MVP, dan FR-16 (P0) bergantung padanya. FR-23 ditambahkan: dynamic discount sebelumnya wajib di 9.1 dan dispesifikasikan penuh di Section 13, tetapi tidak punya FR maupun skenario uji.
@@ -580,7 +582,7 @@ Skor akhir:
 | 0 | Kedaluwarsa | Listing otomatis berstatus Expired dan disembunyikan dari marketplace |
 
 - Color indicator mengikuti sisa waktu, konsisten dengan bagian 5.1: merah < 1 jam, kuning 1-3 jam, hijau > 3 jam. Color indicator (jam absolut) dan band skor (fraksi sisa masa layak) adalah **dua indikator paralel yang memang bisa berbeda**: color indicator menjawab "berapa jam lagi harus diambil", band skor menjawab "seberapa layak produk relatif terhadap masa jualnya". Contoh: produk bermasa layak 24 jam dengan sisa 5 jam berwarna hijau (> 3 jam) tetapi band-nya "Segera Ambil" (f ≈ 0,21) — ini by design, bukan bug. 📝 *[REVISI #31]*
-- Rumus dan band skor ini disamakan dengan proposal Savora (Bab 9.3) agar PRD dan proposal tidak berbeda.
+- Rumus dan band skor ini disamakan dengan proposal SavePlate (Bab 9.3) agar PRD dan proposal tidak berbeda.
 
 **Implementasi (siap kode — PRD ini adalah sumber kebenaran):**
 
@@ -638,7 +640,7 @@ function hitungFoodScore(skorAwal: number, publishAt: Date, expiresAt: Date, now
 - Jika `total_masa_layak <= 0` (expires_at ≤ waktu publish), listing ditolak / skor 0.
 - Skor dihitung ulang di client tiap load + tiap menit; simpan snapshot terakhir ke `products.food_score` untuk sorting di server (boleh di-refresh via cron/scheduler).
 
-> 📝 **[REVISI #11]** Rumus Food Score Decay diubah dari **linear** menjadi **power decay (γ=0,65) + band skor**, disamakan dengan proposal (Bab 9.3) dan lebih sesuai dengan model kinetika degradasi kualitas makanan yang umumnya non-linear. **Ditetapkan:** karena tim membangun aplikasi mengikuti PRD, dokumen ini adalah **sumber kebenaran tunggal** untuk rumus ini — kode backend dan proposal mengikuti pseudocode + test case di atas, tanpa perlu konfirmasi antar-anggota. Effort implementasi power decay vs linear praktis sama (hanya beda `pow(f, 0.65)` vs `f`), sehingga power decay dipilih demi konsistensi dengan proposal. Referensi pendukung: *FreshTrack: an innovative IoT-sensor-driven food freshness estimation framework integrating blockchain* (*Scientific Reports*, 2026 — nature.com/articles/s41598-026-44579-1) dan literatur kinetic shelf-life (*Food Chemistry*, 2023). Cantumkan judul lengkap + tautan/DOI ini di daftar pustaka proposal agar juri dapat memeriksa langsung. Framing ke juri: indikator tampilan berbasis **heuristik waktu, tanpa sensor** — referensi di atas mendukung klaim umum bahwa degradasi kualitas makanan bersifat non-linear, bukan klaim bahwa metodologi Savora identik dengan paper tersebut (FreshTrack memakai sensor IoT), dan bukan pengukuran laboratorium.
+> 📝 **[REVISI #11]** Rumus Food Score Decay diubah dari **linear** menjadi **power decay (γ=0,65) + band skor**, disamakan dengan proposal (Bab 9.3) dan lebih sesuai dengan model kinetika degradasi kualitas makanan yang umumnya non-linear. **Ditetapkan:** karena tim membangun aplikasi mengikuti PRD, dokumen ini adalah **sumber kebenaran tunggal** untuk rumus ini — kode backend dan proposal mengikuti pseudocode + test case di atas, tanpa perlu konfirmasi antar-anggota. Effort implementasi power decay vs linear praktis sama (hanya beda `pow(f, 0.65)` vs `f`), sehingga power decay dipilih demi konsistensi dengan proposal. Referensi pendukung: *FreshTrack: an innovative IoT-sensor-driven food freshness estimation framework integrating blockchain* (*Scientific Reports*, 2026 — nature.com/articles/s41598-026-44579-1) dan literatur kinetic shelf-life (*Food Chemistry*, 2023). Cantumkan judul lengkap + tautan/DOI ini di daftar pustaka proposal agar juri dapat memeriksa langsung. Framing ke juri: indikator tampilan berbasis **heuristik waktu, tanpa sensor** — referensi di atas mendukung klaim umum bahwa degradasi kualitas makanan bersifat non-linear, bukan klaim bahwa metodologi SavePlate identik dengan paper tersebut (FreshTrack memakai sensor IoT), dan bukan pengukuran laboratorium.
 
 ### 12.7 Keyword Classification Specification
 
@@ -698,9 +700,9 @@ Dynamic discount digunakan untuk memberi rekomendasi harga rescue deal berdasark
 ### 14.1 Order Status
 | Status | Penjelasan |
 |---|---|
-| Created | Order dibuat oleh customer — status transien; sistem langsung memindahkannya ke Payment Pending begitu transaksi Midtrans dibuat (konsisten dengan flow 10.1 langkah 6) 📝 *[REVISI #29]* |
+| Created | Order dibuat oleh customer — status transien; sistem langsung memindahkannya ke Payment Pending begitu invoice Xendit dibuat (konsisten dengan flow 10.1 langkah 6) 📝 *[REVISI #29, #40]* |
 | Payment Pending | Customer belum menyelesaikan pembayaran online |
-| Paid | Pembayaran berhasil berdasarkan status Midtrans sandbox |
+| Paid | Pembayaran berhasil berdasarkan status Xendit sandbox |
 | Payment Failed | Pembayaran gagal atau melewati batas waktu |
 | Ready for Pickup | UMKM menekan "Siapkan Pesanan" di dashboard setelah order Paid |
 | Completed | Pickup code valid dan transaksi selesai |
@@ -712,15 +714,15 @@ Dynamic discount digunakan untuk memberi rekomendasi harga rescue deal berdasark
 ### 14.2 Transisi Status Order
 | Metode | Alur Status Utama |
 |---|---|
-| Midtrans Sandbox Berhasil | Created -> Payment Pending -> Paid -> Ready for Pickup -> Completed atau No Show |
-| Midtrans Sandbox Gagal/Expired | Created -> Payment Pending -> Payment Failed atau Expired |
+| Xendit Sandbox Berhasil | Created -> Payment Pending -> Paid -> Ready for Pickup -> Completed atau No Show |
+| Xendit Sandbox Gagal/Expired | Created -> Payment Pending -> Payment Failed atau Expired |
 
 ### 14.3 Metode Pembayaran
-Savora menggunakan **cashless only** pada MVP. Tidak ada pembayaran tunai/COD.
+SavePlate menggunakan **cashless only** pada MVP. Tidak ada pembayaran tunai/COD.
 
 | Metode | Penggunaan | Catatan MVP |
 |---|---|---|
-| Midtrans Sandbox (Cashless) | Customer membayar secara online melalui simulasi payment gateway | Digunakan untuk demo integrasi payment gateway, bukan transaksi uang asli. Service fee 5% otomatis ditambahkan ke total pembayaran. |
+| Xendit Sandbox (Cashless) | Customer membayar secara online melalui simulasi Xendit Invoice | Digunakan untuk demo integrasi payment gateway, bukan transaksi uang asli. Service fee 5% otomatis ditambahkan ke total pembayaran. 📝 *[REVISI #40]* |
 
 ### 14.4 Service Fee 5%
 - Service fee 5% otomatis ditambahkan ke total pembayaran customer pada setiap transaksi produk (`total_price = subtotal + service_fee`).
@@ -733,21 +735,21 @@ Savora menggunakan **cashless only** pada MVP. Tidak ada pembayaran tunai/COD.
 
 ### 14.5 Aturan Reservasi Stok
 - Stok di-reserve sementara saat Payment Pending dengan batas waktu pembayaran 15 menit.
-- Jika pembayaran Midtrans berhasil, stok tetap dikunci sampai batas waktu pickup.
-- Jika pembayaran Midtrans gagal atau expired, stok dikembalikan agar dapat dipesan customer lain.
-- **Catatan implementasi Midtrans:** batas 15 menit TIDAK otomatis — default expiry Snap adalah 24 jam, sehingga wajib diset melalui parameter `expiry` saat membuat Snap token (atau via Snap Preference di dashboard; minimum 5 menit). Midtrans juga tidak mengirim webhook saat halaman pembayaran expired, sehingga transisi order ke Expired dan pengembalian stok dilakukan oleh scheduler/cron Savora sendiri. 📝 *[REVISI #35]*
+- Jika pembayaran Xendit berhasil (`PAID`/`SETTLED`), stok tetap dikunci sampai batas waktu pickup.
+- Jika pembayaran Xendit gagal atau expired (`EXPIRED`), stok dikembalikan agar dapat dipesan customer lain.
+- **Catatan implementasi Xendit:** batas 15 menit diset eksplisit melalui parameter `invoice_duration: 900` detik (`PAYMENT_EXPIRY_SECONDS=900`) saat memanggil Xendit Invoice API v2 (`POST https://api.xendit.co/v2/invoices`). Selain melalui webhook `EXPIRED` dari Xendit, scheduler/cron SavePlate juga melakukan pengecekan berkala terhadap `reserved_until` untuk memastikan transisi order ke `EXPIRED` dan pengembalian stok tetap berjalan meskipun callback eksternal tertunda. 📝 *[REVISI #35, #40]*
 
 > 📝 **[REVISI #4]** Batas waktu pembayaran ditetapkan satu angka pasti (15 menit); sebelumnya rentang 10-15 menit yang ambigu untuk implementasi.
 
-### 14.6 Aturan Pembayaran Midtrans (Cashless)
-- Customer memilih Midtrans saat checkout dan sistem membuat transaksi pembayaran melalui Midtrans sandbox.
-- Status awal order adalah Payment Pending sampai Midtrans mengirim status pembayaran berhasil atau gagal.
-- Jika pembayaran berhasil, sistem membuat pickup code dan mengunci stok sampai batas waktu pickup.
-- Jika pembayaran tidak selesai sampai batas waktu pembayaran, order otomatis expired dan stok dikembalikan.
+### 14.6 Aturan Pembayaran Xendit (Cashless)
+- Customer melakukan checkout dan sistem membuat invoice pembayaran melalui Xendit Invoice API (mode sandbox/development key) dengan `external_id = saveplate-order-{order.ID}`.
+- Status awal order adalah `PAYMENT_PENDING` sampai Xendit mengirim callback status pembayaran (`PAID`/`SETTLED` atau `EXPIRED`).
+- Jika pembayaran berhasil, sistem membuat `pickup_code`, menetapkan `pickup_deadline`, mencatat pendapatan biaya layanan pada `platform_revenue`, dan mengunci stok sampai batas waktu pickup.
+- Jika pembayaran tidak selesai sampai batas waktu 15 menit, order otomatis menjadi `EXPIRED` dan stok dikembalikan.
 - Pickup code divalidasi oleh UMKM saat customer datang mengambil pesanan.
-- Sistem memverifikasi notifikasi/webhook Midtrans sandbox sebelum memperbarui status pembayaran. Verifikasi menggunakan signature key resmi Midtrans: `SHA512(order_id + status_code + gross_amount + server_key)`; notifikasi dengan signature tidak cocok diabaikan dan dicatat di payment log. 📝 *[REVISI #28: rumus verifikasi ditulis eksplisit sesuai dokumentasi resmi Midtrans agar implementasi backend tidak perlu menebak.]*
+- Sistem memverifikasi callback/webhook Xendit pada endpoint `POST /api/payments/xendit-webhook` menggunakan header `x-callback-token` yang dibandingkan secara constant-time (`crypto/subtle.ConstantTimeCompare`) terhadap `XENDIT_CALLBACK_TOKEN`. Seluruh percobaan webhook dicatat ke `payment_logs` beserta flag `token_valid`; callback dengan token tidak valid diabaikan tanpa mengubah status pembayaran/order. 📝 *[REVISI #28, #40]*
 - Jika produk tidak tersedia setelah pembayaran sandbox berhasil, order masuk ke Help Requested untuk simulasi penyelesaian/refund manual oleh Admin.
-- Pada MVP lomba, integrasi Midtrans menggunakan mode sandbox untuk kebutuhan demo dan pengujian, bukan transaksi uang asli.
+- Pada MVP dan Proyek 3, integrasi Xendit menggunakan mode sandbox untuk kebutuhan demo dan pengujian, bukan transaksi uang asli.
 
 ### 14.7 Help Center
 Customer dapat membuat laporan jika:
@@ -756,8 +758,8 @@ Customer dapat membuat laporan jika:
 - UMKM tidak merespons.
 - Terjadi kendala saat pickup.
 - Order dibatalkan sepihak.
-- Pembayaran Midtrans sandbox berhasil tetapi pickup code tidak muncul.
-- Pembayaran Midtrans sandbox gagal/expired atau status tidak berubah.
+- Pembayaran Xendit sandbox berhasil tetapi pickup code tidak muncul.
+- Pembayaran Xendit sandbox gagal/expired atau status tidak berubah.
 
 ### 14.8 Penanganan Help Ticket
 | Kondisi | Penanganan |
@@ -795,12 +797,12 @@ Waste Log membantu UMKM mencatat makanan yang tidak layak dijual atau tidak berh
 
 | Screen | Role | Tujuan |
 |---|---|---|
-| Landing Page | Guest | Mengenalkan Savora dan value proposition |
+| Landing Page | Guest | Mengenalkan SavePlate dan value proposition |
 | Register/Login | Guest | Autentikasi pengguna dengan pilihan role Customer, UMKM, atau Mitra Donasi |
 | Customer Marketplace | Customer | Browse rescue deal dengan Food Score, Rescue Time, badge keyword, dan slot iklan |
 | Product Detail | Customer | Melihat detail makanan, Food Trust Index, Food Score Decay, keyword safety, dan harga |
 | Cart | Customer | Mengelola keranjang belanja: menambah produk, mengubah kuantitas, menghapus item, melihat ringkasan total termasuk service fee 5%, dan checkout 📝 *[REVISI #39]* |
-| Checkout & Pembayaran | Customer | Membuat order cashless via Midtrans sandbox dengan service fee 5% |
+| Checkout & Pembayaran | Customer | Membuat order cashless via Xendit sandbox dengan service fee 5% |
 | Order Tracking | Customer | Melihat status order, pickup code, batas waktu, dan memberi review dengan keyword |
 | Customer Impact | Customer | Melihat riwayat dan dampak personal |
 | UMKM Dashboard | UMKM | Melihat listing, order, analitik penjualan, insight, keyword safety, dan pasang iklan |
@@ -820,15 +822,15 @@ Waste Log membantu UMKM mencatat makanan yang tidak layak dijual atau tidak berh
 
 | Komponen | Teknologi MVP | Alasan Pemilihan |
 |---|---|---|
-| Frontend | **Next.js (React)** | Web responsive/mobile-first, routing cepat, cocok untuk demo lomba |
-| Backend | **Go + Fiber v2** | API REST, autentikasi, order flow, dan integrasi Midtrans sandbox (versi persis mengikuti `go.mod`, mis. v2.52) |
+| Frontend | **Next.js (React)** | Web responsive/mobile-first, routing cepat, cocok untuk demo dan evaluasi |
+| Backend | **Go + Fiber v2** | API REST, autentikasi, order flow, dan integrasi Xendit sandbox (versi persis mengikuti `go.mod`, mis. v2.52) |
 | ORM | **GORM** | Mapping model ke PostgreSQL |
 | Database | **PostgreSQL** | Relasional, cocok untuk user, produk, order, payment, review, dan waste log |
-| Payment Gateway | **Midtrans Snap (Sandbox)** | Mendemonstrasikan alur payment gateway tanpa transaksi uang asli |
-| Deployment | Vercel (frontend) + Railway/Render (backend) + PostgreSQL managed | Mudah dipakai untuk MVP dan demo juri |
+| Payment Gateway | **Xendit Invoice (Sandbox)** | Mendemonstrasikan alur payment gateway cashless tanpa transaksi uang asli 📝 *[REVISI #40]* |
+| Deployment | Vercel (frontend) + Railway/Render (backend) + PostgreSQL managed | Mudah dipakai untuk MVP dan pengujian |
 | Design & Documentation | Figma, GitHub, README | Mendukung desain UI, dokumentasi teknis, dan kolaborasi tim |
 
-> 📝 **[REVISI #14]** Stack di-**lock** ke satu pilihan pasti (bukan "A atau B") agar konsisten dengan proposal dan basis kode: Next.js+React, Go+Fiber v2, GORM, PostgreSQL, Midtrans Snap sandbox. Versi framework pasti mengikuti `go.mod` / `package.json` di repo — samakan angka versi di proposal dengan yang benar-benar terpasang. Midtrans tetap mode sandbox untuk demo, bukan klaim sistem pembayaran production-ready.
+> 📝 **[REVISI #14 & #40]** Stack di-**lock** ke satu pilihan pasti (bukan "A atau B") agar konsisten dengan proposal dan basis kode: Next.js+React, Go+Fiber v2, GORM, PostgreSQL, Xendit Invoice sandbox. Versi framework pasti mengikuti `go.mod` / `package.json` di repo — samakan angka versi di proposal dengan yang benar-benar terpasang. Xendit tetap mode sandbox untuk demo dan pengujian, bukan klaim sistem pembayaran production-ready.
 
 ---
 
@@ -844,6 +846,7 @@ Waste Log membantu UMKM mencatat makanan yang tidak layak dijual atau tidak berh
 | food_trust_logs | id, product_id, input_payload, food_trust_status, food_score, reason, created_at |
 | orders | id, product_id, customer_id, quantity, subtotal, service_fee, total_price, payment_method, payment_status, pickup_code, reserved_until, pickup_deadline, status, cancel_reason, created_at, paid_at, completed_at |
 | payments | id, order_id, provider, provider_order_id, amount, service_fee_amount, payment_status, payment_url, signature_verified, paid_at, expired_at, created_at |
+| payment_logs | id, payment_id, event, raw_payload, token_valid, created_at |
 | reviews | id, order_id, reviewer_id, target_id, rating, comment, keywords, created_at |
 | review_keywords | id, review_id, keyword, level, created_at |
 | keyword_scores | id, umkm_id, total_aman, total_warning, total_gawat, safety_level, updated_at |
@@ -898,7 +901,7 @@ Waste Log membantu UMKM mencatat makanan yang tidak layak dijual atau tidak berh
 | Field | Nilai MVP |
 |---|---|
 | user_role | CUSTOMER, UMKM, ADMIN, MITRA_DONASI |
-| payment_method | MIDTRANS_SANDBOX |
+| payment_method | XENDIT_SANDBOX |
 | payment_status | UNPAID, PENDING, PAID, FAILED, EXPIRED |
 | order_status | CREATED, PAYMENT_PENDING, PAID, PAYMENT_FAILED, READY_FOR_PICKUP, COMPLETED, NO_SHOW, CANCELLED, EXPIRED, HELP_REQUESTED |
 | keyword_level | AMAN, WARNING, GAWAT |
@@ -923,9 +926,9 @@ Waste Log membantu UMKM mencatat makanan yang tidak layak dijual atau tidak berh
 | PATCH | /products/{id} | Edit listing | UMKM/Admin |
 | DELETE | /products/{id} | Hapus listing | UMKM/Admin |
 | POST | /food-trust/calculate | Hitung Food Trust Index | UMKM |
-| POST | /orders | Buat order cashless via Midtrans | Customer |
-| POST | /payments/midtrans-token | Membuat token pembayaran Midtrans sandbox | Customer |
-| POST | /payments/midtrans-webhook | Menerima notifikasi status pembayaran Midtrans | System |
+| POST | /orders | Buat order cashless & invoice Xendit sandbox (`invoice_url`) | Customer |
+| POST | /payments/xendit-webhook | Menerima callback status pembayaran Xendit (`x-callback-token`) | System |
+| GET | /payments/{payment_id}/logs | Lihat audit log notifikasi pembayaran | Admin |
 | GET | /orders | List order user | Customer/UMKM/Admin |
 | GET | /orders/{id} | Detail order | Related user/Admin |
 | PATCH | /orders/{id}/status | Update status order | UMKM/Admin |
@@ -1009,7 +1012,7 @@ Pengembangan menggunakan pendekatan **Agile/Scrum sederhana** karena durasi lomb
 | Minggu | Tanggal | Fokus | Deliverable |
 |---|---|---|---|
 | W1 | 4-10 Jul | Setup, desain, backend awal | Repo, database, auth, API skeleton, design system |
-| W2 | 11-17 Jul | Core features | Marketplace, Food Trust Index, Food Score Decay, cashless payment via Midtrans sandbox, rating/review dengan keyword |
+| W2 | 11-17 Jul | Core features | Marketplace, Food Trust Index, Food Score Decay, cashless payment via Xendit sandbox, rating/review dengan keyword |
 | W3 | 18-22 Jul | Polish dan deployment | Dashboard, rating, testing, deploy, video demo |
 | Deadline | 25 Jul | Submission | Proposal PDF, video, GitHub, deployed app |
 
@@ -1026,7 +1029,7 @@ Pengembangan menggunakan pendekatan **Agile/Scrum sederhana** karena durasi lomb
 | Richard Firmansyah | Marketplace Customer, Detail Produk, Slot Iklan | Beranda Food Score/Rescue Time, badge keyword safety, slot iklan marketplace, detail produk |
 | Muhammad Rifaidi | Dashboard UMKM, Analitik, Insight, Iklan UMKM | Dashboard UMKM, analitik penjualan, insight rating & keyword, analitik pelacakan, pengiklanan produk |
 | Ridwan Hakim Ramadhan | Food Score Decay, Keyword Classification | Rumus Food Score decay, mesin klasifikasi keyword ulasan, API score & keyword |
-| Nadi Azzada Akbar | Cashless, Service Fee, Order, Review Keyword | Sistem cashless Midtrans, service fee 5%, checkout, order tracking, input review keyword |
+| Nadi Azzada Akbar | Cashless, Service Fee, Order, Review Keyword | Sistem cashless Xendit, service fee 5%, checkout, order tracking, input review keyword |
 
 ---
 
@@ -1047,10 +1050,10 @@ Pengembangan menggunakan pendekatan **Agile/Scrum sederhana** karena durasi lomb
 | Keyword | Review dengan keyword "basi" | Keyword diklasifikasikan sebagai Gawat | Must |
 | Keyword | Akumulasi keyword per restoran | Badge safety restoran berubah sesuai akumulasi | Must |
 | Marketplace | Customer filter produk | Produk sesuai filter tampil dengan Food Score dan badge keyword | Must |
-| Checkout Cashless | Customer membuat order via Midtrans sandbox | Service fee 5% ditambahkan, payment pending | Must |
-| Checkout Midtrans Paid | Customer menyelesaikan pembayaran Midtrans sandbox | Payment status menjadi Paid dan pickup code dibuat | Must |
-| Checkout Midtrans Expired | Customer tidak menyelesaikan pembayaran Midtrans sandbox | Order menjadi expired dan stok dikembalikan | Must |
-| Midtrans Webhook | Sistem menerima notifikasi pembayaran sandbox | Signature/status diverifikasi sebelum order diperbarui | Must |
+| Checkout Cashless | Customer membuat order via Xendit sandbox | Service fee 5% ditambahkan, payment pending | Must |
+| Checkout Xendit Paid | Customer menyelesaikan pembayaran Xendit sandbox | Payment status menjadi Paid dan pickup code dibuat | Must |
+| Checkout Xendit Expired | Customer tidak menyelesaikan pembayaran Xendit sandbox | Order menjadi expired dan stok dikembalikan | Must |
+| Xendit Webhook | Sistem menerima notifikasi pembayaran sandbox | Signature/status diverifikasi sebelum order diperbarui | Must |
 | Pickup | UMKM input pickup code valid | Order menjadi completed | Must |
 | No Show | Customer tidak datang | Order menjadi no-show/expired | Must |
 | Review Keyword | Customer submit review dengan keyword | Keyword terdeteksi dan diklasifikasikan | Must |
@@ -1077,7 +1080,7 @@ Pengembangan menggunakan pendekatan **Agile/Scrum sederhana** karena durasi lomb
 Kriteria mengikuti sinkronisasi scope [REVISI #19]: tanpa tanda = happy path inti (wajib); *(Should Have)* = kriteria perluasan, berlaku hanya bila fiturnya jadi dikerjakan.
 
 ### 24.1 Customer
-- Customer dapat register, login, browse produk dengan Food Score dan badge keyword, melihat detail produk, checkout cashless via Midtrans sandbox (dengan service fee 5%), melihat order tracking, dan memberi review dengan keyword setelah order selesai.
+- Customer dapat register, login, browse produk dengan Food Score dan badge keyword, melihat detail produk, checkout cashless via Xendit sandbox (dengan service fee 5%), melihat order tracking, dan memberi review dengan keyword setelah order selesai.
 - Customer dapat melihat Food Trust Index, Food Score yang menurun seiring waktu, badge keyword safety, batas waktu pickup, pickup code, dan status order.
 - *(Should Have)* Customer dapat membuat Help Ticket jika terjadi masalah.
 
@@ -1115,7 +1118,7 @@ Kriteria mengikuti sinkronisasi scope [REVISI #19]: tanpa tanda = happy path int
 | Customer no-show setelah order dibuat | Stok tertahan dan pengalaman UMKM terganggu | Pickup deadline, pickup code, status no-show, dan Help Center |
 | Trust issue terhadap makanan surplus | Customer ragu membeli | Food Trust Index, foto wajib, jam produksi, rating, dan Help Center |
 | UMKM salah input data | Informasi kelayakan tidak akurat | Validasi form, disclaimer, audit Admin, dan komplain customer |
-| Integrasi Midtrans masih sandbox | Pembayaran belum menggunakan uang asli | Midtrans sandbox untuk demo payment gateway cashless; jelaskan batasan MVP |
+| Integrasi Xendit masih sandbox | Pembayaran belum menggunakan uang asli | Xendit sandbox untuk demo payment gateway cashless; jelaskan batasan MVP |
 | Status pembayaran tidak sinkron | Order tidak berubah sesuai hasil pembayaran sandbox | Verifikasi webhook, cek payment log, dan sediakan fallback admin note |
 | Data real terbatas | Dampak sulit dibuktikan | Gunakan dummy data realistis dan jelaskan sebagai validasi awal |
 | Waktu lomba terbatas | Testing kurang mendalam | Fokus pada happy path, edge case utama, dan bug hunter readiness |
@@ -1138,13 +1141,13 @@ Kriteria mengikuti sinkronisasi scope [REVISI #19]: tanpa tanda = happy path int
 
 ## 27. Mapping ke Template Proposal CODE 6.0
 
-| Bagian Proposal CODE 6.0 | Materi dari PRD Savora |
+| Bagian Proposal CODE 6.0 | Materi dari PRD SavePlate |
 |---|---|
 | Cover | Nama aplikasi, nama tim, anggota, universitas, program studi |
-| Abstrak | Ringkasan masalah, solusi Savora, teknologi utama, dan dampak |
+| Abstrak | Ringkasan masalah, solusi SavePlate, teknologi utama, dan dampak |
 | Latar Belakang & Urgensi | Problem statement, data food waste, UMKM, dan kebutuhan customer |
 | Tujuan, Manfaat, & Dampak | Tujuan produk, manfaat per user, metrik dampak MVP |
-| Nilai Inovasi & Orisinalitas | Food Trust Index, Food Score Decay, Keyword Classification, Cashless via Midtrans sandbox, Service Fee 5%, Slot Iklan, Analitik UMKM, Mitra Donasi, Pickup code, Help Center, Waste Log |
+| Nilai Inovasi & Orisinalitas | Food Trust Index, Food Score Decay, Keyword Classification, Cashless via Xendit sandbox, Service Fee 5%, Slot Iklan, Analitik UMKM, Mitra Donasi, Pickup code, Help Center, Waste Log |
 | Analisis Kompetitor & Business Viability | Tabel kompetitor, SWOT, model bisnis realistis |
 | Teknologi yang Digunakan | Next.js, Go, PostgreSQL, deployment, tools 📝 *[REVISI #26: sisa "Supabase" dihapus, konsisten dengan stack yang di-lock di Section 17]* |
 | Batasan Perangkat Lunak | MVP, Should Have, Demo Only, dan fitur yang tidak dicakup |
@@ -1161,7 +1164,7 @@ Kriteria mengikuti sinkronisasi scope [REVISI #19]: tanpa tanda = happy path int
 ## 28. Future Enhancement
 
 Fitur berikut dapat dikembangkan setelah MVP tervalidasi:
-- Mode production Midtrans dan perluasan channel pembayaran sesuai kebutuhan pengguna.
+- Mode production Xendit dan perluasan channel pembayaran sesuai kebutuhan pengguna.
 - Sistem voucher atau promo untuk customer loyal.
 - Notifikasi WhatsApp/email untuk reminder pickup.
 - Insight stok dan rekomendasi waktu publish listing.
@@ -1173,4 +1176,4 @@ Fitur berikut dapat dikembangkan setelah MVP tervalidasi:
 
 ## 29. Kesimpulan PRD
 
-Savora adalah ide produk yang realistis untuk lomba CODE 6.0 karena menyelesaikan masalah yang dekat dengan UMKM dan customer, memiliki scope MVP yang jelas, serta dapat didemonstrasikan dalam bentuk aplikasi web. Fokus utama Savora adalah food rescue marketplace dengan Food Trust Index, Food Score Decay, Keyword Classification, cashless payment via Midtrans sandbox, service fee 5%, slot iklan, analitik & insight UMKM, mitra donasi, pickup code, Help Center, dan Waste Log sederhana. Seluruh fitur dirancang agar tidak overclaim, tetap relevan dengan kebutuhan lomba, dan dapat dikembangkan oleh tim AmbaTeam dalam waktu terbatas.
+SavePlate adalah ide produk yang realistis untuk lomba CODE 6.0 karena menyelesaikan masalah yang dekat dengan UMKM dan customer, memiliki scope MVP yang jelas, serta dapat didemonstrasikan dalam bentuk aplikasi web. Fokus utama SavePlate adalah food rescue marketplace dengan Food Trust Index, Food Score Decay, Keyword Classification, cashless payment via Xendit sandbox, service fee 5%, slot iklan, analitik & insight UMKM, mitra donasi, pickup code, Help Center, dan Waste Log sederhana. Seluruh fitur dirancang agar tidak overclaim, tetap relevan dengan kebutuhan lomba, dan dapat dikembangkan oleh tim AmbaTeam dalam waktu terbatas.
