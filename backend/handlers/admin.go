@@ -473,17 +473,17 @@ func GetAdminSummaryHandler(c *fiber.Ctx) error {
 	database.DB.Model(&models.Product{}).Count(&summary.TotalProducts)
 	database.DB.Model(&models.Product{}).Where("status = ?", models.ProductStatusAktif).Count(&summary.ActiveProducts)
 
-	// Count orders per status (status existing: Bahasa Indonesia)
+	// Count orders per status — menggunakan konstanta kanonik models.Order*
 	database.DB.Model(&models.Order{}).Count(&summary.TotalOrders)
-	database.DB.Model(&models.Order{}).Where("status = ?", "Menunggu").Count(&summary.OrdersMenunggu)
-	database.DB.Model(&models.Order{}).Where("status = ?", "Diproses").Count(&summary.OrdersDiproses)
-	database.DB.Model(&models.Order{}).Where("status = ?", "Siap Diambil").Count(&summary.OrdersSiapDiambil)
-	database.DB.Model(&models.Order{}).Where("status = ?", "Selesai").Count(&summary.OrdersSelesai)
-	database.DB.Model(&models.Order{}).Where("status = ?", "Dibatalkan").Count(&summary.OrdersDibatalkan)
+	database.DB.Model(&models.Order{}).Where("status = ?", models.OrderCreated).Count(&summary.OrdersMenunggu)
+	database.DB.Model(&models.Order{}).Where("status IN (?)", []string{models.OrderPaymentPending, models.OrderPaid}).Count(&summary.OrdersDiproses)
+	database.DB.Model(&models.Order{}).Where("status = ?", models.OrderReadyForPickup).Count(&summary.OrdersSiapDiambil)
+	database.DB.Model(&models.Order{}).Where("status = ?", models.OrderCompleted).Count(&summary.OrdersSelesai)
+	database.DB.Model(&models.Order{}).Where("status = ?", models.OrderCancelled).Count(&summary.OrdersDibatalkan)
 
 	// Sum transaction value dari order selesai
-	database.DB.Model(&models.Order{}).Where("status = ?", "Selesai").Count(&summary.CompletedOrders)
-	database.DB.Model(&models.Order{}).Where("status = ?", "Selesai").Select("COALESCE(SUM(total_amount), 0)").Scan(&summary.TotalTransactionValue)
+	database.DB.Model(&models.Order{}).Where("status = ?", models.OrderCompleted).Count(&summary.CompletedOrders)
+	database.DB.Model(&models.Order{}).Where("status = ?", models.OrderCompleted).Select("COALESCE(SUM(total_price), 0)").Scan(&summary.TotalTransactionValue)
 
 	// === QUERY BARU - PLATFORM OVERVIEW DELTA (§2.1) ===
 
@@ -581,17 +581,16 @@ func GetAdminSummaryHandler(c *fiber.Ctx) error {
 
 	// === PLATFORM HEALTH (§2.5) ===
 
-	// Makanan diselamatkan (kg) - JOIN order_items & products
-	// Query: SUM(order_items.quantity * products.weight_per_portion) WHERE orders.status = 'Selesai'
+	// Makanan diselamatkan (kg) — dihitung dari orders.weight_per_portion_snapshot × quantity
+	// untuk semua order berstatus COMPLETED (sesuai mekanisme redistribusi Algoritma 1).
+	// Sebelumnya menggunakan JOIN order_items yang tidak ada di skema ini.
 	type FoodRescued struct {
 		TotalKg float64
 	}
 	var foodRescued FoodRescued
 	database.DB.Table("orders").
-		Select("COALESCE(SUM(order_items.quantity * products.weight_per_portion), 0) as total_kg").
-		Joins("JOIN order_items ON order_items.order_id = orders.id").
-		Joins("JOIN products ON products.id = order_items.product_id").
-		Where("orders.status = ?", "Selesai").
+		Select("COALESCE(SUM(weight_per_portion_snapshot * quantity) / 1000.0, 0) as total_kg").
+		Where("status = ?", models.OrderCompleted).
 		Scan(&foodRescued)
 	summary.MakananDiselamatkanKg = foodRescued.TotalKg
 
@@ -621,15 +620,14 @@ func GetAdminSummaryHandler(c *fiber.Ctx) error {
 	}
 	var topUMKMRaw []TopUMKMRaw
 	database.DB.Table("orders").
-		Select(`orders.umkm_id,
+		Select(`products.umkm_id,
 				COUNT(orders.id) as orders_completed,
-				COALESCE(SUM(orders.total_amount), 0) as revenue_kotor,
-				COALESCE(SUM(order_items.quantity * products.weight_per_portion), 0) as food_rescued_kg`).
-		Joins("JOIN order_items ON order_items.order_id = orders.id").
-		Joins("JOIN products ON products.id = order_items.product_id").
+				COALESCE(SUM(orders.total_price), 0) as revenue_kotor,
+				COALESCE(SUM(orders.weight_per_portion_snapshot * orders.quantity) / 1000.0, 0) as food_rescued_kg`).
+		Joins("JOIN products ON products.id = orders.product_id").
 		Where("orders.status = ? AND orders.created_at >= ? AND orders.created_at < ?",
-			"Selesai", startOfMonth, endOfMonth).
-		Group("orders.umkm_id").
+			models.OrderCompleted, startOfMonth, endOfMonth).
+		Group("products.umkm_id").
 		Order("orders_completed DESC").
 		Limit(4).
 		Scan(&topUMKMRaw)
@@ -666,11 +664,10 @@ func GetAdminSummaryHandler(c *fiber.Ctx) error {
 	// Total makanan diselamatkan (kg) all-time - sama dengan MakananDiselamatkanKg tapi tanpa filter periode
 	summary.TotalMakananDiselamatkanKg = foodRescued.TotalKg // Sudah all-time dari query sebelumnya
 
-	// Porsi diselamatkan all-time - SUM(order_items.quantity) WHERE orders.status = 'Selesai'
+	// Porsi diselamatkan all-time - SUM(quantity) WHERE status = COMPLETED
 	database.DB.Table("orders").
-		Select("COALESCE(SUM(order_items.quantity), 0)").
-		Joins("JOIN order_items ON order_items.order_id = orders.id").
-		Where("orders.status = ?", "Selesai").
+		Select("COALESCE(SUM(quantity), 0)").
+		Where("status = ?", models.OrderCompleted).
 		Scan(&summary.PortiDiselamatkan)
 
 	// Order completed count all-time
@@ -680,7 +677,7 @@ func GetAdminSummaryHandler(c *fiber.Ctx) error {
 
 	// Get recent orders (5 terbaru)
 	var recentOrders []models.Order
-	database.DB.Order("created_at desc").Limit(5).Preload("OrderItems.Product").Find(&recentOrders)
+	database.DB.Order("created_at desc").Limit(5).Preload("Product").Find(&recentOrders)
 
 	// Get recent products (5 terbaru)
 	var recentProducts []models.Product

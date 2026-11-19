@@ -16,12 +16,13 @@ type Order struct {
 	PaymentStatus  string    `json:"payment_status"`    // UNPAID, PENDING, PAID, FAILED, EXPIRED
 	PickupCode     *string    `json:"pickup_code,omitempty" gorm:"uniqueIndex;size:10"`
 	ReservedUntil  time.Time  `json:"reserved_until"`    // batas waktu bayar
-	PickupDeadline *time.Time `json:"pickup_deadline,omitempty"` // batas ambil setelah Paid
-	Status         string     `json:"status" gorm:"index:idx_orders_customer_status;index:idx_orders_product_status"` // CREATED, PAYMENT_PENDING, PAID, PAYMENT_FAILED, READY_FOR_PICKUP, COMPLETED, NO_SHOW, CANCELLED, EXPIRED, HELP_REQUESTED
-	CancelReason   string     `json:"cancel_reason,omitempty"`
-	CreatedAt      time.Time  `json:"created_at"`
-	PaidAt         *time.Time `json:"paid_at,omitempty"`
-	CompletedAt    *time.Time `json:"completed_at,omitempty"`
+	PickupDeadline          *time.Time `json:"pickup_deadline,omitempty"` // batas ambil setelah Paid
+	WeightPerPortionSnapshot float64    `json:"weight_per_portion_snapshot"` // wi = wP(i)(t_order) — snapshot berat saat order dibuat
+	Status                  string     `json:"status" gorm:"index:idx_orders_customer_status;index:idx_orders_product_status"` // CREATED, PAYMENT_PENDING, PAID, PAYMENT_FAILED, READY_FOR_PICKUP, COMPLETED, NO_SHOW, CANCELLED, EXPIRED, HELP_REQUESTED
+	CancelReason            string     `json:"cancel_reason,omitempty"`
+	CreatedAt               time.Time  `json:"created_at"`
+	PaidAt                  *time.Time `json:"paid_at,omitempty"`
+	CompletedAt             *time.Time `json:"completed_at,omitempty"`
 
 	// Relations
 	Product  Product  `json:"product,omitempty" gorm:"foreignKey:ProductID"`

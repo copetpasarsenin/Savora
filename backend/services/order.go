@@ -127,18 +127,21 @@ func CreateOrder(db *gorm.DB, customerID uint, req CreateOrderRequest, paymentSe
 		}
 
 		// 4. Buat order dengan status Created
+		// Snapshot berat per porsi saat order dibuat (wi = wP(i)(t_order)).
+		// Field ini tidak berubah meski UMKM mengubah weight_per_portion produk setelahnya.
 		reservedUntil := time.Now().Add(15 * time.Minute)
 		order := models.Order{
-			ProductID:      req.ProductID,
-			CustomerID:     customerID,
-			Quantity:       req.Quantity,
-			Subtotal:       subtotal,
-			ServiceFee:     serviceFee,
-			TotalPrice:     totalPrice,
-			PaymentMethod:  models.PaymentMethodXenditSandbox,
-			PaymentStatus:  models.PaymentUnpaid,
-			Status:         models.OrderCreated,
-			ReservedUntil:  reservedUntil,
+			ProductID:                req.ProductID,
+			CustomerID:               customerID,
+			Quantity:                 req.Quantity,
+			WeightPerPortionSnapshot: product.WeightPerPortion,
+			Subtotal:                 subtotal,
+			ServiceFee:               serviceFee,
+			TotalPrice:               totalPrice,
+			PaymentMethod:            models.PaymentMethodXenditSandbox,
+			PaymentStatus:            models.PaymentUnpaid,
+			Status:                   models.OrderCreated,
+			ReservedUntil:            reservedUntil,
 		}
 
 		if err := tx.Create(&order).Error; err != nil {
