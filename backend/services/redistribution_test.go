@@ -11,6 +11,8 @@ package services
 import (
 	"testing"
 	"time"
+
+	"github.com/saveplate/backend/models"
 )
 
 // helper: pointer ke string
@@ -332,6 +334,51 @@ func TestExperiment3_ComponentComparison(t *testing.T) {
 	t.Logf("Config A (tanpa gate): Wd = %.1f g (%d items)", configAWeight, configACount)
 	t.Logf("Config B (SavePlate):  Wd = %.1f g (%d items)", configB.TotalWeightGrams, configB.EligibleCount)
 	t.Logf("Overestimation bias:   %.1f g (+%.2f%%)", bias, bias/groundTruth*100)
+}
+
+func TestBuildRedistributionReport_MetricsAndEdgeCases(t *testing.T) {
+	completedTime := tp(now)
+	orders := []models.Order{
+		{ID: 1, ProductID: 10, CustomerID: 20, WeightPerPortionSnapshot: 300, Quantity: 2, Status: models.OrderCompleted, PaymentStatus: models.PaymentPaid, CompletedAt: completedTime, Product: models.Product{Name: "Nasi Kotak", UmkmID: 5}}, // 600g eligible
+		{ID: 2, ProductID: 11, CustomerID: 21, WeightPerPortionSnapshot: 400, Quantity: 1, Status: models.OrderPaid, PaymentStatus: models.PaymentPaid, CompletedAt: nil, Product: models.Product{Name: "Roti", UmkmID: 5}},                  // 400g phantom
+		{ID: 3, ProductID: 12, CustomerID: 22, WeightPerPortionSnapshot: 200, Quantity: 1, Status: models.OrderNoShow, PaymentStatus: models.PaymentPaid, CompletedAt: nil, Product: models.Product{Name: "Kue", UmkmID: 5}},                 // 200g phantom
+		{ID: 4, ProductID: 13, CustomerID: 23, WeightPerPortionSnapshot: 500, Quantity: 1, Status: models.OrderCancelled, PaymentStatus: models.PaymentUnpaid, CompletedAt: nil},                                                              // excluded from C & E
+	}
+
+	rep := BuildRedistributionReport(orders)
+	if rep.VerifiedWeightGrams != 600 {
+		t.Fatalf("VerifiedWeightGrams = %.1f, want 600", rep.VerifiedWeightGrams)
+	}
+	if rep.ClaimedWeightGrams != 1200 {
+		t.Fatalf("ClaimedWeightGrams = %.1f, want 1200", rep.ClaimedWeightGrams)
+	}
+	if rep.PhantomRescueGrams != 600 {
+		t.Fatalf("PhantomRescueGrams = %.1f, want 600", rep.PhantomRescueGrams)
+	}
+	if rep.EligibleCount != 1 || rep.ClaimedCount != 3 || rep.EligiblePortions != 2 {
+		t.Fatalf("counts = (E:%d, C:%d, portions:%d), want (1, 3, 2)", rep.EligibleCount, rep.ClaimedCount, rep.EligiblePortions)
+	}
+	if rep.OBR == nil || abs(*rep.OBR-1.0) > 1e-6 {
+		t.Fatalf("OBR = %v, want 1.0", rep.OBR)
+	}
+	if rep.EC == nil || abs(*rep.EC-(1.0/3.0)) > 1e-6 {
+		t.Fatalf("EC = %v, want 1/3", rep.EC)
+	}
+
+	// Edge case: Wd = 0 (tidak ada order lolos) → OBR nil (hindari div-by-zero), EC = 0
+	onlyPhantom := BuildRedistributionReport(orders[1:2])
+	if onlyPhantom.OBR != nil {
+		t.Fatalf("expected OBR nil when Wd == 0, got %v", *onlyPhantom.OBR)
+	}
+	if onlyPhantom.EC == nil || *onlyPhantom.EC != 0 {
+		t.Fatalf("expected EC == 0 when |E|==0 and |C|>0, got %v", onlyPhantom.EC)
+	}
+
+	// Edge case: dataset kosong → OBR nil, EC nil
+	empty := BuildRedistributionReport(nil)
+	if empty.OBR != nil || empty.EC != nil {
+		t.Fatalf("expected OBR & EC nil for empty dataset")
+	}
 }
 
 // ===========================================================================

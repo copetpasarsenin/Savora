@@ -8,34 +8,40 @@ import assert from 'node:assert';
 import { 
   normalizeUMKMOrder, 
   canTransition, 
-  allowedUmkmTransitions 
+  allowedUmkmTransitions,
+  updateOrderStatus,
+  validatePickupCode,
 } from '../src/lib/orders.js';
 
 // Mock data untuk testing
 const mockBackendOrder = {
   id: 123,
   status: 'PAID',
+  payment_status: 'PAID',
+  weight_per_portion_snapshot: 350,
   quantity: 2,
   total_price: 50000,
   created_at: '2026-07-25T10:30:00Z',
-  payment_method: 'GoPay',
+  payment_method: 'XENDIT_SANDBOX',
   product: {
     id: 1,
     name: 'Nasi Goreng',
     rescue_price: 25000
   },
-  user: {
+  customer: {
     name: 'John Doe',
     phone: '081234567890'
   }
 };
 
 // Test normalizeUMKMOrder
-test('normalizeUMKMOrder should include original_id and backend_status', () => {
+test('normalizeUMKMOrder should include original_id, backend_status, customer, and weight snapshot', () => {
   const normalized = normalizeUMKMOrder(mockBackendOrder);
   
   assert.strictEqual(normalized.original_id, 123, 'Should preserve original numeric ID');
   assert.strictEqual(normalized.backend_status, 'PAID', 'Should preserve backend status');
+  assert.strictEqual(normalized.weight_per_portion_snapshot, 350, 'Should preserve weight snapshot');
+  assert.strictEqual(normalized.customer, 'John Doe', 'Should read customer field from backend');
   assert.strictEqual(normalized.id, 'SVR-0123', 'Should format display ID');
   assert.strictEqual(normalized.status, 'Diproses', 'Should map status to Indonesian');
 });
@@ -67,8 +73,23 @@ test('canTransition should allow PAID -> READY_FOR_PICKUP', () => {
   assert.strictEqual(canTransition('PAID', 'READY_FOR_PICKUP'), true);
 });
 
-test('canTransition should allow READY_FOR_PICKUP -> COMPLETED', () => {
-  assert.strictEqual(canTransition('READY_FOR_PICKUP', 'COMPLETED'), true);
+test('canTransition should reject direct READY_FOR_PICKUP -> COMPLETED (must use validatePickupCode)', () => {
+  assert.strictEqual(canTransition('READY_FOR_PICKUP', 'COMPLETED'), false);
+});
+
+test('canTransition should allow PAID/READY_FOR_PICKUP -> NO_SHOW', () => {
+  assert.strictEqual(canTransition('PAID', 'NO_SHOW'), true);
+  assert.strictEqual(canTransition('READY_FOR_PICKUP', 'NO_SHOW'), true);
+});
+
+test('updateOrderStatus should reject COMPLETED bypass client-side', async () => {
+  const res = await updateOrderStatus(123, 'COMPLETED');
+  assert.strictEqual(res.ok, false);
+});
+
+test('validatePickupCode should reject empty pickup code', async () => {
+  const res = await validatePickupCode(123, '   ');
+  assert.strictEqual(res.ok, false);
 });
 
 test('canTransition should reject PAID -> COMPLETED (illegal transition)', () => {
@@ -93,8 +114,8 @@ test('allowedUmkmTransitions should only contain UMKM-allowed transitions', () =
   const allowedStatuses = Object.keys(allowedUmkmTransitions);
   assert.deepStrictEqual(allowedStatuses, ['PAID', 'READY_FOR_PICKUP'], 'Only PAID and READY_FOR_PICKUP should have transitions');
   
-  assert.deepStrictEqual(allowedUmkmTransitions.PAID, ['READY_FOR_PICKUP']);
-  assert.deepStrictEqual(allowedUmkmTransitions.READY_FOR_PICKUP, ['COMPLETED']);
+  assert.deepStrictEqual(allowedUmkmTransitions.PAID, ['READY_FOR_PICKUP', 'NO_SHOW']);
+  assert.deepStrictEqual(allowedUmkmTransitions.READY_FOR_PICKUP, ['NO_SHOW']);
 });
 
 // Test status mapping completeness

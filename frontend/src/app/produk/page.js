@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/lib/useAuthGuard";
+import { getUser } from "@/lib/auth";
 import { Plus, Search, Filter, ArrowUpDown, Clock, CheckCircle2, AlertTriangle, AlertCircle, BarChart2, Lightbulb, TrendingUp, Sparkles, Image as ImageIcon, Camera, Package, MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
@@ -36,14 +37,15 @@ export default function ProdukPage() {
 
   // Product form state - MUST be declared before any early returns
   const [newProduct, setNewProduct] = useState({ 
-    name: "", category: "Makanan Siap Saji", original_price: "", rescue_price: "", stock: "",
+    name: "", category: "Makanan Siap Saji", original_price: "", rescue_price: "", stock: "", weight_per_portion: "",
     production_time: "", expires_at: "", packaging_condition: "Standar", storage_method: "Sesuai"
   });
 
   useEffect(() => {
     async function loadProducts() {
       setLoading(true);
-      const data = await fetchUMKMProducts(1, true); // Enable fallback to dummy data
+      const umkmId = getUser()?.id || 1;
+      const data = await fetchUMKMProducts(umkmId);
       setProducts(data);
       setLoading(false);
     }
@@ -100,10 +102,20 @@ export default function ProdukPage() {
     const productionTimeISO = datetimeLocalToISO(newProduct.production_time);
     const expiresAtISO = datetimeLocalToISO(newProduct.expires_at);
     
+    // Validate weight_per_portion (> 0 gram, wajib verified-gram)
+    const weightGrams = parseFloat(newProduct.weight_per_portion);
+    const errors = [];
+    if (!Number.isFinite(weightGrams) || weightGrams <= 0) {
+      errors.push("Berat per porsi (gram) wajib diisi dan harus lebih dari 0.");
+    }
+
     // Validate dates
     const validation = validateProductDates(productionTimeISO, expiresAtISO);
     if (!validation.valid) {
-      setValidationErrors(validation.errors);
+      errors.push(...validation.errors);
+    }
+    if (errors.length > 0) {
+      setValidationErrors(errors);
       return; // Stop submission
     }
     
@@ -115,15 +127,18 @@ export default function ProdukPage() {
       }
     }
     
+    const umkmId = getUser()?.id || 1;
+
     // Prepare product data for API
     // VALIDATION: Status MUST be "Aktif" (Indonesian) for marketplace visibility
     const productData = {
-      umkm_id: 1, // TODO: Get from auth context
+      umkm_id: umkmId,
       name: newProduct.name,
       category: newProduct.category,
       original_price: parseInt(newProduct.original_price) || 0,
       rescue_price: parseInt(newProduct.rescue_price) || 0,
       stock: parseInt(newProduct.stock) || 0,
+      weight_per_portion: weightGrams,
       production_time: productionTimeISO,
       expires_at: expiresAtISO,
       packaging_condition: newProduct.packaging_condition || "Standar",
@@ -137,7 +152,7 @@ export default function ProdukPage() {
         const updatedProduct = await updateProduct(editingProductId, productData);
         if (updatedProduct) {
           // Refetch all products to ensure timer/score are updated
-          const refreshedProducts = await fetchUMKMProducts(1);
+          const refreshedProducts = await fetchUMKMProducts(umkmId);
           setProducts(refreshedProducts);
         }
       } else {
@@ -145,12 +160,12 @@ export default function ProdukPage() {
         const createdProduct = await createProduct(productData);
         if (createdProduct) {
           // Refetch all products
-          const refreshedProducts = await fetchUMKMProducts(1);
+          const refreshedProducts = await fetchUMKMProducts(umkmId);
           setProducts(refreshedProducts);
         }
       }
 
-      setNewProduct({ name: "", category: "Makanan Siap Saji", original_price: "", rescue_price: "", stock: "", production_time: "", expires_at: "", packaging_condition: "Standar", storage_method: "Sesuai" });
+      setNewProduct({ name: "", category: "Makanan Siap Saji", original_price: "", rescue_price: "", stock: "", weight_per_portion: "", production_time: "", expires_at: "", packaging_condition: "Standar", storage_method: "Sesuai" });
       setIsModalOpen(false);
       setAddMode(null);
       setEditingProductId(null);
@@ -179,6 +194,7 @@ export default function ProdukPage() {
       original_price: p.original_price || "",
       rescue_price: p.rescue_price || "",
       stock: p.stock || "",
+      weight_per_portion: p.weight_per_portion || "",
       production_time: isoToDatetimeLocal(p.production_time),
       expires_at: isoToDatetimeLocal(p.expires_at),
       packaging_condition: p.packaging_condition || "Standar",
@@ -199,7 +215,8 @@ export default function ProdukPage() {
       try {
         await deleteProduct(id);
         // Refetch from API to ensure data consistency
-        const data = await fetchUMKMProducts(1, true);
+        const umkmId = getUser()?.id || 1;
+        const data = await fetchUMKMProducts(umkmId);
         setProducts(data);
       } catch (error) {
         alert(`Gagal menghapus produk: ${error.message}`);
@@ -643,7 +660,7 @@ export default function ProdukPage() {
                     <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '5px' }}>Nama Produk</label>
                     <input type="text" value={newProduct.name} onChange={(e) => setNewProduct({...newProduct, name: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #D1D5DB' }} />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '5px' }}>Kategori</label>
                       <select value={newProduct.category} onChange={(e) => setNewProduct({...newProduct, category: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #D1D5DB' }}>
@@ -652,7 +669,11 @@ export default function ProdukPage() {
                     </div>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '5px' }}>Stok</label>
-                      <input type="number" value={newProduct.stock} onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #D1D5DB' }} />
+                      <input type="number" min="0" value={newProduct.stock} onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #D1D5DB' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '5px' }}>Berat / Porsi (gram) *</label>
+                      <input type="number" min="1" placeholder="cth: 350" value={newProduct.weight_per_portion} onChange={(e) => setNewProduct({...newProduct, weight_per_portion: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #D1D5DB' }} />
                     </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>

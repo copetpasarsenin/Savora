@@ -98,20 +98,23 @@ func setupRoutes(app *fiber.App, xenditService *services.XenditService) {
 	// Grup /api untuk semua route backend (konvensi final tim)
 	api := app.Group("/api")
 
-	// Product routes
+	// Product routes (read publik; mutasi wajib JWT + cek kepemilikan di handler)
 	api.Get("/products/umkm/:umkm_id", handlers.GetProductsByUMKM)
 	api.Get("/products/marketplace", handlers.GetActiveMarketplaceProducts)
-	api.Post("/products", handlers.CreateProduct)
-	api.Put("/products/:id", handlers.UpdateProduct)
-	api.Delete("/products/:id", handlers.DeleteProduct)
+	api.Post("/products", middleware.AuthMiddleware, handlers.CreateProduct)
+	api.Put("/products/:id", middleware.AuthMiddleware, handlers.UpdateProduct)
+	api.Delete("/products/:id", middleware.AuthMiddleware, handlers.DeleteProduct)
 
-	// Order routes
+	// Order routes (seluruh operasi order wajib JWT + cek kepemilikan di handler)
 	orderHandler := handlers.NewOrderHandler(xenditService)
 	api.Post("/orders", middleware.AuthMiddleware, orderHandler.CreateOrder)
 	api.Get("/orders", middleware.AuthMiddleware, orderHandler.GetOrders)
-	api.Get("/orders/:id", orderHandler.GetOrderDetail)
-	api.Patch("/orders/:id/status", orderHandler.UpdateOrderStatus)
-	api.Post("/orders/:id/validate-pickup", orderHandler.ValidatePickupCode)
+	api.Get("/orders/:id", middleware.AuthMiddleware, orderHandler.GetOrderDetail)
+	api.Patch("/orders/:id/status", middleware.AuthMiddleware, orderHandler.UpdateOrderStatus)
+	api.Post("/orders/:id/validate-pickup", middleware.AuthMiddleware, orderHandler.ValidatePickupCode)
+
+	// Verified-gram redistribution report (Algoritma 1: Wd, Wc, OBR, EC, audit per order)
+	api.Get("/redistribution/report", middleware.AuthMiddleware, handlers.GetRedistributionReport)
 
 	// Payment routes (webhook Xendit sekarang di /api/payments/xendit-webhook)
 	paymentHandler := handlers.NewPaymentHandler(xenditService)

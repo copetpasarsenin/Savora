@@ -62,6 +62,9 @@ export function normalizeOrder(order) {
     pickupCode: order.pickup_code,
     pickupDeadline: order.pickup_deadline,
     reservedUntil: order.reserved_until,
+    completedAt: order.completed_at ?? null,
+    quantity: Number(order.quantity ?? 1),
+    weightPerPortionSnapshot: Number(order.weight_per_portion_snapshot ?? 0),
     subtotal: order.subtotal,
     serviceFee: order.service_fee,
     totalPrice: order.total_price,
@@ -135,12 +138,19 @@ export function normalizeUMKMOrder(raw) {
     paymentMethod = base.payment.method;
   }
 
+  const customerObj = base.customer || base.user || null;
+
   return {
     id: `SVR-${String(base.id || 0).padStart(4, '0')}`,
     original_id: base.id, // simpan ID asli untuk update
     backend_status: base.status, // simpan status backend asli
-    customer: base.user ? base.user.name : "Pelanggan Guest",
-    phone: base.user ? base.user.phone : "0812-XXXX-XXXX",
+    payment_status: base.payment_status || "",
+    weight_per_portion_snapshot: Number(base.weight_per_portion_snapshot ?? 0),
+    quantity: Number(base.quantity ?? 1),
+    completed_at: base.completed_at || null,
+    pickup_deadline: base.pickup_deadline || null,
+    customer: customerObj?.name || "Pelanggan Guest",
+    phone: customerObj?.phone || "0812-XXXX-XXXX",
     items: [{ name: productName, qty: base.quantity || 1, price: productPrice }],
     total: base.total_price ? Number(base.total_price) : 0,
     status: statusMap[base.status] || "Menunggu Pembayaran",
@@ -153,7 +163,7 @@ export function normalizeUMKMOrder(raw) {
 /**
  * Ambil daftar pesanan UMKM dari backend.
  */
-export async function fetchUMKMOrders(umkmId = DEFAULT_UMKM_ID) {
+export async function fetchUMKMOrders() {
   const useMock = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
   try {
@@ -177,12 +187,18 @@ export async function fetchUMKMOrders(umkmId = DEFAULT_UMKM_ID) {
 }
 
 /**
- * Update status pesanan via API.
+ * Update status pesanan via API (tidak boleh untuk COMPLETED — wajib lewat validatePickupCode).
  * @param {number} orderId - ID numerik asli pesanan (bukan string SVR-xxxx)
- * @param {string} backendStatus - Status backend (PAID, READY_FOR_PICKUP, dll)
+ * @param {string} backendStatus - Status backend (READY_FOR_PICKUP, NO_SHOW)
  * @returns {Promise<{ok: boolean, error?: string}>}
  */
 export async function updateOrderStatus(orderId, backendStatus) {
+  if (backendStatus === "COMPLETED") {
+    return {
+      ok: false,
+      error: "Gunakan verifikasi kode pickup untuk menyelesaikan pesanan",
+    };
+  }
   try {
     await apiFetch(`/orders/${orderId}/status`, {
       method: 'PATCH',
@@ -198,12 +214,37 @@ export async function updateOrderStatus(orderId, backendStatus) {
 }
 
 /**
- * Transisi status yang diizinkan untuk UMKM sesuai backend state machine.
- * UMKM hanya boleh: PAID → READY_FOR_PICKUP, READY_FOR_PICKUP → COMPLETED
+ * Verifikasi kode pickup untuk menyelesaikan pesanan (gerbang wajib verified-gram).
+ * @param {number} orderId - ID numerik asli pesanan
+ * @param {string} pickupCode - Kode pickup dari pelanggan
+ * @returns {Promise<{ok: boolean, data?: Object, error?: string}>}
+ */
+export async function validatePickupCode(orderId, pickupCode) {
+  const cleaned = String(pickupCode ?? "").trim().toUpperCase();
+  if (!cleaned) {
+    return { ok: false, error: "Masukkan kode pickup terlebih dahulu" };
+  }
+  try {
+    const data = await apiFetch(`/orders/${orderId}/validate-pickup`, {
+      method: 'POST',
+      body: { pickup_code: cleaned },
+    });
+    return { ok: true, data };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error.message || "Kode pickup tidak valid",
+    };
+  }
+}
+
+/**
+ * Transisi status yang diizinkan untuk UMKM via PATCH /orders/:id/status.
+ * Transisi READY_FOR_PICKUP -> COMPLETED wajib melalui validatePickupCode.
  */
 export const allowedUmkmTransitions = {
-  "PAID": ["READY_FOR_PICKUP"],
-  "READY_FOR_PICKUP": ["COMPLETED"]
+  "PAID": ["READY_FOR_PICKUP", "NO_SHOW"],
+  "READY_FOR_PICKUP": ["NO_SHOW"]
 };
 
 /**

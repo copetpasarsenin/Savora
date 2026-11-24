@@ -5,13 +5,16 @@ import { useAuthGuard } from "@/lib/useAuthGuard";
 import { Search, Filter, Calendar, MapPin, Phone, MessageSquare, AlertTriangle, CheckCircle2, ChevronRight, Download, Package } from "lucide-react";
 import TopHeader from "@/components/organisms/TopHeader";
 import Badge from "@/components/atoms/Badge";
-import { fetchUMKMOrders, updateOrderStatus, canTransition } from "@/lib/orders";
+import { fetchUMKMOrders, updateOrderStatus, validatePickupCode } from "@/lib/orders";
 
 export default function PesananPage() {
   const { loading: authLoading } = useAuthGuard(['UMKM'], { checkVerification: true });
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pickupCodeInput, setPickupCodeInput] = useState("");
+  const [pickupError, setPickupError] = useState("");
+  const [verifyingPickup, setVerifyingPickup] = useState(false);
 
   useEffect(() => {
     loadOrders();
@@ -21,7 +24,7 @@ export default function PesananPage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchUMKMOrders(1);
+      const data = await fetchUMKMOrders();
       setOrders(data);
     } catch (err) {
       setError(err.message || "Gagal memuat pesanan");
@@ -42,28 +45,25 @@ export default function PesananPage() {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showDateDropdown, setShowDateDropdown] = useState(false);
 
-  // Map backend English status to frontend Indonesian display
-  const mapOrderStatus = (backendStatus) => {
+  // Map backend/display status ke kategori tampilan konsisten
+  const mapOrderStatus = (orderOrStatus) => {
+    const raw = typeof orderOrStatus === "object" && orderOrStatus
+      ? (orderOrStatus.backend_status || orderOrStatus.status)
+      : orderOrStatus;
     const statusMap = {
       'CREATED': 'Menunggu',
       'PAYMENT_PENDING': 'Menunggu',
+      'Menunggu Pembayaran': 'Menunggu',
       'PAID': 'Diproses',
       'READY_FOR_PICKUP': 'Siap Diambil',
       'COMPLETED': 'Selesai',
-      'NO_SHOW': 'Didonasikan',
+      'NO_SHOW': 'No-Show',
+      'Tidak Diambil': 'No-Show',
       'CANCELLED': 'Dibatalkan',
+      'EXPIRED': 'Kedaluwarsa',
     };
-    return statusMap[backendStatus] || backendStatus;
+    return statusMap[raw] || raw;
   };
-  useEffect(() => {
-    async function loadOrders() {
-      setLoading(true);
-      const data = await fetchUMKMOrders(1);
-      setOrders(data);
-      setLoading(false);
-    }
-    loadOrders();
-  }, []);
 
   if (authLoading) {
     return <div style={{ padding: '40px', color: '#6B7280' }}>Memuat...</div>;
@@ -79,6 +79,8 @@ export default function PesananPage() {
 
   const openOrderDetails = (order) => {
     setSelectedOrder(order);
+    setPickupCodeInput("");
+    setPickupError("");
     setIsModalOpen(true);
   };
 
@@ -93,32 +95,49 @@ export default function PesananPage() {
     const res = await updateOrderStatus(selectedOrder.original_id, newBackendStatus);
     
     if (res.ok) {
-      // Refetch dari server untuk konsistensi
       await loadOrders();
       setIsModalOpen(false);
       setIsEmergencyModalOpen(false);
     } else {
-      // Tampilkan error
       alert(res.error || "Gagal mengubah status pesanan");
+    }
+  };
+
+  const handleVerifyPickup = async () => {
+    if (!selectedOrder?.original_id) return;
+    setPickupError("");
+    setVerifyingPickup(true);
+    const res = await validatePickupCode(selectedOrder.original_id, pickupCodeInput);
+    setVerifyingPickup(false);
+
+    if (res.ok) {
+      const grams = res.data?.verified_weight_grams ??
+        ((selectedOrder.weight_per_portion_snapshot || 0) * (selectedOrder.quantity || 1));
+      alert(`Pickup terverifikasi! Berat tercatat: ${grams} g`);
+      setPickupCodeInput("");
+      setIsModalOpen(false);
+      await loadOrders();
+    } else {
+      setPickupError(res.error || "Kode pickup tidak valid");
     }
   };
 
   // Calculate tab counts dynamically based on mapped status
   const tabCounts = {
     'Semua': orders.length,
-    'Pesanan Aktif': orders.filter(o => ['Menunggu', 'Diproses', 'Siap Diambil'].includes(mapOrderStatus(o.status))).length,
-    'Riwayat Penjualan': orders.filter(o => mapOrderStatus(o.status) === 'Selesai').length,
-    'Riwayat Donasi': orders.filter(o => mapOrderStatus(o.status) === 'Didonasikan').length,
-    'Dibatalkan': orders.filter(o => mapOrderStatus(o.status) === 'Dibatalkan').length,
+    'Pesanan Aktif': orders.filter(o => ['Menunggu', 'Diproses', 'Siap Diambil'].includes(mapOrderStatus(o))).length,
+    'Riwayat Penjualan': orders.filter(o => mapOrderStatus(o) === 'Selesai').length,
+    'Riwayat Donasi': orders.filter(o => mapOrderStatus(o) === 'Didonasikan').length,
+    'Dibatalkan': orders.filter(o => ['Dibatalkan', 'No-Show', 'Kedaluwarsa'].includes(mapOrderStatus(o))).length,
   };
 
   const filteredOrders = orders.filter(o => {
-    const mappedStatus = mapOrderStatus(o.status); // Convert backend status to Indonesian
+    const mappedStatus = mapOrderStatus(o);
     let matchesTab = true;
     if (activeTab === "Pesanan Aktif") matchesTab = ["Menunggu", "Diproses", "Siap Diambil"].includes(mappedStatus);
     if (activeTab === "Riwayat Penjualan") matchesTab = mappedStatus === "Selesai";
     if (activeTab === "Riwayat Donasi") matchesTab = mappedStatus === "Didonasikan";
-    if (activeTab === "Dibatalkan") matchesTab = mappedStatus === "Dibatalkan";
+    if (activeTab === "Dibatalkan") matchesTab = ["Dibatalkan", "No-Show", "Kedaluwarsa"].includes(mappedStatus);
 
     const matchesSearch = o.id.toLowerCase().includes(searchQuery.toLowerCase()) || o.customer.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus ? o.status === filterStatus : true;
@@ -355,6 +374,14 @@ export default function PesananPage() {
                     <span>Biaya Platform</span>
                     <span>Rp 0</span>
                   </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', fontSize: '0.875rem', color: '#4B5563' }}>
+                    <span>Snapshot Berat Redistribusi</span>
+                    <span style={{ fontWeight: 600 }}>
+                      {selectedOrder.weight_per_portion_snapshot > 0
+                        ? `${selectedOrder.weight_per_portion_snapshot} g × ${selectedOrder.quantity || 1} = ${selectedOrder.weight_per_portion_snapshot * (selectedOrder.quantity || 1)} g`
+                        : '—'}
+                    </span>
+                  </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed #E5E7EB' }}>
                     <span style={{ fontWeight: 600, fontSize: '1rem' }}>Total Pembayaran</span>
                     <span style={{ fontWeight: 700, fontSize: '1.25rem', color: '#10B981' }}>{formatRupiah(selectedOrder.total)}</span>
@@ -365,25 +392,53 @@ export default function PesananPage() {
                 </div>
               </div>
 
+              {/* Verifikasi Kode Pickup (wajib untuk READY_FOR_PICKUP -> COMPLETED) */}
+              {selectedOrder.backend_status === "READY_FOR_PICKUP" && (
+                <div style={{ padding: '15px', border: '1px solid #A7F3D0', backgroundColor: '#ECFDF5', borderRadius: '8px', marginBottom: '15px' }}>
+                  <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#065F46', marginBottom: '6px' }}>
+                    Verifikasi Kode Pickup Pelanggan
+                  </div>
+                  <p style={{ fontSize: '0.75rem', color: '#047857', margin: '0 0 10px 0' }}>
+                    Minta 8 karakter kode pickup dari pelanggan saat serah-terima fisik agar berat redistribusi tercatat sebagai verified-gram.
+                  </p>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <input
+                      type="text"
+                      value={pickupCodeInput}
+                      onChange={(e) => { setPickupCodeInput(e.target.value.toUpperCase()); setPickupError(""); }}
+                      placeholder="Masukkan kode pickup (cth: ABC12345)"
+                      style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid #10B981', fontFamily: 'monospace', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}
+                    />
+                    <button
+                      className="btn-primary"
+                      disabled={verifyingPickup}
+                      onClick={handleVerifyPickup}
+                      style={{ padding: '10px 18px', whiteSpace: 'nowrap' }}
+                    >
+                      {verifyingPickup ? "Memverifikasi..." : "Verifikasi & Selesai"}
+                    </button>
+                  </div>
+                  {pickupError && (
+                    <div style={{ color: '#DC2626', fontSize: '0.75rem', marginTop: '8px', fontWeight: 500 }}>
+                      {pickupError}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Action Buttons */}
               {selectedOrder.status !== "Selesai" && selectedOrder.status !== "Dibatalkan" && (
                 <div style={{ display: 'flex', gap: '15px' }}>
-                  {/* Tombol hanya muncul sesuai state machine backend */}
                   {selectedOrder.backend_status === "PAID" && (
                     <button className="btn-primary" onClick={() => handleUpdateStatus("READY_FOR_PICKUP")} style={{ flex: 1, padding: '12px' }}>
                       Siapkan Pesanan
-                    </button>
-                  )}
-                  {selectedOrder.backend_status === "READY_FOR_PICKUP" && (
-                    <button className="btn-primary" onClick={() => handleUpdateStatus("COMPLETED")} style={{ flex: 1, padding: '12px' }}>
-                      Selesaikan Pesanan
                     </button>
                   )}
                   
                   {/* Tombol emergency hanya untuk status aktif */}
                   {["PAID", "READY_FOR_PICKUP"].includes(selectedOrder.backend_status) && (
                     <button onClick={() => setIsEmergencyModalOpen(true)} style={{ padding: '12px 20px', border: '1px solid #EF4444', color: '#EF4444', backgroundColor: 'white', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <AlertTriangle size={18} /> Darurat (No-Show)
+                      <AlertTriangle size={18} /> Tandai No-Show
                     </button>
                   )}
                 </div>
@@ -398,24 +453,21 @@ export default function PesananPage() {
         </div>
       )}
 
-      {/* Emergency Donation Modal (No-Show) */}
+      {/* Emergency Modal (No-Show) */}
       {isEmergencyModalOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 110, display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center' }}>
           <div className="card" style={{ width: '100%', maxWidth: '450px', textAlign: 'center', padding: '30px' }}>
             <div style={{ width: '60px', height: '60px', backgroundColor: '#FEF2F2', color: '#EF4444', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
               <AlertTriangle size={30} />
             </div>
-            <h3 style={{ margin: '0 0 10px 0' }}>Pelanggan Tidak Datang?</h3>
+            <h3 style={{ margin: '0 0 10px 0' }}>Pelanggan Tidak Datang (No-Show)?</h3>
             <p style={{ color: '#4B5563', fontSize: '0.875rem', marginBottom: '25px', lineHeight: '1.5' }}>
-              Jika pelanggan tidak mengambil pesanan (no-show) setelah batas waktu, Anda dapat mengalihkan makanan ini untuk donasi agar tidak menjadi food waste.
+              Pesanan yang ditandai <strong>NO_SHOW</strong> tidak akan dihitung sebagai berat redistribusi terverifikasi (mencegah <em>phantom rescue</em>).
             </p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <button className="btn-primary" onClick={() => handleUpdateStatus("Didonasikan")} style={{ padding: '12px', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                Alihkan ke Donasi SavePlate
-              </button>
-              <button className="btn-secondary" onClick={() => handleUpdateStatus("Dibatalkan")} style={{ padding: '12px', width: '100%', color: '#EF4444', borderColor: '#FEE2E2', backgroundColor: '#FEF2F2' }}>
-                Batalkan & Kembalikan ke Stok
+              <button className="btn-primary" onClick={() => handleUpdateStatus("NO_SHOW")} style={{ padding: '12px', width: '100%', backgroundColor: '#EF4444', borderColor: '#EF4444' }}>
+                Konfirmasi No-Show
               </button>
               <button onClick={() => setIsEmergencyModalOpen(false)} style={{ padding: '12px', width: '100%', background: 'none', border: 'none', color: '#6B7280', fontWeight: 600, cursor: 'pointer', marginTop: '10px' }}>
                 Tutup

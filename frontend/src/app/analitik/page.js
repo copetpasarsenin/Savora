@@ -13,8 +13,7 @@ import ProgressTargetBar from "@/components/molecules/ProgressTargetBar";
 import RecommendationCard from "@/components/molecules/RecommendationCard";
 import Badge from "@/components/atoms/Badge";
 import { fetchTopProducts, fetchWasteLogs, createWasteLog, fetchUmkmInsight, fetchListingMetrics } from "@/lib/analytics";
-
-const UMKM_ID = 1;
+import { getUser } from "@/lib/auth";
 
 // Sub-tab masing-masing section.
 const ANALITIK_TABS = ["Penjualan", "Produk", "Food Waste", "Customer", "Sustainability", "Visualisasi"];
@@ -39,16 +38,17 @@ export default function AnalitikPage() {
 
   useEffect(() => {
     let active = true;
-    fetchTopProducts(UMKM_ID, 5).then((data) => {
+    const umkmId = getUser()?.id || 1;
+    fetchTopProducts(umkmId, 5).then((data) => {
       if (active) setTopProducts(data);
     });
-    fetchWasteLogs(UMKM_ID).then((data) => {
+    fetchWasteLogs(umkmId).then((data) => {
       if (active) setWasteLogs(data);
     });
-    fetchUmkmInsight(UMKM_ID).then((data) => {
+    fetchUmkmInsight(umkmId).then((data) => {
       if (active) setInsightData(data);
     });
-    fetchListingMetrics(UMKM_ID).then((data) => {
+    fetchListingMetrics(umkmId).then((data) => {
       if (active) setListingMetrics(data);
     });
     return () => {
@@ -268,13 +268,13 @@ export default function AnalitikPage() {
                           setWasteLoading(true);
                           try {
                             await createWasteLog({
-                              umkm_id: UMKM_ID,
+                              umkm_id: getUser()?.id || 1,
                               food_name: wasteForm.food_name,
                               category: wasteForm.category,
                               estimated_weight: parseFloat(wasteForm.estimated_weight) || 0,
                               reason: "Manual: " + wasteForm.reason,
                             });
-                            const data = await fetchWasteLogs(UMKM_ID);
+                            const data = await fetchWasteLogs(getUser()?.id || 1);
                             setWasteLogs(data);
                             setShowWasteForm(false);
                             setWasteForm({ food_name: "", category: "Bahan Baku", estimated_weight: "", reason: "" });

@@ -17,7 +17,11 @@ package services
 // Referensi model: backend/models/order.go
 // Diuji di: backend/services/redistribution_test.go
 
-import "time"
+import (
+	"time"
+
+	"github.com/saveplate/backend/models"
+)
 
 // OrderInput adalah representasi order yang sudah didenormalisasi untuk
 // keperluan pengujian dan kalkulasi — tidak bergantung pada koneksi DB.
@@ -127,4 +131,120 @@ func CalculateRedistributionWeight(orders []OrderInput) RedistributionResult {
 	}
 
 	return result
+}
+
+// OrderToInput mengonversi models.Order menjadi OrderInput untuk EligibilityGate.
+func OrderToInput(o models.Order) OrderInput {
+	return OrderInput{
+		ID:                       o.ID,
+		WeightPerPortionSnapshot: o.WeightPerPortionSnapshot,
+		Quantity:                 o.Quantity,
+		Status:                   o.Status,
+		PaymentStatus:            o.PaymentStatus,
+		PickupCode:               o.PickupCode,
+		CompletedAt:              o.CompletedAt,
+		PickupDeadline:           o.PickupDeadline,
+	}
+}
+
+// RedistributionAuditItem menyimpan jejak audit kelayakan per order item.
+type RedistributionAuditItem struct {
+	OrderID                  uint       `json:"order_id"`
+	ProductID                uint       `json:"product_id"`
+	ProductName              string     `json:"product_name"`
+	UMKMID                   uint       `json:"umkm_id"`
+	CustomerID               uint       `json:"customer_id"`
+	WeightPerPortionSnapshot float64    `json:"weight_per_portion_snapshot"`
+	Quantity                 int        `json:"quantity"`
+	Status                   string     `json:"status"`
+	PaymentStatus            string     `json:"payment_status"`
+	CompletedAt              *time.Time `json:"completed_at,omitempty"`
+	PickupDeadline           *time.Time `json:"pickup_deadline,omitempty"`
+	Eligible                 bool       `json:"eligible"`
+	FailedConditions         []string   `json:"failed_conditions"`
+	WeightContributionGrams  float64    `json:"weight_contribution_grams"`
+}
+
+// RedistributionReport merangkum metrik verified-gram (Wd, Wc, OBR, EC) dan audit per order.
+type RedistributionReport struct {
+	VerifiedWeightGrams float64                   `json:"verified_weight_grams"`
+	VerifiedWeightKg    float64                   `json:"verified_weight_kg"`
+	ClaimedWeightGrams  float64                   `json:"claimed_weight_grams"`
+	ClaimedWeightKg     float64                   `json:"claimed_weight_kg"`
+	PhantomRescueGrams  float64                   `json:"phantom_rescue_grams"`
+	OBR                 *float64                  `json:"obr"`
+	OBRPercent          *float64                  `json:"obr_percent"`
+	EC                  *float64                  `json:"ec"`
+	EligibleCount       int                       `json:"eligible_count"`
+	ClaimedCount        int                       `json:"claimed_count"`
+	TotalCount          int                       `json:"total_count"`
+	EligiblePortions    int                       `json:"eligible_portions"`
+	Items               []RedistributionAuditItem `json:"items"`
+}
+
+// BuildRedistributionReport menghitung Wd, Wc, OBR, EC, dan audit trail per order
+// menggunakan EligibilityGate (Algoritma 1) sebagai satu sumber kebenaran.
+func BuildRedistributionReport(orders []models.Order) RedistributionReport {
+	report := RedistributionReport{
+		TotalCount: len(orders),
+		Items:      make([]RedistributionAuditItem, 0, len(orders)),
+	}
+
+	for _, o := range orders {
+		in := OrderToInput(o)
+		det := EligibilityGate(in)
+
+		failed := det.FailedConditions
+		if failed == nil {
+			failed = []string{}
+		}
+
+		report.Items = append(report.Items, RedistributionAuditItem{
+			OrderID:                  o.ID,
+			ProductID:                o.ProductID,
+			ProductName:              o.Product.Name,
+			UMKMID:                   o.Product.UmkmID,
+			CustomerID:               o.CustomerID,
+			WeightPerPortionSnapshot: o.WeightPerPortionSnapshot,
+			Quantity:                 o.Quantity,
+			Status:                   o.Status,
+			PaymentStatus:            o.PaymentStatus,
+			CompletedAt:              o.CompletedAt,
+			PickupDeadline:           o.PickupDeadline,
+			Eligible:                 det.Eligible,
+			FailedConditions:         failed,
+			WeightContributionGrams:  det.WeightContributionGrams,
+		})
+
+		// C = {i ∈ I | PaymentStatus = PAID ∧ wi > 0 ∧ qi > 0}
+		if o.PaymentStatus == models.PaymentPaid && o.WeightPerPortionSnapshot > 0 && o.Quantity > 0 {
+			report.ClaimedWeightGrams += o.WeightPerPortionSnapshot * float64(o.Quantity)
+			report.ClaimedCount++
+		}
+
+		if det.Eligible {
+			report.VerifiedWeightGrams += det.WeightContributionGrams
+			report.EligibleCount++
+			report.EligiblePortions += o.Quantity
+		}
+	}
+
+	report.VerifiedWeightKg = report.VerifiedWeightGrams / 1000.0
+	report.ClaimedWeightKg = report.ClaimedWeightGrams / 1000.0
+	if report.ClaimedWeightGrams > report.VerifiedWeightGrams {
+		report.PhantomRescueGrams = report.ClaimedWeightGrams - report.VerifiedWeightGrams
+	}
+
+	if report.VerifiedWeightGrams > 0 {
+		obr := (report.ClaimedWeightGrams - report.VerifiedWeightGrams) / report.VerifiedWeightGrams
+		obrPct := obr * 100.0
+		report.OBR = &obr
+		report.OBRPercent = &obrPct
+	}
+	if report.ClaimedCount > 0 {
+		ec := float64(report.EligibleCount) / float64(report.ClaimedCount)
+		report.EC = &ec
+	}
+
+	return report
 }

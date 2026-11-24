@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/saveplate/backend/database"
 	"github.com/saveplate/backend/models"
+	"github.com/saveplate/backend/services"
 )
 
 // VerifyUMKMRequest body
@@ -436,11 +437,16 @@ func GetAdminSummaryHandler(c *fiber.Ctx) error {
 		// Top UMKM Paling Aktif (§2.6) - top 4 berdasarkan orders completed bulan ini
 		TopUMKM []TopUMKMData `json:"top_umkm"`
 
-		// Environmental Impact (§2.7) - metrik FR-13
-		TotalMakananDiselamatkanKg float64 `json:"total_makanan_diselamatkan_kg"` // Kumulatif kg (all-time)
-		PortiDiselamatkan          int64   `json:"porsi_diselamatkan"`            // Total porsi diselamatkan (all-time)
-		OrderCompletedCount        int64   `json:"order_completed_count"`         // Total order completed (all-time)
-		// waste_log & estimasi_co2 - SKIP (sesuai PROGRESS.md §2)
+		// Environmental Impact (§2.7) - metrik FR-13 + verified-gram (Algoritma 1)
+		TotalMakananDiselamatkanKg float64  `json:"total_makanan_diselamatkan_kg"` // Kumulatif kg terverifikasi (all-time)
+		PortiDiselamatkan          int64    `json:"porsi_diselamatkan"`            // Total porsi terverifikasi (all-time)
+		OrderCompletedCount        int64    `json:"order_completed_count"`         // Total order completed (all-time)
+		VerifiedWeightGrams        float64  `json:"verified_weight_grams"`         // Wd (gram)
+		ClaimedWeightGrams         float64  `json:"claimed_weight_grams"`          // Wc (gram)
+		PhantomRescueGrams         float64  `json:"phantom_rescue_grams"`          // Wc - Wd (gram)
+		OBRPercent                 *float64 `json:"obr_percent"`                   // Overestimation Bias Ratio (%)
+		EC                         *float64 `json:"ec"`                            // Evidence Coverage (|E|/|C|)
+		// waste_log & estimasi_co2 - SKIP (sesuai PROGRESS.md §2 & batasan naskah)
 	}
 
 	summary := Summary{}
@@ -581,18 +587,17 @@ func GetAdminSummaryHandler(c *fiber.Ctx) error {
 
 	// === PLATFORM HEALTH (§2.5) ===
 
-	// Makanan diselamatkan (kg) — dihitung dari orders.weight_per_portion_snapshot × quantity
-	// untuk semua order berstatus COMPLETED (sesuai mekanisme redistribusi Algoritma 1).
-	// Sebelumnya menggunakan JOIN order_items yang tidak ada di skema ini.
-	type FoodRescued struct {
-		TotalKg float64
-	}
-	var foodRescued FoodRescued
-	database.DB.Table("orders").
-		Select("COALESCE(SUM(weight_per_portion_snapshot * quantity) / 1000.0, 0) as total_kg").
-		Where("status = ?", models.OrderCompleted).
-		Scan(&foodRescued)
-	summary.MakananDiselamatkanKg = foodRescued.TotalKg
+	// Makanan diselamatkan (kg) — dihitung melalui EligibilityGate (Algoritma 1, 7 kondisi C1–C7)
+	// sebagai satu sumber kebenaran untuk Wd, Wc, OBR, EC, dan porsi terverifikasi.
+	var allOrders []models.Order
+	database.DB.Find(&allOrders)
+	redistReport := services.BuildRedistributionReport(allOrders)
+	summary.MakananDiselamatkanKg = redistReport.VerifiedWeightKg
+	summary.VerifiedWeightGrams = redistReport.VerifiedWeightGrams
+	summary.ClaimedWeightGrams = redistReport.ClaimedWeightGrams
+	summary.PhantomRescueGrams = redistReport.PhantomRescueGrams
+	summary.OBRPercent = redistReport.OBRPercent
+	summary.EC = redistReport.EC
 
 	// Produk rescue aktif (status Active & belum expired)
 	database.DB.Model(&models.Product{}).
@@ -625,8 +630,11 @@ func GetAdminSummaryHandler(c *fiber.Ctx) error {
 				COALESCE(SUM(orders.total_price), 0) as revenue_kotor,
 				COALESCE(SUM(orders.weight_per_portion_snapshot * orders.quantity) / 1000.0, 0) as food_rescued_kg`).
 		Joins("JOIN products ON products.id = orders.product_id").
-		Where("orders.status = ? AND orders.created_at >= ? AND orders.created_at < ?",
-			models.OrderCompleted, startOfMonth, endOfMonth).
+		Where(`orders.status = ? AND orders.payment_status = ?
+			AND orders.completed_at IS NOT NULL
+			AND orders.weight_per_portion_snapshot > 0 AND orders.quantity > 0
+			AND orders.created_at >= ? AND orders.created_at < ?`,
+			models.OrderCompleted, models.PaymentPaid, startOfMonth, endOfMonth).
 		Group("products.umkm_id").
 		Order("orders_completed DESC").
 		Limit(4).
@@ -661,17 +669,12 @@ func GetAdminSummaryHandler(c *fiber.Ctx) error {
 
 	// === ENVIRONMENTAL IMPACT (§2.7) - FR-13 ===
 
-	// Total makanan diselamatkan (kg) all-time - sama dengan MakananDiselamatkanKg tapi tanpa filter periode
-	summary.TotalMakananDiselamatkanKg = foodRescued.TotalKg // Sudah all-time dari query sebelumnya
+	// Total makanan & porsi diselamatkan (all-time) — konsisten dari EligibilityGate (C1–C7)
+	summary.TotalMakananDiselamatkanKg = redistReport.VerifiedWeightKg
+	summary.PortiDiselamatkan = int64(redistReport.EligiblePortions)
 
-	// Porsi diselamatkan all-time - SUM(quantity) WHERE status = COMPLETED
-	database.DB.Table("orders").
-		Select("COALESCE(SUM(quantity), 0)").
-		Where("status = ?", models.OrderCompleted).
-		Scan(&summary.PortiDiselamatkan)
-
-	// Order completed count all-time
-	summary.OrderCompletedCount = summary.CompletedOrders // Sudah diquery di atas (existing)
+	// Order completed & terverifikasi all-time
+	summary.OrderCompletedCount = int64(redistReport.EligibleCount)
 
 	// === RECENT DATA (existing, unchanged) ===
 

@@ -108,6 +108,11 @@ func CreateOrder(db *gorm.DB, customerID uint, req CreateOrderRequest, paymentSe
 			return errors.New("stok tidak mencukupi")
 		}
 
+		// Validasi berat satuan wajib > 0 (fail-closed verified-gram)
+		if product.WeightPerPortion <= 0 {
+			return errors.New("berat produk per porsi harus lebih dari 0 gram")
+		}
+
 		// Validasi food trust status (guardrail 13.3)
 		if product.FoodTrustStatus == "Tidak Disarankan Dijual" || product.FoodTrustStatus == "Tidak Layak Konsumsi" {
 			return errors.New("produk tidak memenuhi standar keamanan pangan")

@@ -45,15 +45,18 @@ func GetUmkmInsight(c *fiber.Ctx) error {
 	var totalRevenue float64
 	var totalUnits int64
 
-	// Hitung total revenue dari pesanan yang selesai
+	// Hitung hanya dari pesanan yang lolos verifikasi pickup (C1–C7: COMPLETED, PAID, completed_at terisi, berat & qty > 0)
+	verifiedWhere := `products.umkm_id = ? AND orders.status = ? AND orders.payment_status = ?
+		AND orders.completed_at IS NOT NULL AND orders.weight_per_portion_snapshot > 0 AND orders.quantity > 0`
+
 	db.Model(&models.Order{}).
 		Joins("JOIN products ON products.id = orders.product_id").
-		Where("products.umkm_id = ? AND orders.status IN (?)", umkmID, []string{models.OrderCompleted, models.OrderPaid, models.OrderReadyForPickup}).
+		Where(verifiedWhere, umkmID, models.OrderCompleted, models.PaymentPaid).
 		Select("COALESCE(SUM(orders.total_price), 0)").Scan(&totalRevenue)
 
 	db.Model(&models.Order{}).
 		Joins("JOIN products ON products.id = orders.product_id").
-		Where("products.umkm_id = ? AND orders.status IN (?)", umkmID, []string{models.OrderCompleted, models.OrderPaid, models.OrderReadyForPickup}).
+		Where(verifiedWhere, umkmID, models.OrderCompleted, models.PaymentPaid).
 		Select("COALESCE(SUM(orders.quantity), 0)").Scan(&totalUnits)
 
 	type TopProduct struct {
@@ -68,7 +71,7 @@ func GetUmkmInsight(c *fiber.Ctx) error {
 	var topProducts []TopProduct
 	db.Model(&models.Order{}).
 		Joins("JOIN products ON products.id = orders.product_id").
-		Where("products.umkm_id = ? AND orders.status IN (?)", umkmID, []string{models.OrderCompleted, models.OrderPaid, models.OrderReadyForPickup}).
+		Where(verifiedWhere, umkmID, models.OrderCompleted, models.PaymentPaid).
 		Select("products.id as product_id, products.name, products.category, SUM(orders.quantity) as units_sold, SUM(orders.total_price) as revenue, COUNT(orders.id) as orders_count").
 		Group("products.id, products.name, products.category").
 		Order("units_sold DESC").

@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useAuthGuard } from "@/lib/useAuthGuard";
 import { apiFetch } from "@/lib/api";
+import { getUser } from "@/lib/auth";
 import {
   LayoutDashboard,
   Package,
@@ -625,6 +626,8 @@ function Input({
   onChange,
   placeholder,
   prefix,
+  suffix,
+  min,
   type = "text",
 }) {
   return (
@@ -634,11 +637,15 @@ function Input({
       )}
       <input
         type={type}
+        min={min}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="flex-1 px-3 py-2.5 text-sm bg-transparent outline-none placeholder:text-muted-foreground/60"
       />
+      {suffix && (
+        <span className="px-3 text-sm text-muted-foreground border-l border-border bg-muted py-2.5">{suffix}</span>
+      )}
     </div>
   );
 }
@@ -1149,8 +1156,8 @@ function Step1Form({
                 <FormField label="Jumlah Produk">
                   <QuantityControl value={form.quantity} onChange={(v) => set("quantity", v)} />
                 </FormField>
-                <FormField label="Berat">
-                  <Input value={form.weight} onChange={(v) => set("weight", v)} placeholder="500g" />
+                <FormField label="Berat per Porsi (gram) *" hint="Wajib > 0 g untuk pencatatan verified-gram">
+                  <Input type="number" min="1" value={form.weight} onChange={(v) => set("weight", v)} placeholder="350" suffix="g" />
                 </FormField>
                 <FormField label="Porsi">
                   <Input value={form.portion} onChange={(v) => set("portion", v)} placeholder="1–2 porsi" />
@@ -1191,8 +1198,8 @@ function Step1Form({
                 <FormField label="Jumlah Box">
                   <QuantityControl value={form.quantity} onChange={(v) => set("quantity", v)} />
                 </FormField>
-                <FormField label="Estimasi Berat">
-                  <Input value={form.mysteryEstWeight} onChange={(v) => set("mysteryEstWeight", v)} placeholder="800g – 1kg" />
+                <FormField label="Berat per Box (gram) *" hint="Wajib > 0 g (satuan gram)">
+                  <Input type="number" min="1" value={form.mysteryEstWeight} onChange={(v) => set("mysteryEstWeight", v)} placeholder="800" suffix="g" />
                 </FormField>
                 <FormField label="Estimasi Porsi">
                   <Input value={form.mysteryEstPortion} onChange={(v) => set("mysteryEstPortion", v)} placeholder="2–3 Orang" />
@@ -2173,18 +2180,30 @@ export default function App() {
         console.log("✅ Gambar berhasil diupload:", uploadedPhotoUrl);
       }
       
-      // Prepare payload sesuai model Product backend
+      // Validasi berat satuan wajib > 0 gram (berlaku untuk produk reguler & mystery box)
+      const rawWeight = form.productType === "mystery" ? form.mysteryEstWeight : form.weight;
+      const weightGrams = parseFloat(rawWeight);
+      if (!Number.isFinite(weightGrams) || weightGrams <= 0) {
+        throw new Error("Berat per porsi/box wajib diisi dengan angka lebih dari 0 gram.");
+      }
+
+      const currentUser = getUser();
+      const productName = form.productType === "mystery" ? (form.mysteryName || form.name) : form.name;
+      const productCategory = form.productType === "mystery" ? (form.mysteryCategory || form.category) : form.category;
+
+      // Prepare payload sesuai model Product backend (umkm_id juga ditegakkan dari JWT di backend)
       const payload = {
-        umkm_id: 1, // TODO: Ganti dengan umkm_id dari session/auth
-        name: form.name,
-        category: form.category,
-        description: form.description,
+        umkm_id: currentUser?.id || 1,
+        name: productName,
+        category: productCategory,
+        description: form.description || form.mysteryContents || "",
         photo_url: uploadedPhotoUrl || form.photoUrl || "",
         original_price: parseFloat(form.normalPrice.replace(/\D/g, "")) || 0,
         rescue_price: parseFloat(form.rescuePrice.replace(/\D/g, "")) || 0,
+        min_price: parseFloat((form.minimumPrice || "").replace(/\D/g, "")) || 0,
         stock: form.quantity,
-        weight_per_portion: parseFloat(form.weight) || 0,
-        pickup_address: "Alamat UMKM", // TODO: Ambil dari profil UMKM
+        weight_per_portion: weightGrams,
+        pickup_address: currentUser?.address || "Alamat UMKM",
         packaging_condition: assessment.packaging || "Baik",
         storage_method: assessment.storage || "Sesuai",
         production_time: form.productionTime ? (() => {

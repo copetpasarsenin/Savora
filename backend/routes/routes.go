@@ -21,12 +21,7 @@ func SetupRoutes(app *fiber.App) {
 	api.Get("/me", middleware.AuthMiddleware, handlers.GetProfileHandler)
 	api.Patch("/me", middleware.AuthMiddleware, handlers.UpdateProfileHandler)
 
-	// Product Routes
-	api.Get("/products/umkm/:umkm_id", handlers.GetProductsByUMKM)
-	api.Get("/products/marketplace", handlers.GetActiveMarketplaceProducts)
-	api.Post("/products", handlers.CreateProduct)
-	api.Put("/products/:id", handlers.UpdateProduct)
-	api.Delete("/products/:id", handlers.DeleteProduct)
+	// Product & Waste Log routes didaftarkan di main.go (hindari duplikasi registrasi)
 
 	// Orders
 	// TODO(pemilik modul): handler tidak ditemukan — main tidak compile sejak e4cd920, wiring perlu diperbaiki pemilik modul
@@ -57,9 +52,7 @@ func SetupRoutes(app *fiber.App) {
 	api.Put("/ads/:id/status", handlers.AdComingSoonStub)
 	api.Get("/ads/active", handlers.AdComingSoonStub)
 
-	// Waste Logs
-	api.Get("/waste-logs/umkm/:umkm_id", handlers.GetWasteLogsByUMKM)
-	api.Post("/waste-logs", handlers.CreateWasteLog)
+	// Waste Logs didaftarkan di main.go (hindari duplikasi registrasi)
 
 	// Reviews & Keywords
 	// TODO(pemilik modul): handler tidak ditemukan — main tidak compile sejak e4cd920, wiring perlu diperbaiki pemilik modul
