@@ -104,7 +104,11 @@ export async function apiFetch(path, options = {}) {
       }
 
       // Throw error dengan pesan dari backend atau fallback
-      throw new Error(errorData.error || errorData.message || `HTTP ${response.status}`);
+      const errorMessage =
+        (typeof errorData.error === 'string' ? errorData.error : errorData.error?.message) ||
+        errorData.message ||
+        `HTTP ${response.status}`;
+      throw new Error(errorMessage);
     }
 
     // Return parsed JSON jika response JSON, atau response object untuk non-JSON

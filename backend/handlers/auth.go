@@ -170,7 +170,7 @@ func LoginHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
 			Success: false,
 			Data:    nil,
-			Error:   &ErrorInfo{Code: "UNAUTHORIZED", Message: "Email atau password salah"},
+			Error:   &ErrorInfo{Code: "UNAUTHORIZED", Message: "Kata sandi/email salah"},
 		})
 	}
 
@@ -179,7 +179,7 @@ func LoginHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
 			Success: false,
 			Data:    nil,
-			Error:   &ErrorInfo{Code: "UNAUTHORIZED", Message: "Email atau password salah"},
+			Error:   &ErrorInfo{Code: "UNAUTHORIZED", Message: "Kata sandi/email salah"},
 		})
 	}
 
