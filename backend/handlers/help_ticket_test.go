@@ -66,7 +66,7 @@ func setupHelpTicketTestDB(t *testing.T) {
 }
 
 // cleanupHelpTicketTestData removes test data after test
-func cleanupHelpTicketTestData(t *testing.T, ticketID uint, orderID uint, userIDs ...uint) {
+func cleanupHelpTicketTestData(_ *testing.T, ticketID uint, orderID uint, userIDs ...uint) {
 	if database.DB != nil {
 		if ticketID > 0 {
 			database.DB.Exec("DELETE FROM help_tickets WHERE id = ?", ticketID)

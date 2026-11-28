@@ -54,7 +54,7 @@ func setupTestDB(t *testing.T) {
 }
 
 // cleanupTestData removes test data after test
-func cleanupTestData(t *testing.T, userID, mitraID uint) {
+func cleanupTestData(_ *testing.T, userID, mitraID uint) {
 	if database.DB != nil {
 		database.DB.Delete(&models.MitraDonasiProfile{}, mitraID)
 		database.DB.Delete(&models.User{}, userID)

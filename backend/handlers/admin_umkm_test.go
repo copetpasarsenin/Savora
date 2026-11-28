@@ -50,7 +50,7 @@ func setupUMKMTestDB(t *testing.T) {
 }
 
 // cleanupUMKMTestData removes test data after test
-func cleanupUMKMTestData(t *testing.T, userID, umkmID uint) {
+func cleanupUMKMTestData(_ *testing.T, userID, umkmID uint) {
 	if database.DB != nil {
 		if umkmID > 0 {
 			database.DB.Delete(&models.UMKMProfile{}, umkmID)

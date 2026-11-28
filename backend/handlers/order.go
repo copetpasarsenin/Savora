@@ -141,14 +141,15 @@ func (h *OrderHandler) GetOrders(c *fiber.Ctx) error {
 
 	// Role-based filtering (case-insensitive)
 	roleUpper := strings.ToUpper(role)
-	if roleUpper == "CUSTOMER" {
+	switch roleUpper {
+	case "CUSTOMER":
 		// Customer hanya lihat order miliknya sendiri
 		query = query.Where("customer_id = ?", userID)
-	} else if roleUpper == "ADMIN" {
+	case "ADMIN":
 		// Admin lihat semua order (tidak ada filter)
-	} else if roleUpper == "UMKM" {
+	case "UMKM":
 		query = query.Joins("JOIN products ON products.id = orders.product_id").Where("products.umkm_id = ?", userID)
-	} else {
+	default:
 		// Role lain tidak punya akses ke orders
 		return c.Status(403).JSON(fiber.Map{
 			"error": "Forbidden: role tidak memiliki akses ke orders",

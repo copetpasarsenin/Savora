@@ -92,9 +92,10 @@ func handleBase64Upload(c *fiber.Ctx, imageData, supabaseURL, supabaseKey, bucke
 
 	// Generate unique filename
 	ext := ".jpg"
-	if contentType == "image/png" {
+	switch contentType {
+	case "image/png":
 		ext = ".png"
-	} else if contentType == "image/webp" {
+	case "image/webp":
 		ext = ".webp"
 	}
 	filename := fmt.Sprintf("products/%s_%d%s", uuid.New().String(), time.Now().Unix(), ext)

@@ -51,7 +51,7 @@ func setupAdvertisementTestDB(t *testing.T) {
 }
 
 // cleanupAdvertisementTestData removes test data after test
-func cleanupAdvertisementTestData(t *testing.T, adID uint, revenueID uint, userIDs ...uint) {
+func cleanupAdvertisementTestData(_ *testing.T, adID uint, revenueID uint, userIDs ...uint) {
 	if database.DB != nil {
 		if adID > 0 {
 			database.DB.Delete(&models.Advertisement{}, adID)

@@ -47,7 +47,7 @@ func setupModerationTestDB(t *testing.T) {
 }
 
 // cleanupModerationTestData removes test data after test
-func cleanupModerationTestData(t *testing.T, userIDs ...uint) {
+func cleanupModerationTestData(_ *testing.T, userIDs ...uint) {
 	if database.DB != nil {
 		for _, userID := range userIDs {
 			if userID > 0 {

@@ -260,17 +260,18 @@ func GetProfileHandler(c *fiber.Ctx) error {
 	var umkmProfile *models.UMKMProfile
 	var mitraProfileResponse interface{}
 
-	if user.Role == models.RoleCustomer {
+	switch user.Role {
+	case models.RoleCustomer:
 		var cp models.CustomerProfile
 		if err := database.DB.Where("user_id = ?", user.ID).First(&cp).Error; err == nil {
 			customerProfile = &cp
 		}
-	} else if user.Role == models.RoleUmkm {
+	case models.RoleUmkm:
 		var up models.UMKMProfile
 		if err := database.DB.Where("user_id = ?", user.ID).First(&up).Error; err == nil {
 			umkmProfile = &up
 		}
-	} else if user.Role == models.RoleMitraDonasi {
+	case models.RoleMitraDonasi:
 		var mp models.MitraDonasiProfile
 		if err := database.DB.Where("user_id = ?", user.ID).First(&mp).Error; err == nil {
 			// Query audit_logs untuk mendapatkan catatan admin terbaru (dari audit_logs, bukan kolom tabel)

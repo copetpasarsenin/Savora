@@ -731,9 +731,10 @@ func GetProductsHandler(c *fiber.Ctx) error {
 	if foodTrustFilter != "" {
 		query = query.Where("products.food_trust_status = ?", foodTrustFilter)
 	}
-	if expiredFilter == "true" {
+	switch expiredFilter {
+	case "true":
 		query = query.Where("products.expires_at < NOW()")
-	} else if expiredFilter == "false" {
+	case "false":
 		query = query.Where("products.expires_at >= NOW() OR products.expires_at IS NULL")
 	}
 
@@ -844,9 +845,10 @@ func ModerateProductHandler(c *fiber.Ctx) error {
 
 	// Create audit log (gunakan req.Status asli untuk backward compatibility)
 	action := "MODERATE_PRODUCT_WARNING"
-	if req.Status == "Active" {
+	switch req.Status {
+	case "Active":
 		action = "MODERATE_PRODUCT_ACTIVE"
-	} else if req.Status == "Suspended" {
+	case "Suspended":
 		action = "MODERATE_PRODUCT_SUSPENDED"
 	}
 	createAuditLog(claims.UserID, action, "PRODUCT", uint(productID), req.Note)
