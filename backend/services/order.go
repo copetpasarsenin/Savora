@@ -6,7 +6,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -108,6 +108,11 @@ func CreateOrder(db *gorm.DB, customerID uint, req CreateOrderRequest, paymentSe
 			return errors.New("stok tidak mencukupi")
 		}
 
+		// Validasi berat satuan wajib > 0 (fail-closed verified-gram)
+		if product.WeightPerPortion <= 0 {
+			return errors.New("berat produk per porsi harus lebih dari 0 gram")
+		}
+
 		// Validasi food trust status (guardrail 13.3)
 		if product.FoodTrustStatus == "Tidak Disarankan Dijual" || product.FoodTrustStatus == "Tidak Layak Konsumsi" {
 			return errors.New("produk tidak memenuhi standar keamanan pangan")
@@ -127,18 +132,21 @@ func CreateOrder(db *gorm.DB, customerID uint, req CreateOrderRequest, paymentSe
 		}
 
 		// 4. Buat order dengan status Created
+		// Snapshot berat per porsi saat order dibuat (wi = wP(i)(t_order)).
+		// Field ini tidak berubah meski UMKM mengubah weight_per_portion produk setelahnya.
 		reservedUntil := time.Now().Add(15 * time.Minute)
 		order := models.Order{
-			ProductID:      req.ProductID,
-			CustomerID:     customerID,
-			Quantity:       req.Quantity,
-			Subtotal:       subtotal,
-			ServiceFee:     serviceFee,
-			TotalPrice:     totalPrice,
-			PaymentMethod:  models.PaymentMethodXenditSandbox,
-			PaymentStatus:  models.PaymentUnpaid,
-			Status:         models.OrderCreated,
-			ReservedUntil:  reservedUntil,
+			ProductID:                req.ProductID,
+			CustomerID:               customerID,
+			Quantity:                 req.Quantity,
+			WeightPerPortionSnapshot: product.WeightPerPortion,
+			Subtotal:                 subtotal,
+			ServiceFee:               serviceFee,
+			TotalPrice:               totalPrice,
+			PaymentMethod:            models.PaymentMethodXenditSandbox,
+			PaymentStatus:            models.PaymentUnpaid,
+			Status:                   models.OrderCreated,
+			ReservedUntil:            reservedUntil,
 		}
 
 		if err := tx.Create(&order).Error; err != nil {

@@ -24,6 +24,7 @@ export const AD_STATUS = {
  */
 export function normalizeAdStatus(value) {
   const key = String(value || "").trim();
+  if (key === "Kadaluarsa") return AD_STATUS.Kedaluwarsa;
   return AD_STATUS[key] || AD_STATUS.Draft;
 }
 

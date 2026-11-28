@@ -78,8 +78,8 @@ export default function RegisterPage() {
       {/* Top Bar */}
       <div style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E5E7EB', padding: '12px 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="/images/savora-logo.png" alt="Savora Logo" style={{ width: '28px', height: '28px' }} />
-          <span style={{ fontSize: '18px', fontWeight: 600, color: '#1B7A43' }}>Savora</span>
+          <img src="/images/saveplate-logo.png" alt="SavePlate Logo" style={{ width: '28px', height: '28px' }} />
+          <span style={{ fontSize: '18px', fontWeight: 600, color: '#1B7A43' }}>SavePlate</span>
         </div>
       </div>
 
@@ -88,7 +88,7 @@ export default function RegisterPage() {
         <div style={{ width: '100%', maxWidth: '440px', backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '32px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '0 0 8px', color: '#1F2937' }}>Buat Akun Savora</h1>
+            <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '0 0 8px', color: '#1F2937' }}>Buat Akun SavePlate</h1>
             <p style={{ fontSize: '13px', color: '#6B7280', margin: 0, lineHeight: '1.5' }}>Bergabunglah dengan ribuan orang untuk menyelamatkan makanan setiap hari.</p>
           </div>
 
@@ -231,7 +231,7 @@ export default function RegisterPage() {
 
           {/* Footer Text */}
           <div style={{ marginTop: '16px', textAlign: 'center', fontSize: '11px', color: '#9CA3AF', lineHeight: '1.5' }}>
-            Dengan mendaftar, Anda menyetujui Syarat & Ketentuan dan Kebijakan Privasi Savora.
+            Dengan mendaftar, Anda menyetujui Syarat & Ketentuan dan Kebijakan Privasi SavePlate.
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -21,13 +21,24 @@ func ConnectDB() {
 
 	if dbUrl != "" {
 		db, err = gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
-	} else if host != "" && host != "localhost" {
+	} else if host != "" {
 		// Use Postgres with individual variables
 		port := os.Getenv("DB_PORT")
+		if port == "" {
+			port = "5432"
+		}
 		user := os.Getenv("DB_USER")
 		password := os.Getenv("DB_PASSWORD")
 		dbname := os.Getenv("DB_NAME")
-		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta", host, user, password, dbname, port)
+		sslmode := os.Getenv("DB_SSLMODE")
+		if sslmode == "" {
+			if host == "localhost" || host == "127.0.0.1" {
+				sslmode = "disable"
+			} else {
+				sslmode = "require"
+			}
+		}
+		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=Asia/Jakarta", host, user, password, dbname, port, sslmode)
 		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	} else {
 		log.Fatal("Database configuration is missing. Please set DATABASE_URL or DB_HOST.")
@@ -53,12 +64,16 @@ func ConnectDB() {
 			&models.Payment{},            // P1 MVP - payment transactions
 			&models.PaymentLog{},         // P1 MVP - payment audit log
 			&models.Review{},
+			&models.ReviewKeyword{},
+			&models.KeywordScore{},
 			&models.Advertisement{},      // Task 5: Iklan
 			&models.AdMetrics{},          // Task 5: Iklan Metrics
 			&models.PlatformRevenue{},    // Task 5 & 6: Revenue Platform
 			&models.HelpTicket{},         // Task 7: Help Center
 			&models.Notification{},       // P2 Should Have - in-app notifications
 			&models.WasteLog{},           // P2 Should Have - waste tracking
+			&models.DonationOffer{},      // Mitra Donasi: donation offers
+			&models.DonationHistory{},    // Mitra Donasi: donation history
 		)
 		if err != nil {
 			log.Fatal("Failed to migrate database:", err)

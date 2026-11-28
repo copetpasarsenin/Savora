@@ -14,7 +14,7 @@ import { computeImpactSummary } from "@/lib/impact";
 import { useCart } from "@/lib/CartContext";
 import { apiGet } from "@/lib/api";
 import { getUser, logout } from "@/lib/auth";
-import SavoraNavbar from "@/components/navbar/SavoraNavbar";
+import SavePlateNavbar from "@/components/navbar/SavePlateNavbar";
 
 // ── Data demo lokal (fallback tanpa backend) ──────────────────────────────
 // 3-4 order contoh: campuran Completed & Paid, termasuk service fee 5%.
@@ -25,12 +25,14 @@ const DEMO_ORDERS = [
     product_name: "Nasi Campur Bali Spesial",
     vendor: "Warung Bu Ratih",
     quantity: 2,
+    weight_per_portion_snapshot: 350,
     original_price: 25000,
     rescue_price: 12000,
     subtotal: 24000,
     service_fee: 1200,
     total_price: 25200,
     status: "Completed",
+    payment_status: "PAID",
     created_at: "2026-07-21T12:30:00+07:00",
     completed_at: "2026-07-21T13:15:00+07:00",
   },
@@ -39,12 +41,14 @@ const DEMO_ORDERS = [
     product_name: "Pastry Cokelat Almond",
     vendor: "Sweet Corner Patisserie",
     quantity: 1,
+    weight_per_portion_snapshot: 250,
     original_price: 35000,
     rescue_price: 18000,
     subtotal: 18000,
     service_fee: 900,
     total_price: 18900,
     status: "Completed",
+    payment_status: "PAID",
     created_at: "2026-07-20T15:00:00+07:00",
     completed_at: "2026-07-20T16:20:00+07:00",
   },
@@ -53,12 +57,14 @@ const DEMO_ORDERS = [
     product_name: "Paket Gorengan Campur",
     vendor: "Kios Mbak Sari",
     quantity: 3,
+    weight_per_portion_snapshot: 300,
     original_price: 15000,
     rescue_price: 6000,
     subtotal: 18000,
     service_fee: 900,
     total_price: 18900,
     status: "Paid",
+    payment_status: "PAID",
     created_at: "2026-07-22T09:45:00+07:00",
     completed_at: null,
   },
@@ -67,12 +73,14 @@ const DEMO_ORDERS = [
     product_name: "Roti Sourdough Artisan",
     vendor: "Roti Kayu Bakery",
     quantity: 1,
+    weight_per_portion_snapshot: 450,
     original_price: 45000,
     rescue_price: 22000,
     subtotal: 22000,
     service_fee: 1100,
     total_price: 23100,
     status: "Completed",
+    payment_status: "PAID",
     created_at: "2026-07-19T11:00:00+07:00",
     completed_at: "2026-07-19T12:40:00+07:00",
   },
@@ -97,12 +105,14 @@ async function fetchOrders() {
       vendor: "—", // UMKM name belum di-preload dari backend, fallback dulu
       umkm_name: "—",
       quantity: order.quantity ?? "—",
+      weight_per_portion_snapshot: Number(order.weight_per_portion_snapshot ?? 0),
       original_price: order.product?.original_price || 0,
       rescue_price: order.product?.rescue_price || 0,
       subtotal: order.subtotal || 0,
       service_fee: order.service_fee || 0,
       total_price: order.total_price || 0,
       status: order.status || "—",
+      payment_status: order.payment_status || "",
       created_at: order.created_at || null,
       completed_at: order.completed_at || null,
     }));
@@ -181,15 +191,15 @@ function ImpactCards({ impact }) {
           <span className="beranda-akun-card-icon">
             <Weight size={24} aria-hidden="true" />
           </span>
-          <b className="beranda-akun-card-value">{impact.estimatedKg} kg</b>
+          <b className="beranda-akun-card-value">{impact.verifiedKg} kg</b>
           <span className="beranda-akun-card-label">
-            Makanan Terselamatkan
+            Berat Terverifikasi ({impact.totalGrams} g)
           </span>
         </div>
       </div>
 
       <p className="beranda-akun-disclaimer">
-        Estimasi berbasis transaksi — bukan klaim resmi.
+        Dihitung dari snapshot berat pesanan yang telah terverifikasi pickup (verified-gram).
       </p>
     </section>
   );
@@ -273,7 +283,7 @@ export default function AkunPage() {
 
   return (
     <div style={{ background: "#ffffff", fontFamily: '"Plus Jakarta Sans", sans-serif', minHeight: "100vh" }}>
-      <SavoraNavbar />
+      <SavePlateNavbar />
 
       <main className="beranda-akun-main">
         <h1 className="beranda-akun-title">Riwayat &amp; Impact</h1>
@@ -305,7 +315,7 @@ export default function AkunPage() {
       <footer className="beranda-footer">
         <div className="beranda-footer-container">
           <div className="beranda-footer-column-brand">
-            <div className="beranda-footer-wordmark">Savora</div>
+            <div className="beranda-footer-wordmark">SavePlate</div>
             <p className="beranda-footer-mission">
               Misi kami sederhana: Tidak boleh ada makanan enak yang terbuang sia-sia.
               Bergabunglah dengan ribuan penyelamat makanan lainnya di seluruh Indonesia.
@@ -321,7 +331,7 @@ export default function AkunPage() {
           </div>
         </div>
         <div className="beranda-footer-bottom">
-          <span>© 2026 Savora Platform. Proudly Made In Indonesia for the Earth.</span>
+          <span>© 2026 SavePlate Platform. Proudly Made In Indonesia for the Earth.</span>
         </div>
       </footer>
     </div>

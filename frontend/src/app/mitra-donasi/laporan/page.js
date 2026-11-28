@@ -20,12 +20,6 @@ export default function LaporanMitraPage() {
     rata_per_hari: 0,
   });
 
-  useEffect(() => {
-    const currentUser = isAuthenticated() ? getUser() : null;
-    setUser(currentUser || { name: 'Mitra Demo', role: 'MITRA_DONASI' });
-    loadImpactData();
-  }, []);
-
   async function loadImpactData() {
     setLoading(true);
     setUsingDemoData(false);
@@ -64,6 +58,19 @@ export default function LaporanMitraPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    let active = true;
+    const currentUser = isAuthenticated() ? getUser() : null;
+    queueMicrotask(() => {
+      if (!active) return;
+      setUser(currentUser || { name: 'Mitra Demo', role: 'MITRA_DONASI' });
+      loadImpactData();
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Calculate environmental impact from real data
   const co2Reduced = (stats.total_kg * 0.6).toFixed(0); // 0.6 kg CO2e per kg food

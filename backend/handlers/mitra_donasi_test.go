@@ -11,12 +11,15 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
-	"github.com/savora/backend/database"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/database"
+	"github.com/saveplate/backend/models"
 )
 
 // setupTestDB initializes test database connection
 func setupTestDB(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping DB integration test in -short mode")
+	}
 	// Connect to database if not already connected
 	if database.DB == nil {
 		// Load .env file untuk DATABASE_URL
@@ -51,7 +54,7 @@ func setupTestDB(t *testing.T) {
 }
 
 // cleanupTestData removes test data after test
-func cleanupTestData(t *testing.T, userID, mitraID uint) {
+func cleanupTestData(_ *testing.T, userID, mitraID uint) {
 	if database.DB != nil {
 		database.DB.Delete(&models.MitraDonasiProfile{}, mitraID)
 		database.DB.Delete(&models.User{}, userID)

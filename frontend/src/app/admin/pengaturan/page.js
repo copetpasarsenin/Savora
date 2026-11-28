@@ -372,7 +372,7 @@ export default function PengaturanPage() {
               </h2>
               <div style={{ fontSize: '14px', lineHeight: 1.8, color: 'var(--text-main)' }}>
                 <div style={{ marginBottom: '1rem' }}>
-                  <strong>Savora Admin Dashboard</strong>
+                  <strong>SavePlate Admin Dashboard</strong>
                   <div style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Versi 1.0.0 (MVP)</div>
                 </div>
                 <div style={{ marginBottom: '1rem' }}>
@@ -380,11 +380,11 @@ export default function PengaturanPage() {
                   <ul style={{ margin: '8px 0 0', paddingLeft: '20px' }}>
                     <li>
                       <a
-                        href="/docs/SAVORA_PRD.md"
+                        href="/docs/SavePlate_PRD_v3.9.md"
                         target="_blank"
                         style={{ color: 'var(--primary-color)', textDecoration: 'none' }}
                       >
-                        Product Requirements Document (PRD v3.7)
+                        Product Requirements Document (PRD v3.9)
                       </a>
                     </li>
                     <li>

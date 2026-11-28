@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/models"
 	"gorm.io/gorm"
 )
 
@@ -55,7 +55,7 @@ func (s *SchedulerService) ExpireStalePayments() {
 
 			// Update order dengan guard state machine (hanya jika masih PAYMENT_PENDING)
 			res = tx.Model(&models.Order{}).
-				Where("order_id = ? AND status = ?", payment.OrderID, models.OrderPaymentPending).
+				Where("id = ? AND status = ?", payment.OrderID, models.OrderPaymentPending).
 				Updates(map[string]interface{}{
 					"status":         models.OrderExpired,
 					"payment_status": models.PaymentExpired,
@@ -101,10 +101,13 @@ func (s *SchedulerService) ProcessNoShow() {
 	log.Printf("⏰ Scheduler: found %d no-show orders, processing...", len(orders))
 
 	for _, order := range orders {
-		order.Status = models.OrderNoShow
-		if err := s.db.Save(&order).Error; err != nil {
-			log.Printf("❌ Scheduler: failed to mark no-show order %d: %v", order.ID, err)
-		} else {
+		// Guard atomik agar tidak menimpa order yang baru saja diverifikasi pickup
+		res := s.db.Model(&models.Order{}).
+			Where("id = ? AND status IN (?, ?)", order.ID, models.OrderPaid, models.OrderReadyForPickup).
+			Update("status", models.OrderNoShow)
+		if res.Error != nil {
+			log.Printf("❌ Scheduler: failed to mark no-show order %d: %v", order.ID, res.Error)
+		} else if res.RowsAffected > 0 {
 			log.Printf("✅ Scheduler: marked order %d as no-show", order.ID)
 		}
 	}

@@ -31,12 +31,18 @@ export default function LoginPage() {
 
   // F1: Cek query param registered=1 via window.location.search (CSR-safe, tanpa Suspense)
   useEffect(() => {
+    let active = true;
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('registered') === '1') {
-        setShowRegisteredBanner(true);
+        queueMicrotask(() => {
+          if (active) setShowRegisteredBanner(true);
+        });
       }
     }
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleChange = (e) => {
@@ -84,8 +90,8 @@ export default function LoginPage() {
       {/* Top Bar */}
       <div style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E5E7EB', padding: '12px 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="/images/savora-logo.png" alt="Savora Logo" style={{ width: '28px', height: '28px' }} />
-          <span style={{ fontSize: '18px', fontWeight: 600, color: '#1B7A43' }}>Savora</span>
+          <img src="/images/saveplate-logo.png" alt="SavePlate Logo" style={{ width: '28px', height: '28px' }} />
+          <span style={{ fontSize: '18px', fontWeight: 600, color: '#1B7A43' }}>SavePlate</span>
         </div>
       </div>
 
@@ -94,18 +100,18 @@ export default function LoginPage() {
         <div style={{ width: '100%', maxWidth: '380px', backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '32px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
           {/* Logo dalam kartu */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '24px' }}>
-            <img src="/images/savora-logo.png" alt="Savora Logo" style={{ width: '24px', height: '24px' }} />
-            <span style={{ fontSize: '16px', fontWeight: 600, color: '#1B7A43' }}>Savora</span>
+            <img src="/images/saveplate-logo.png" alt="SavePlate Logo" style={{ width: '24px', height: '24px' }} />
+            <span style={{ fontSize: '16px', fontWeight: 600, color: '#1B7A43' }}>SavePlate</span>
           </div>
 
           {/* Ilustrasi Maskot */}
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-            <img src="/images/maskot-masuk-akun.png" alt="Maskot Savora" style={{ width: '180px', height: 'auto', margin: '0 auto' }} />
+            <img src="/images/maskot-masuk-akun.png" alt="Maskot SavePlate" style={{ width: '180px', height: 'auto', margin: '0 auto' }} />
           </div>
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <h1 style={{ fontSize: '20px', fontWeight: 600, margin: '0 0 8px', color: '#1F2937' }}>Selamat Datang di Savora!</h1>
+            <h1 style={{ fontSize: '20px', fontWeight: 600, margin: '0 0 8px', color: '#1F2937' }}>Selamat Datang di SavePlate!</h1>
             <p style={{ fontSize: '12px', color: '#6B7280', margin: 0, lineHeight: '1.5' }}>Solusi cerdas untuk menyelamatkan makanan dan menghemat pengeluaran, kapan saja dan di mana saja</p>
           </div>
 

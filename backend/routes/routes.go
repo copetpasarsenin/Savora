@@ -2,9 +2,9 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/savora/backend/handlers"
-	"github.com/savora/backend/middleware"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/handlers"
+	"github.com/saveplate/backend/middleware"
+	"github.com/saveplate/backend/models"
 )
 
 func SetupRoutes(app *fiber.App) {
@@ -21,23 +21,19 @@ func SetupRoutes(app *fiber.App) {
 	api.Get("/me", middleware.AuthMiddleware, handlers.GetProfileHandler)
 	api.Patch("/me", middleware.AuthMiddleware, handlers.UpdateProfileHandler)
 
-	// Product Routes
-	api.Get("/products/umkm/:umkm_id", handlers.GetProductsByUMKM)
-	api.Get("/products/marketplace", handlers.GetActiveMarketplaceProducts)
-	api.Post("/products", handlers.CreateProduct)
-	api.Put("/products/:id", handlers.UpdateProduct)
-	api.Delete("/products/:id", handlers.DeleteProduct)
+	// Product & Waste Log routes didaftarkan di main.go (hindari duplikasi registrasi)
 
 	// Orders
 	// TODO(pemilik modul): handler tidak ditemukan — main tidak compile sejak e4cd920, wiring perlu diperbaiki pemilik modul
 	// api.Get("/orders/umkm/:umkm_id", handlers.GetOrdersByUMKM)
 	// api.Put("/orders/:id/status", handlers.UpdateOrderStatus)
 
-	// Notifications
-	api.Get("/notifications/user/:user_id", handlers.GetNotificationsByUser)
-	api.Get("/notifications/unread/:user_id", handlers.GetUnreadCount)
-	api.Put("/notifications/:id/read", handlers.MarkAsRead)
-	api.Put("/notifications/read-all/:user_id", handlers.MarkAllAsRead)
+	// Notifications (protected)
+	notifications := api.Group("/notifications", middleware.AuthMiddleware)
+	notifications.Get("/user/:user_id", handlers.GetNotificationsByUser)
+	notifications.Get("/unread/:user_id", handlers.GetUnreadCount)
+	notifications.Put("/:id/read", handlers.MarkAsRead)
+	notifications.Put("/read-all/:user_id", handlers.MarkAllAsRead)
 
 	// Analytics
 	// TODO(pemilik modul): handler tidak ditemukan — main tidak compile sejak e4cd920, wiring perlu diperbaiki pemilik modul
@@ -57,9 +53,7 @@ func SetupRoutes(app *fiber.App) {
 	api.Put("/ads/:id/status", handlers.AdComingSoonStub)
 	api.Get("/ads/active", handlers.AdComingSoonStub)
 
-	// Waste Logs
-	api.Get("/waste-logs/umkm/:umkm_id", handlers.GetWasteLogsByUMKM)
-	api.Post("/waste-logs", handlers.CreateWasteLog)
+	// Waste Logs didaftarkan di main.go (hindari duplikasi registrasi)
 
 	// Reviews & Keywords
 	// TODO(pemilik modul): handler tidak ditemukan — main tidak compile sejak e4cd920, wiring perlu diperbaiki pemilik modul
@@ -70,8 +64,8 @@ func SetupRoutes(app *fiber.App) {
 	// Dynamic Discount
 	api.Post("/discount/calculate", handlers.CalculateDynamicDiscount)
 
-	// Upload Image
-	api.Post("/upload/image", handlers.UploadImage)
+	// Upload Image (protected)
+	api.Post("/upload/image", middleware.AuthMiddleware, handlers.UploadImage)
 
 	// Mitra Donasi Routes (protected - wajib login + role MITRA_DONASI)
 	mitraDonasi := api.Group("/mitra-donasi", middleware.AuthMiddleware, middleware.RequireRole(models.RoleMitraDonasi))

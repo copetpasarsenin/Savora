@@ -1,20 +1,20 @@
-# Savora — Agent Instructions
+# SavePlate — Agent Instructions
 
 Food rescue marketplace. Competition project for CODE 6.0.
 
 ## Critical path quirks
 
-**Working directory with spaces:** Project root is `/home/ridwan/Documents/Belajar/Lomba/WEB APP/fixkancuy/Savora/`. Always use `workdir` parameter or quote paths in bash.
+**Working directory with spaces:** Project root is `/home/ridwan/Documents/Belajar/Lomba/WEB APP/fixkancuy/SavePlate/`. Always use `workdir` parameter or quote paths in bash.
 
 **Two sources of truth:**
-1. `Savora_PRD_Midtrans_v3.7.md` — business rules, formulas, requirements (REVISI #33-#41 dated Jul 24-25)
+1. `SavePlate_PRD_v3.9.md` — business rules, formulas, requirements (REVISI #33-#40)
 2. `CLAUDE.md` — tech stack, architecture, coding standards
 
-**Priority:** PRD v3.7 > executable config (package.json, go.mod) > code > comments.
+**Priority:** PRD v3.9 > executable config (package.json, go.mod) > code > comments.
 
 ## Commands that must succeed before task complete
 
-Run from Savora/ directory:
+Run from SavePlate/ directory:
 
 ```bash
 # Frontend (12 test files, 155 tests)
@@ -22,24 +22,24 @@ npm test
 npm run build
 
 # Backend (60 Go files)
-go build -o savora-backend
+go build -o saveplate-backend
 
 # Lint (90 pre-existing problems OK, don't add new ones)
 npm run lint
 ```
 
-All commands run from `Savora/` directory with `workdir` parameter.
+All commands run from `SavePlate/` directory with `workdir` parameter.
 
 ## Dev servers
 
 ```bash
-# Frontend :3000 (from Savora/frontend/)
+# Frontend :3000 (from SavePlate/frontend/)
 npm run dev
 
-# Backend :8000 (from Savora/backend/)
+# Backend :8000 (from SavePlate/backend/)
 go run main.go
 
-# Seeder (from Savora/backend/)
+# Seeder (from SavePlate/backend/)
 go run cmd/seed/main.go
 ```
 
@@ -65,7 +65,7 @@ Initial scores: Fresh=100, Layak Dijual=85, Segera Dijual=70.
 `total_price = subtotal + (subtotal * 0.05)`
 
 ### Payment Timeout
-15 minutes exact. Midtrans Snap default is 24hrs — MUST explicitly set `expiry: { duration: 15, unit: 'minute' }`. No webhook on expiry; scheduler must auto-expire orders.
+15 minutes exact (`PAYMENT_EXPIRY_SECONDS=900` / `invoice_duration: 900` on Xendit Invoice API). Scheduler also auto-expires overdue `PAYMENT_PENDING` orders and releases stock.
 
 ### Order Status Flow
 `CREATED` (transient) → `PAYMENT_PENDING` → `PAID` → `READY_FOR_PICKUP` → `COMPLETED` or `NO_SHOW`.
@@ -94,7 +94,7 @@ Do NOT change to "1 bad keyword = instant red badge".
 | Frontend | Next.js 16.2.11, React 19.2.4, Tailwind v4 | JavaScript `.js`, NOT TypeScript |
 | Backend | Go 1.26.2, Fiber v2.52.14, GORM 1.31.2 | Flat structure (no clean architecture) |
 | Database | PostgreSQL via Supabase | GORM + `DATABASE_URL` only, NO Supabase SDK |
-| Payment | Midtrans Snap Sandbox | PRD says Midtrans; code has legacy Xendit service (main.go:36) |
+| Payment | Xendit Invoice Sandbox | Standardized across PRD v3.9 & backend (`services/xendit.go`) |
 | Auth | JWT + bcrypt | `golang.org/x/crypto`, `github.com/golang-jwt/jwt/v5` |
 
 ## Architecture quirks
@@ -145,15 +145,15 @@ Do NOT change to "1 bad keyword = instant red badge".
 1. **Food Score**: Power decay γ=0.65, NOT linear
 2. **Service fee**: Added to customer (× 1.05), NOT deducted from UMKM
 3. **Payment timeout**: 15 minutes, not 10 or 20
-4. **Midtrans expiry**: MUST set `expiry: { duration: 15, unit: 'minute' }` explicitly
+4. **Xendit expiry & callback**: MUST set `invoice_duration: 900` (15 minutes) and verify `x-callback-token` in constant time
 5. **Order status**: English enum (`PAID`, `COMPLETED`), not Indonesian
 6. **Register endpoint**: Hard-code `role=CUSTOMER`; reject role injection
 7. **Database access**: GORM only, NO Supabase SDK
 8. **Keyword badge**: Threshold-based, NOT worst-case
 
-## Platform quirk
+## Platform note
 
-Linux system, but `playwright.config.js:32` expects `cd backend && ./savora-backend.exe`. Build binary or symlink before E2E tests.
+`playwright.config.js` runs `cd backend && go run main.go` on `:8000` and `cd frontend && npm run dev` on `:3000`.
 
 ## Test locations
 
@@ -164,8 +164,8 @@ Linux system, but `playwright.config.js:32` expects `cd backend && ./savora-back
 ## Environment setup
 
 Copy `.env.example` files:
-- `backend/.env.example` → `backend/.env` (DB_*, JWT_SECRET, Midtrans keys, Supabase storage)
-- `frontend/.env.example` → `frontend/.env.local` (NEXT_PUBLIC_API_URL)
+- `backend/.env.example` → `backend/.env` (DB_*, JWT_SECRET, Xendit keys, Supabase storage)
+- `frontend/.env.example` → `frontend/.env.local` (NEXT_PUBLIC_API_BASE_URL)
 
 **Database access:** `main.go` requires individual `DB_*` variables (DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME). Seeder supports both `DATABASE_URL` and individual `DB_*` vars with `DATABASE_URL` as priority.
 
@@ -178,7 +178,7 @@ All admin actions MUST be logged to `audit_logs` (actor_id, action, target_type,
 
 ## References
 
-- Full requirements: `Savora_PRD_Midtrans_v3.7.md`
+- Full requirements: `SavePlate_PRD_v3.9.md`
 - Tech details: `CLAUDE.md`
 - Frontend: `frontend/AGENTS.md`
 - Visual refs: `docs/design/01-Beranda.png` through `08-Pick-up.png`

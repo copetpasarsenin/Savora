@@ -6,8 +6,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/savora/backend/database"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/database"
+	"github.com/saveplate/backend/models"
 )
 
 // Response format seragam (CLAUDE.md Section 12)
@@ -170,7 +170,7 @@ func LoginHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
 			Success: false,
 			Data:    nil,
-			Error:   &ErrorInfo{Code: "UNAUTHORIZED", Message: "Email atau password salah"},
+			Error:   &ErrorInfo{Code: "UNAUTHORIZED", Message: "Kata sandi/email salah"},
 		})
 	}
 
@@ -179,7 +179,7 @@ func LoginHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(APIResponse{
 			Success: false,
 			Data:    nil,
-			Error:   &ErrorInfo{Code: "UNAUTHORIZED", Message: "Email atau password salah"},
+			Error:   &ErrorInfo{Code: "UNAUTHORIZED", Message: "Kata sandi/email salah"},
 		})
 	}
 
@@ -260,17 +260,18 @@ func GetProfileHandler(c *fiber.Ctx) error {
 	var umkmProfile *models.UMKMProfile
 	var mitraProfileResponse interface{}
 
-	if user.Role == models.RoleCustomer {
+	switch user.Role {
+	case models.RoleCustomer:
 		var cp models.CustomerProfile
 		if err := database.DB.Where("user_id = ?", user.ID).First(&cp).Error; err == nil {
 			customerProfile = &cp
 		}
-	} else if user.Role == models.RoleUmkm {
+	case models.RoleUmkm:
 		var up models.UMKMProfile
 		if err := database.DB.Where("user_id = ?", user.ID).First(&up).Error; err == nil {
 			umkmProfile = &up
 		}
-	} else if user.Role == models.RoleMitraDonasi {
+	case models.RoleMitraDonasi:
 		var mp models.MitraDonasiProfile
 		if err := database.DB.Where("user_id = ?", user.ID).First(&mp).Error; err == nil {
 			// Query audit_logs untuk mendapatkan catatan admin terbaru (dari audit_logs, bukan kolom tabel)
@@ -387,7 +388,7 @@ func UpdateProfileHandler(c *fiber.Ctx) error {
 func generateJWT(user models.User) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		secret = "savora-secret-key-change-in-production" // Default untuk development
+		secret = "saveplate-secret-key-change-in-production" // Default untuk development
 	}
 
 	claims := JWTClaims{

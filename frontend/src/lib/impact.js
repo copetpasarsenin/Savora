@@ -1,22 +1,19 @@
-// Impact Tracking — Richard Firmansyah (Customer Dashboard)
+// Impact Tracking — Verified-Gram Redistribution Accounting
 //
-// Helper murni untuk menghitung ringkasan dampak personal customer
-// berdasarkan data order. Sesuai PRD Section 16 & FR-13 (P1):
-// ringkasan impact sederhana berbasis data riil.
-//
-// Grafik impact agregat & monthly story = Demo Only (PRD 9.3, REVISI #24),
-// jadi modul ini TIDAK menyediakan data untuk chart.
-
-const KG_PER_PORTION = 0.4;
+// Helper murni untuk menghitung ringkasan dampak personal customer berdasarkan
+// snapshot berat per porsi (weight_per_portion_snapshot) pada pesanan yang lolos
+// gerbang kelayakan pickup (COMPLETED, PAID, completed_at terisi, w > 0, q > 0).
 
 /**
  * Hitung ringkasan dampak personal customer dari daftar order.
- *
- * Hanya order berstatus **Completed** yang dihitung (PRD 14.1: order
- * selesai = pickup code valid & transaksi selesai).
+ * Fail-closed: order tanpa bukti serah-terima (completed_at) atau tanpa snapshot
+ * berat valid (> 0 g) berkontribusi 0 gram.
  *
  * @param {Array<{
  *   status?: string,
+ *   payment_status?: string,
+ *   completed_at?: string | null,
+ *   weight_per_portion_snapshot?: number,
  *   quantity?: number,
  *   original_price?: number,
  *   rescue_price?: number,
@@ -24,6 +21,8 @@ const KG_PER_PORTION = 0.4;
  * @returns {{
  *   totalPortions: number,
  *   totalSaved: number,
+ *   totalGrams: number,
+ *   verifiedKg: number,
  *   estimatedKg: number,
  * }}
  */
@@ -32,33 +31,47 @@ export function computeImpactSummary(orders) {
 
   let totalPortions = 0;
   let totalSaved = 0;
+  let totalGrams = 0;
 
   for (const order of list) {
-    // Hanya hitung order yang sudah Completed (case-insensitive).
+    // C7: hanya order COMPLETED (case-insensitive)
     const status = String(order?.status ?? "").trim().toLowerCase();
     if (status !== "completed") continue;
 
+    // C5: bila field payment_status dikirim, wajib PAID
+    if (order?.payment_status !== undefined && order?.payment_status !== null && String(order.payment_status).trim() !== "") {
+      if (String(order.payment_status).trim().toLowerCase() !== "paid") continue;
+    }
+
+    // C6: bila field completed_at eksplisit null/kosong, tolak (belum terverifikasi pickup)
+    if (order?.completed_at === null || order?.completed_at === "") continue;
+
+    // C2: quantity > 0
     const qty = Number(order.quantity);
-    const portions = Number.isFinite(qty) && qty > 0 ? qty : 0;
+    if (!Number.isFinite(qty) || qty <= 0) continue;
+
+    // C1: weight_per_portion_snapshot > 0 (fail-closed -> 0 g jika hilang/tidak valid)
+    const unitGrams = Number(order.weight_per_portion_snapshot);
+    const orderGrams = Number.isFinite(unitGrams) && unitGrams > 0 ? unitGrams * qty : 0;
 
     const original = Number(order.original_price);
     const rescue = Number(order.rescue_price);
-
-    // Hitung hemat per item: selisih harga asli − harga rescue.
-    // Jika salah satu field harga tidak valid/hilang, anggap hemat 0
-    // untuk item tersebut agar tidak merusak total.
     let savedPerItem = 0;
     if (Number.isFinite(original) && Number.isFinite(rescue) && original > rescue) {
       savedPerItem = original - rescue;
     }
 
-    totalPortions += portions;
-    totalSaved += savedPerItem * portions;
+    totalPortions += qty;
+    totalSaved += savedPerItem * qty;
+    totalGrams += orderGrams;
   }
 
+  const verifiedKg = +(totalGrams / 1000).toFixed(2);
   return {
     totalPortions,
     totalSaved,
-    estimatedKg: +(totalPortions * KG_PER_PORTION).toFixed(1),
+    totalGrams: +totalGrams.toFixed(1),
+    verifiedKg,
+    estimatedKg: verifiedKg,
   };
 }

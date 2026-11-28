@@ -13,8 +13,7 @@ import ProgressTargetBar from "@/components/molecules/ProgressTargetBar";
 import RecommendationCard from "@/components/molecules/RecommendationCard";
 import Badge from "@/components/atoms/Badge";
 import { fetchTopProducts, fetchWasteLogs, createWasteLog, fetchUmkmInsight, fetchListingMetrics } from "@/lib/analytics";
-
-const UMKM_ID = 1;
+import { getUser } from "@/lib/auth";
 
 // Sub-tab masing-masing section.
 const ANALITIK_TABS = ["Penjualan", "Produk", "Food Waste", "Customer", "Sustainability", "Visualisasi"];
@@ -39,16 +38,17 @@ export default function AnalitikPage() {
 
   useEffect(() => {
     let active = true;
-    fetchTopProducts(UMKM_ID, 5).then((data) => {
+    const umkmId = getUser()?.id || 1;
+    fetchTopProducts(umkmId, 5).then((data) => {
       if (active) setTopProducts(data);
     });
-    fetchWasteLogs(UMKM_ID).then((data) => {
+    fetchWasteLogs(umkmId).then((data) => {
       if (active) setWasteLogs(data);
     });
-    fetchUmkmInsight(UMKM_ID).then((data) => {
+    fetchUmkmInsight(umkmId).then((data) => {
       if (active) setInsightData(data);
     });
-    fetchListingMetrics(UMKM_ID).then((data) => {
+    fetchListingMetrics(umkmId).then((data) => {
       if (active) setListingMetrics(data);
     });
     return () => {
@@ -60,7 +60,9 @@ export default function AnalitikPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const section = new URLSearchParams(window.location.search).get("section");
-    if (section && section.toLowerCase() === "insight") setView("Insight");
+    if (section && section.toLowerCase() === "insight") {
+      queueMicrotask(() => setView("Insight"));
+    }
   }, []);
 
   if (authLoading) {
@@ -268,13 +270,13 @@ export default function AnalitikPage() {
                           setWasteLoading(true);
                           try {
                             await createWasteLog({
-                              umkm_id: UMKM_ID,
+                              umkm_id: getUser()?.id || 1,
                               food_name: wasteForm.food_name,
                               category: wasteForm.category,
                               estimated_weight: parseFloat(wasteForm.estimated_weight) || 0,
                               reason: "Manual: " + wasteForm.reason,
                             });
-                            const data = await fetchWasteLogs(UMKM_ID);
+                            const data = await fetchWasteLogs(getUser()?.id || 1);
                             setWasteLogs(data);
                             setShowWasteForm(false);
                             setWasteForm({ food_name: "", category: "Bahan Baku", estimated_weight: "", reason: "" });
@@ -376,7 +378,7 @@ export default function AnalitikPage() {
             </div>
             <div className="card" style={{ gridColumn: '1 / -1' }}>
               <h3 style={{ marginBottom: '15px' }}>Sustainability Score</h3>
-              <ProgressTargetBar title="Score Keberlanjutan Savora" current="A+" target="Max" percentage={95} color="#10B981" statusText="Sangat Baik" />
+              <ProgressTargetBar title="Score Keberlanjutan SavePlate" current="A+" target="Max" percentage={95} color="#10B981" statusText="Sangat Baik" />
               <p style={{ fontSize: '0.875rem', color: '#6B7280', marginTop: '10px' }}>Skor ini dihitung berdasarkan rasio makanan terselamatkan dibandingkan limbah, serta dampaknya terhadap pengurangan jejak karbon.</p>
             </div>
           </div>
@@ -494,9 +496,9 @@ export default function AnalitikPage() {
           <div className="card">
             <h3 style={{ marginBottom: '20px' }}>Rekomendasi Dynamic Pricing</h3>
             <div className="grid-3">
-              <RecommendationCard type="info" icon={<DollarSign size={20} />} title="Diskon 50% untuk Salad Bowl" description="Sisa 4 jam kelayakan. Turunkan harga menjadi Rp 14.000 untuk memicu impulse buying." actionText="Terapkan Diskon" onClick={() => alert("Simulasi Savora MVP: Harga produk Salad Bowl berhasil diturunkan menjadi Rp 14.000!")} />
+              <RecommendationCard type="info" icon={<DollarSign size={20} />} title="Diskon 50% untuk Salad Bowl" description="Sisa 4 jam kelayakan. Turunkan harga menjadi Rp 14.000 untuk memicu impulse buying." actionText="Terapkan Diskon" onClick={() => alert("Simulasi SavePlate MVP: Harga produk Salad Bowl berhasil diturunkan menjadi Rp 14.000!")} />
               <RecommendationCard type="success" icon={<TrendingUp size={20} />} title="Harga Normal Mystery Box" description="Permintaan sangat tinggi. Pertahankan harga Rp 25.000 tanpa perlu tambahan diskon ekstra." />
-              <RecommendationCard type="critical" icon={<DollarSign size={20} />} title="Flash Sale Sore Hari" description="Banyak user aktif jam 16.00-18.00. Aktifkan diskon 30% pada jam tersebut khusus untuk Roti." actionText="Jadwalkan Flash Sale" onClick={() => alert("Simulasi Savora MVP: Flash Sale berhasil dijadwalkan!")} />
+              <RecommendationCard type="critical" icon={<DollarSign size={20} />} title="Flash Sale Sore Hari" description="Banyak user aktif jam 16.00-18.00. Aktifkan diskon 30% pada jam tersebut khusus untuk Roti." actionText="Jadwalkan Flash Sale" onClick={() => alert("Simulasi SavePlate MVP: Flash Sale berhasil dijadwalkan!")} />
             </div>
           </div>
           </div>
@@ -533,7 +535,7 @@ export default function AnalitikPage() {
             <div className="card">
               <h3 style={{ marginBottom: '20px' }}>Insight Perilaku & Loyalitas</h3>
               <RecommendationCard type="info" icon={<Clock size={20} />} title="Jam Pembelian Terbaik: 18.00 - 19.00" description="Sebagian besar pembelian food rescue terjadi pada jam pulang kerja. Pasang notifikasi promo di jam 17.30." />
-              <RecommendationCard type="success" icon={<Users size={20} />} title="Sapa Repeat Customer Anda" description="65% pembeli adalah pelanggan tetap. Tawarkan 'Loyalty Badge' agar mereka makin rajin berbelanja." actionText="Buat Program Loyalitas" onClick={() => alert("Simulasi Savora MVP: Fitur Program Loyalitas akan segera hadir!")} />
+              <RecommendationCard type="success" icon={<Users size={20} />} title="Sapa Repeat Customer Anda" description="65% pembeli adalah pelanggan tetap. Tawarkan 'Loyalty Badge' agar mereka makin rajin berbelanja." actionText="Buat Program Loyalitas" onClick={() => alert("Simulasi SavePlate MVP: Fitur Program Loyalitas akan segera hadir!")} />
             </div>
             <div className="card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -568,7 +570,7 @@ export default function AnalitikPage() {
                 </div>
                 {ks.badge === "Gawat" && (
                   <div style={{ marginTop: '15px', padding: '10px', backgroundColor: '#FEE2E2', borderRadius: '8px', borderLeft: '4px solid #EF4444', fontSize: '0.875rem', color: '#991B1B' }}>
-                    <strong>Peringatan!</strong> Ditemukan banyak laporan "Basi / Bau" dari beberapa pelanggan. Segera periksa kualitas bahan dan kurangi porsi harian!
+                    <strong>Peringatan!</strong> Ditemukan banyak laporan &quot;Basi / Bau&quot; dari beberapa pelanggan. Segera periksa kualitas bahan dan kurangi porsi harian!
                   </div>
                 )}
               </div>
@@ -585,7 +587,7 @@ export default function AnalitikPage() {
             <div className="card">
               <h3 style={{ marginBottom: '20px' }}>Target Bulanan</h3>
               <ProgressTargetBar title="Target Pengurangan Food Waste" current="73%" target="85%" percentage={85} color="#F59E0B" statusText="On Progress" />
-              <ProgressTargetBar title="Savora Rescue Score" current="92" target="95" percentage={96} color="#10B981" statusText="Hampir Tercapai" />
+              <ProgressTargetBar title="SavePlate Rescue Score" current="92" target="95" percentage={96} color="#10B981" statusText="Hampir Tercapai" />
               <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#F9FAFB', borderRadius: '8px', fontSize: '0.875rem' }}>
                 Ayo tingkatkan donasi produk H-1 basi untuk langsung mendapatkan lonjakan poin *Rescue Score*!
               </div>
@@ -593,7 +595,7 @@ export default function AnalitikPage() {
             <div className="card">
               <h3 style={{ marginBottom: '20px' }}>Rekomendasi Keberlanjutan (Eco-Insight)</h3>
               <RecommendationCard type="success" icon={<Leaf size={20} />} title="Strategi Mengurangi Food Waste 15%" description="Gunakan sistem First In First Out (FIFO) dengan ketat di kulkas penyimpanan Anda." />
-              <RecommendationCard type="info" icon={<Zap size={20} />} title="Meningkatkan Food Rescue Score" description="Donasikan 10 porsi makanan berlebih (kurang layak jual tapi masih aman) ke Savora Shelter hari ini." actionText="Mulai Donasi" onClick={() => alert("Simulasi Savora MVP: Mengarahkan Anda ke formulir Mitra Donasi...")} />
+              <RecommendationCard type="info" icon={<Zap size={20} />} title="Meningkatkan Food Rescue Score" description="Donasikan 10 porsi makanan berlebih (kurang layak jual tapi masih aman) ke SavePlate Shelter hari ini." actionText="Mulai Donasi" onClick={() => alert("Simulasi SavePlate MVP: Mengarahkan Anda ke formulir Mitra Donasi...")} />
             </div>
           </div>
         );

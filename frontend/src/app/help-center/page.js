@@ -15,8 +15,8 @@ const categories = [
   "UMKM tidak merespons",
   "Terjadi kendala saat pickup",
   "Order dibatalkan sepihak",
-  "Pembayaran Midtrans sandbox berhasil tetapi pickup code tidak muncul",
-  "Pembayaran Midtrans sandbox gagal/expired atau status tidak berubah"
+  "Pembayaran Xendit sandbox berhasil tetapi pickup code tidak muncul",
+  "Pembayaran Xendit sandbox gagal/expired atau status tidak berubah"
 ];
 
 export default function HelpCenterPage() {

@@ -9,7 +9,8 @@ import {
 
 test("normalizeAdStatus maps known statuses and defaults to Draft", () => {
   assert.equal(normalizeAdStatus("Aktif").key, "Aktif");
-  assert.equal(normalizeAdStatus("Kadaluarsa").key, "Kadaluarsa");
+  assert.equal(normalizeAdStatus("Kedaluwarsa").key, "Kedaluwarsa");
+  assert.equal(normalizeAdStatus("Kadaluarsa").key, "Kedaluwarsa");
   assert.equal(normalizeAdStatus("apa saja").key, "Draft");
   assert.equal(normalizeAdStatus("").key, "Draft");
 });
@@ -43,5 +44,5 @@ test("normalizeUmkmAd accepts ad_id alias and preserves schedule", () => {
 });
 
 test("AD_STATUS exposes the three known states", () => {
-  assert.deepEqual(Object.keys(AD_STATUS).sort(), ["Aktif", "Draft", "Kadaluarsa"]);
+  assert.deepEqual(Object.keys(AD_STATUS).sort(), ["Aktif", "Draft", "Kedaluwarsa"]);
 });

@@ -4,20 +4,21 @@
 // fetch + fallback demo lokal agar UI tetap jalan saat backend belum tersedia (aturan AGENTS.md).
 
 import { apiFetch } from './api.js';
+import { getUser } from './auth.js';
 import { computeFoodScoreFromDates, initialFoodScore } from './foodScore.js';
 
 const DEFAULT_UMKM_ID = 1;
 
 // Fallback demo (dipakai bila API belum tersedia/mati).
 export const fallbackProducts = [
-  { id: 1, name: "Nasi Kotak Ayam Bakar", category: "Makanan Siap Saji", original_price: 35000, rescue_price: 20000, stock: 8, score: 87, timer: "6j", status: "Aktif" },
-  { id: 2, name: "Roti Gandum Artisan", category: "Bakeri & Roti", original_price: 25000, rescue_price: 12000, stock: 3, score: 38, timer: "2j", status: "Hampir Habis" },
-  { id: 3, name: "Salad Bowl Superfood", category: "Makanan Sehat", original_price: 45000, rescue_price: 28000, stock: 12, score: 74, timer: "8j", status: "Aktif" },
-  { id: 4, name: "Kue Tart Spesial", category: "Kue & Pastri", original_price: 150000, rescue_price: 65000, stock: 1, score: 14, timer: "1j", status: "Kritis" },
-  { id: 5, name: "Sandwich Club Tuna", category: "Sandwich & Wrap", original_price: 28000, rescue_price: null, stock: 0, score: 0, timer: "—", status: "Habis" },
-  { id: 6, name: "Smoothie Bowl Mango", category: "Minuman & Bowl", original_price: 55000, rescue_price: 35000, stock: 6, score: 68, timer: "7j", status: "Aktif" },
-  { id: 7, name: "Pizza Margherita Min", category: "Pizza & Pasta", original_price: 65000, rescue_price: 65000, stock: 4, score: 91, timer: "11j", status: "Aktif" },
-  { id: 8, name: "Bakso Premium Solo", category: "Makanan Siap Saji", original_price: 40000, rescue_price: 25000, stock: 6, score: 55, timer: "5j", status: "Aktif" },
+  { id: 1, name: "Nasi Kotak Ayam Bakar", category: "Makanan Siap Saji", original_price: 35000, rescue_price: 20000, stock: 8, weight_per_portion: 350, score: 87, timer: "6j", status: "Aktif" },
+  { id: 2, name: "Roti Gandum Artisan", category: "Bakeri & Roti", original_price: 25000, rescue_price: 12000, stock: 3, weight_per_portion: 250, score: 38, timer: "2j", status: "Hampir Habis" },
+  { id: 3, name: "Salad Bowl Superfood", category: "Makanan Sehat", original_price: 45000, rescue_price: 28000, stock: 12, weight_per_portion: 300, score: 74, timer: "8j", status: "Aktif" },
+  { id: 4, name: "Kue Tart Spesial", category: "Kue & Pastri", original_price: 150000, rescue_price: 65000, stock: 1, weight_per_portion: 500, score: 14, timer: "1j", status: "Kritis" },
+  { id: 5, name: "Sandwich Club Tuna", category: "Sandwich & Wrap", original_price: 28000, rescue_price: null, stock: 0, weight_per_portion: 200, score: 0, timer: "—", status: "Habis" },
+  { id: 6, name: "Smoothie Bowl Mango", category: "Minuman & Bowl", original_price: 55000, rescue_price: 35000, stock: 6, weight_per_portion: 300, score: 68, timer: "7j", status: "Aktif" },
+  { id: 7, name: "Pizza Margherita Min", category: "Pizza & Pasta", original_price: 65000, rescue_price: 65000, stock: 4, weight_per_portion: 400, score: 91, timer: "11j", status: "Aktif" },
+  { id: 8, name: "Bakso Premium Solo", category: "Makanan Siap Saji", original_price: 40000, rescue_price: 25000, stock: 6, weight_per_portion: 450, score: 55, timer: "5j", status: "Aktif" },
 ];
 
 /**
@@ -68,6 +69,7 @@ export function normalizeProduct(raw) {
     original_price: Number(base.original_price ?? 0),
     rescue_price: base.rescue_price ? Number(base.rescue_price) : null,
     stock: Number(base.stock ?? 0),
+    weight_per_portion: Number(base.weight_per_portion ?? 0),
     score: rescueScore,
     timer: rescueTimer,
     status: normalizedStatus,
@@ -84,11 +86,12 @@ export function normalizeProduct(raw) {
  * Ambil daftar produk UMKM dari backend.
  * Dummy fallback hanya aktif jika NEXT_PUBLIC_USE_MOCK=true.
  */
-export async function fetchUMKMProducts(umkmId = DEFAULT_UMKM_ID) {
+export async function fetchUMKMProducts(umkmId) {
+  const resolvedId = umkmId ?? getUser()?.id ?? DEFAULT_UMKM_ID;
   const useMock = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 
   try {
-    const data = await apiFetch(`/products/umkm/${umkmId}`);
+    const data = await apiFetch(`/products/umkm/${resolvedId}`);
     if (!Array.isArray(data)) {
       throw new Error("Respons products tidak valid");
     }
@@ -113,6 +116,11 @@ export async function fetchUMKMProducts(umkmId = DEFAULT_UMKM_ID) {
 export async function createProduct(productData) {
   try {
     const payload = { ...productData };
+    const weight = Number(payload.weight_per_portion);
+    if (!Number.isFinite(weight) || weight <= 0) {
+      throw new Error("Berat per porsi wajib diisi dan harus lebih dari 0 gram");
+    }
+    payload.weight_per_portion = weight;
 
     // Hitung expires_at jika belum ada tapi ada production_time & shelf_life_hours
     if (!payload.expires_at && payload.production_time && payload.shelf_life_hours) {
@@ -147,6 +155,13 @@ export async function createProduct(productData) {
 export async function updateProduct(productId, productData) {
   try {
     const payload = { ...productData };
+    if (payload.weight_per_portion !== undefined) {
+      const weight = Number(payload.weight_per_portion);
+      if (!Number.isFinite(weight) || weight <= 0) {
+        throw new Error("Berat per porsi wajib diisi dan harus lebih dari 0 gram");
+      }
+      payload.weight_per_portion = weight;
+    }
 
     // Hitung expires_at jika belum ada tapi ada production_time & shelf_life_hours
     if (!payload.expires_at && payload.production_time && payload.shelf_life_hours) {

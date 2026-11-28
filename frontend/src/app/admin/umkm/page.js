@@ -307,7 +307,7 @@ export default function KelolaUMKMPage() {
             Kelola UMKM
           </h1>
           <p style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
-            Kelola semua UMKM yang terdaftar di platform Savora
+            Kelola semua UMKM yang terdaftar di platform SavePlate
           </p>
         </div>
 

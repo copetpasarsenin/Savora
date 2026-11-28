@@ -7,7 +7,6 @@ const crypto = require('crypto');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
-const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || 'test_server_key_12345';
 
 // Test accounts
 const TEST_ACCOUNTS = {
@@ -57,7 +56,7 @@ const XENDIT_CALLBACK_TOKEN = process.env.XENDIT_CALLBACK_TOKEN || 'test_xendit_
 function generateXenditInvoice(orderId, amount = 52500) {
   return {
     id: `xendit_inv_${orderId}_${Date.now()}`,
-    external_id: `savora-order-${orderId}`,
+    external_id: `saveplate-order-${orderId}`,
     status: 'PENDING',
     amount: amount,
     invoice_url: `https://checkout.xendit.co/web/${crypto.randomBytes(16).toString('hex')}`,
@@ -69,7 +68,7 @@ function generateXenditInvoice(orderId, amount = 52500) {
 async function triggerXenditWebhook(request, orderId, status = 'PAID', amount = 52500, callbackToken = XENDIT_CALLBACK_TOKEN) {
   const webhookData = {
     id: `xendit_inv_${orderId}_123456`,
-    external_id: `savora-order-${orderId}`,
+    external_id: `saveplate-order-${orderId}`,
     status: status,
     amount: amount,
     paid_at: status === 'PAID' ? new Date().toISOString() : undefined,
@@ -199,8 +198,11 @@ module.exports = {
   TEST_ACCOUNTS,
   login,
   getAuthToken,
-  generateMidtransSignature,
-  triggerMidtransWebhook,
+  generateXenditInvoice,
+  triggerXenditWebhook,
+  verifyOrderPending,
+  verifyOrderPaid,
+  waitForOrderStatus,
   waitForElement,
   getElementText,
   clickAndWait,
@@ -210,5 +212,5 @@ module.exports = {
   apiPatch,
   BASE_URL,
   API_URL,
-  MIDTRANS_SERVER_KEY,
+  XENDIT_CALLBACK_TOKEN,
 };

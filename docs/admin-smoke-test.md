@@ -259,7 +259,7 @@
 - [ ] **Verify:** ditolak dengan error "Akun Anda belum diverifikasi"
 
 ### Service Fee Flow (Task 6)
-- [ ] Customer checkout order → bayar via Midtrans sandbox
+- [ ] Customer checkout order → bayar via Xendit sandbox
 - [ ] Order selesai (status COMPLETED)
 - [ ] **Verify di platform_revenue:**
   - Record baru dengan source_type = "ORDER_SERVICE_FEE"
@@ -358,7 +358,7 @@
 
 4. **Known Limitations:**
    - Help ticket integration tests skipped karena orders table belum migrated ke PRD schema
-   - Test dengan Midtrans sandbox → gunakan test card numbers dari dokumentasi Midtrans
+   - Test dengan Xendit sandbox → gunakan simulasi pembayaran Xendit Invoice sandbox
 
 ---
 

@@ -1,32 +1,59 @@
 "use client";
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getUser } from '@/lib/auth';
 
 const UmkmContext = createContext();
 
 export function UmkmProvider({ children }) {
   const [umkmData, setUmkmData] = useState({
     users: {
-      name: "Ibu Lestari",
-      email: "lestari@gmail.com",
+      id: null,
+      name: "UMKM SavePlate",
+      email: "",
     },
     umkm_profiles: {
-      business_name: "Warung Bu Lestari",
-      address: "Jl. Kaliurang KM 5.5, Gg. Megatruh No. 15, Caturtunggal, Depok, Sleman, DI Yogyakarta 55281",
-      geo_location: "-7.759247, 110.380735",
-      rating: 4.8,
-      keyword_safety_level: "Aman", // Sesuai PRD enum
-      level: "Gold Rescuer", // Hardcoded dari Sidebar sebelumnya
+      business_name: "UMKM SavePlate",
+      address: "",
+      geo_location: "",
+      rating: 0,
+      keyword_safety_level: "Aman",
+      level: "UMKM",
     },
-    // Extra visual fields untuk mockup
-    tagline: "Makanan rumahan sehat, murah, dan lezat",
+    tagline: "",
     category: "Makanan Siap Saji",
     isStoreOpen: true,
-    phone: "081234567890",
-    description: "Warung Bu Lestari menyediakan berbagai macam masakan rumahan dengan resep rahasia keluarga. Berkomitmen untuk mengurangi food waste.",
-    nib: "1234567890123",
-    npwp: "98.765.432.1-000.000"
+    phone: "",
+    description: "",
+    nib: "",
+    npwp: ""
   });
+
+  useEffect(() => {
+    let active = true;
+    const user = getUser();
+    if (!user) return;
+    queueMicrotask(() => {
+      if (!active) return;
+      setUmkmData((prev) => ({
+        ...prev,
+        users: {
+          id: user.id ?? prev.users.id,
+          name: user.name || prev.users.name,
+          email: user.email || prev.users.email,
+        },
+        umkm_profiles: {
+          ...prev.umkm_profiles,
+          business_name: user.business_name || user.name || prev.umkm_profiles.business_name,
+          address: user.address || prev.umkm_profiles.address,
+        },
+        phone: user.phone || prev.phone,
+      }));
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <UmkmContext.Provider value={{ umkmData, setUmkmData }}>

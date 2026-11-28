@@ -1,6 +1,6 @@
 export const metadata = {
-  title: 'Savora - Autentikasi',
-  description: 'Login atau daftar ke Savora',
+  title: 'SavePlate - Autentikasi',
+  description: 'Login atau daftar ke SavePlate',
 }
 
 /**

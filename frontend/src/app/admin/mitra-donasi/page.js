@@ -277,7 +277,7 @@ export default function KelolaMitraDonasiPage() {
             Kelola Mitra Donasi
           </h1>
           <p style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>
-            Kelola mitra donasi yang sudah terverifikasi di platform Savora
+            Kelola mitra donasi yang sudah terverifikasi di platform SavePlate
           </p>
         </div>
 

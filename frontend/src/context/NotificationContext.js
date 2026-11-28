@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { fetchNotifications, fetchUnreadCount, markAsRead, markAllAsRead } from '@/lib/notifications';
+import { isAuthenticated } from '@/lib/auth';
 
 const NotificationContext = createContext();
 
@@ -11,15 +12,8 @@ export function NotificationProvider({ children, userId = 1, userRole = 'umkm' }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch notifikasi & unread count saat mount
-  useEffect(() => {
-    loadNotifications();
-    // Poll setiap 30 detik untuk notifikasi baru
-    const interval = setInterval(loadNotifications, 30000);
-    return () => clearInterval(interval);
-  }, [userId, userRole]);
-
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
+    if (!isAuthenticated()) return;
     try {
       setLoading(true);
       const [notifs, count] = await Promise.all([
@@ -34,7 +28,22 @@ export function NotificationProvider({ children, userId = 1, userRole = 'umkm' }
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, userRole]);
+
+  // Fetch notifikasi & unread count saat mount (hanya jika sudah login)
+  useEffect(() => {
+    if (!isAuthenticated()) return;
+    let active = true;
+    queueMicrotask(() => {
+      if (active) loadNotifications();
+    });
+    // Poll setiap 30 detik untuk notifikasi baru
+    const interval = setInterval(loadNotifications, 30000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [loadNotifications]);
 
   const handleMarkAsRead = async (notificationId) => {
     await markAsRead(notificationId);

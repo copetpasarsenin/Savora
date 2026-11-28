@@ -8,14 +8,14 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/savora/backend/handlers"
+	"github.com/saveplate/backend/handlers"
 )
 
 // Helper: Generate valid JWT token for testing
 func generateTestToken(userID uint, email, role string) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		secret = "savora-secret-key-change-in-production"
+		secret = "saveplate-secret-key-change-in-production"
 	}
 
 	claims := handlers.JWTClaims{
@@ -36,7 +36,7 @@ func generateTestToken(userID uint, email, role string) (string, error) {
 func generateExpiredToken(userID uint, email, role string) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		secret = "savora-secret-key-change-in-production"
+		secret = "saveplate-secret-key-change-in-production"
 	}
 
 	claims := handlers.JWTClaims{

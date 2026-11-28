@@ -11,6 +11,7 @@ import { Users, Store, ShoppingCart, TrendingUp, Package, CheckCircle, Clock, Al
 
 export default function AdminDashboardPage() {
   const [summary, setSummary] = useState(null);
+  const [redistReport, setRedistReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [topUMKMPeriod, setTopUMKMPeriod] = useState('month'); // 'month' or '30days'
@@ -28,11 +29,17 @@ export default function AdminDashboardPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiGet('/admin/reports/summary');
+      const [response, reportRes] = await Promise.all([
+        apiGet('/admin/reports/summary'),
+        apiGet('/redistribution/report').catch(() => null),
+      ]);
       if (response.success) {
         setSummary(response.data.summary);
       } else {
         setError(response.error?.message || 'Gagal memuat data dashboard');
+      }
+      if (reportRes?.success && reportRes?.data) {
+        setRedistReport(reportRes.data);
       }
     } catch (err) {
       setError(err.message || 'Terjadi kesalahan saat memuat data');
@@ -93,7 +100,7 @@ export default function AdminDashboardPage() {
       <div className="topbar">
           <div>
             <div className="page-title">Dashboard Admin</div>
-            <div className="page-subtitle">Ringkasan aktivitas platform Savora</div>
+            <div className="page-subtitle">Ringkasan aktivitas platform SavePlate</div>
           </div>
         </div>
 
@@ -636,7 +643,7 @@ export default function AdminDashboardPage() {
                 {/* Metrics */}
                 <div style={{ flex: 1, minWidth: '280px' }}>
                   <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                    Dampak lingkungan Savora sejak awal
+                    Dampak lingkungan SavePlate sejak awal
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '20px' }}>
                     {/* Metric 1: Total Makanan Diselamatkan */}
@@ -665,12 +672,72 @@ export default function AdminDashboardPage() {
                         {formatNumber(summary?.order_completed_count || 0)}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Order Diselesaikan
+                        Order Terverifikasi (|E|)
+                      </div>
+                    </div>
+
+                    {/* Metric 4: Phantom Rescue & OBR */}
+                    <div>
+                      <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#D97706', marginBottom: '2px' }}>
+                        {formatNumber(summary?.phantom_rescue_grams || 0)} g
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        Phantom Rescue ({summary?.obr_percent != null ? `OBR +${summary.obr_percent.toFixed(2)}%` : 'OBR —'})
+                      </div>
+                    </div>
+
+                    {/* Metric 5: Evidence Coverage */}
+                    <div>
+                      <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#2563EB', marginBottom: '2px' }}>
+                        {summary?.ec != null ? `${(summary.ec * 100).toFixed(1)}%` : '—'}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        Evidence Coverage (EC)
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              {redistReport?.items?.length > 0 && (
+                <div style={{ marginTop: '24px', background: '#ffffff', borderRadius: '10px', padding: '16px', overflowX: 'auto' }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: '10px', color: 'var(--text-main)' }}>
+                    Jejak Audit Redistribusi Verified-Gram (10 Pesanan Terbaru)
+                  </div>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+                    <thead>
+                      <tr style={{ textAlign: 'left', color: 'var(--text-muted)', borderBottom: '1px solid #E5E7EB' }}>
+                        <th style={{ padding: '8px' }}>Order</th>
+                        <th style={{ padding: '8px' }}>Produk</th>
+                        <th style={{ padding: '8px' }}>Snapshot × Qty</th>
+                        <th style={{ padding: '8px' }}>Status</th>
+                        <th style={{ padding: '8px' }}>Gerbang C1–C7</th>
+                        <th style={{ padding: '8px', textAlign: 'right' }}>Kontribusi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {redistReport.items.slice(0, 10).map((item) => (
+                        <tr key={item.order_id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                          <td style={{ padding: '8px', fontWeight: 600 }}>#{item.order_id}</td>
+                          <td style={{ padding: '8px' }}>{item.product_name || `Produk #${item.product_id}`}</td>
+                          <td style={{ padding: '8px' }}>{item.weight_per_portion_snapshot} g × {item.quantity}</td>
+                          <td style={{ padding: '8px' }}>{item.status} ({item.payment_status})</td>
+                          <td style={{ padding: '8px' }}>
+                            {item.eligible ? (
+                              <span style={{ color: '#16A34A', fontWeight: 600 }}>ELIGIBLE</span>
+                            ) : (
+                              <span style={{ color: '#DC2626' }}>{(item.failed_conditions || []).join(', ')}</span>
+                            )}
+                          </td>
+                          <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600 }}>
+                            {formatNumber(item.weight_contribution_grams)} g
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         </div>

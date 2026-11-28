@@ -7,12 +7,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
-	"github.com/savora/backend/database"
-	"github.com/savora/backend/handlers"
-	"github.com/savora/backend/middleware"
-	"github.com/savora/backend/models"
-	"github.com/savora/backend/routes"
-	"github.com/savora/backend/services"
+	"github.com/saveplate/backend/database"
+	"github.com/saveplate/backend/handlers"
+	"github.com/saveplate/backend/middleware"
+	"github.com/saveplate/backend/models"
+	"github.com/saveplate/backend/routes"
+	"github.com/saveplate/backend/services"
 )
 
 func main() {
@@ -27,37 +27,12 @@ func main() {
 	}
 
 	// Share connection: auth/admin handlers use database.DB, avoid duplicate connection
+	// AutoMigrate dikelola terpusat di services.InitDB() (hanya jalan jika AUTO_MIGRATE=true)
 	database.DB = services.GetDB()
-
-	// Auto-migrate models (sync schema dengan struct Go)
-	log.Println("🔄 Running database migrations...")
-	if err := database.DB.AutoMigrate(
-		&models.Order{},
-		&models.Payment{},
-		&models.PaymentLog{},
-		&models.PlatformRevenue{},
-		&models.Product{},
-		&models.User{},
-		&models.CustomerProfile{},
-		&models.UMKMProfile{},
-		&models.MitraDonasiProfile{},
-		&models.Review{},
-		&models.ReviewKeyword{},
-		&models.KeywordScore{},
-		&models.HelpTicket{},
-		&models.WasteLog{},
-	); err != nil {
-		log.Fatalf("❌ Failed to migrate database: %v", err)
-	}
-	log.Println("✅ Database migrations completed")
 
 	// Start cron jobs (auto-expire products)
 	services.StartCronJobs()
 	log.Println("✅ Cron jobs started")
-
-	// Share DB connection with database package (used by auth/admin handlers)
-	// Single connection avoids duplicate DB race condition (see analisis_masalah_refresh_produk.md)
-	database.DB = services.GetDB()
 
 	// Init Xendit service
 	xenditService := services.NewXenditService()
@@ -98,38 +73,41 @@ func setupRoutes(app *fiber.App, xenditService *services.XenditService) {
 	// Grup /api untuk semua route backend (konvensi final tim)
 	api := app.Group("/api")
 
-	// Product routes
+	// Product routes (read publik; mutasi wajib JWT + cek kepemilikan di handler)
 	api.Get("/products/umkm/:umkm_id", handlers.GetProductsByUMKM)
 	api.Get("/products/marketplace", handlers.GetActiveMarketplaceProducts)
-	api.Post("/products", handlers.CreateProduct)
-	api.Put("/products/:id", handlers.UpdateProduct)
-	api.Delete("/products/:id", handlers.DeleteProduct)
+	api.Post("/products", middleware.AuthMiddleware, handlers.CreateProduct)
+	api.Put("/products/:id", middleware.AuthMiddleware, handlers.UpdateProduct)
+	api.Delete("/products/:id", middleware.AuthMiddleware, handlers.DeleteProduct)
 
-	// Order routes
+	// Order routes (seluruh operasi order wajib JWT + cek kepemilikan di handler)
 	orderHandler := handlers.NewOrderHandler(xenditService)
 	api.Post("/orders", middleware.AuthMiddleware, orderHandler.CreateOrder)
 	api.Get("/orders", middleware.AuthMiddleware, orderHandler.GetOrders)
-	api.Get("/orders/:id", orderHandler.GetOrderDetail)
-	api.Patch("/orders/:id/status", orderHandler.UpdateOrderStatus)
-	api.Post("/orders/:id/validate-pickup", orderHandler.ValidatePickupCode)
+	api.Get("/orders/:id", middleware.AuthMiddleware, orderHandler.GetOrderDetail)
+	api.Patch("/orders/:id/status", middleware.AuthMiddleware, orderHandler.UpdateOrderStatus)
+	api.Post("/orders/:id/validate-pickup", middleware.AuthMiddleware, orderHandler.ValidatePickupCode)
+
+	// Verified-gram redistribution report (Algoritma 1: Wd, Wc, OBR, EC, audit per order)
+	api.Get("/redistribution/report", middleware.AuthMiddleware, handlers.GetRedistributionReport)
 
 	// Payment routes (webhook Xendit sekarang di /api/payments/xendit-webhook)
 	paymentHandler := handlers.NewPaymentHandler(xenditService)
 	api.Post("/payments/xendit-webhook", paymentHandler.XenditWebhook)
 
-	// Review routes
+	// Review routes (CreateReview wajib JWT; baca publik)
 	reviewHandler := handlers.NewReviewHandler()
-	api.Post("/reviews", reviewHandler.CreateReview)
+	api.Post("/reviews", middleware.AuthMiddleware, reviewHandler.CreateReview)
 	api.Get("/reviews/keywords/:umkm_id", reviewHandler.GetKeywordSafety)
 	api.Get("/reviews/umkm/:umkm_id", reviewHandler.GetReviewsByUmkm)
 	api.Get("/reviews/product/:product_id", reviewHandler.GetReviewsByProduct)
 
-	// Help Ticket routes (Should Have - Fase 7)
+	// Help Ticket & Payment Log routes
 	helpHandler := handlers.NewHelpTicketHandler()
-	api.Post("/help-tickets", helpHandler.CreateHelpTicket)
-	api.Get("/help-tickets", helpHandler.GetHelpTickets)
-	api.Get("/payments/:payment_id/logs", helpHandler.GetPaymentLogs)
-	api.Patch("/help-tickets/:id/status", helpHandler.UpdateTicketStatus)
+	api.Post("/help-tickets", middleware.AuthMiddleware, helpHandler.CreateHelpTicket)
+	api.Get("/help-tickets", middleware.AuthMiddleware, middleware.RequireRole(models.RoleAdmin), helpHandler.GetHelpTickets)
+	api.Get("/payments/:payment_id/logs", middleware.AuthMiddleware, middleware.RequireRole(models.RoleAdmin), helpHandler.GetPaymentLogs)
+	api.Patch("/help-tickets/:id/status", middleware.AuthMiddleware, middleware.RequireRole(models.RoleAdmin), helpHandler.UpdateTicketStatus)
 
 	// // Ad routes (Tugas 1)
 	// TODO(iklan-soon): dinonaktifkan sementara mengikuti build tag di handlers/ads.go
@@ -141,7 +119,7 @@ func setupRoutes(app *fiber.App, xenditService *services.XenditService) {
 
 	// Waste Log routes (Tugas 2)
 	api.Get("/waste-logs/umkm/:umkm_id", handlers.GetWasteLogsByUMKM)
-	api.Post("/waste-logs", handlers.CreateWasteLog)
+	api.Post("/waste-logs", middleware.AuthMiddleware, middleware.RequireRole(models.RoleUmkm), handlers.CreateWasteLog)
 
 	// Analytics routes (Tugas 4)
 	api.Get("/analytics/insight/:umkm_id", handlers.GetUmkmInsight)

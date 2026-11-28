@@ -19,12 +19,12 @@ export default function MitraDonasiLayout({ children }) {
           <div className="w-8 h-8 flex items-center justify-center overflow-hidden rounded-lg bg-emerald-50">
             <img 
               src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png" 
-              alt="Savora Logo" 
+              alt="SavePlate Logo" 
               className="w-full h-full object-cover" 
             />
           </div>
           <div>
-            <span className="font-bold text-slate-900 text-lg">Savora</span>
+            <span className="font-bold text-slate-900 text-lg">SavePlate</span>
             <p className="text-xs text-slate-500">Mitra Donasi</p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 // Ulasan Keyword — Richard Firmansyah (Batch 2, sisi customer)
 //
-// Alih-alih hanya mengandalkan moderasi & rating manual, Savora menandai
+// Alih-alih hanya mengandalkan moderasi & rating manual, SavePlate menandai
 // tingkat kegawatan ulasan per restoran berdasarkan keyword. Mesin
 // klasifikasi utama (rule-based / backend) adalah tanggung jawab modul
 // Score (Ridwan) & Review (Nadi). Di sisi customer, modul ini:

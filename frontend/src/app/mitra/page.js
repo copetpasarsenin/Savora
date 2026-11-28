@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import SavoraNavbar from "@/components/navbar/SavoraNavbar";
+import SavePlateNavbar from "@/components/navbar/SavePlateNavbar";
 import "./mitra.css";
 
 export default function MitraPage() {
@@ -16,7 +16,7 @@ export default function MitraPage() {
   const faqItems = [
     {
       question: "Berapa biaya untuk bergabung menjadi mitra?",
-      answer: "Pendaftaran dasar di Savora adalah gratis. Kami hanya menerapkan biaya platform per transaksi pickup yang berhasil untuk mendukung keberlanjutan operasional logistik yang tersertifikasi."
+      answer: "Pendaftaran dasar di SavePlate adalah gratis. Kami hanya menerapkan biaya platform per transaksi pickup yang berhasil untuk mendukung keberlanjutan operasional logistik yang tersertifikasi."
     },
     {
       question: "Bagaimana kualitas makanan yang didonasikan dipastikan?",
@@ -24,7 +24,7 @@ export default function MitraPage() {
     },
     {
       question: "Siapa yang bertanggung jawab atas penjemputan?",
-      answer: "Customer atau mitra pengolah bertanggung jawab mengambil makanan langsung di lokasi UMKM sesuai jadwal yang disepakati. Savora menyediakan sistem pickup code untuk memastikan keamanan transaksi."
+      answer: "Customer atau mitra pengolah bertanggung jawab mengambil makanan langsung di lokasi UMKM sesuai jadwal yang disepakati. SavePlate menyediakan sistem pickup code untuk memastikan keamanan transaksi."
     },
     {
       question: "Berapa lama proses verifikasi mitra?",
@@ -32,7 +32,7 @@ export default function MitraPage() {
     },
     {
       question: "Apakah ada biaya untuk bergabung menjadi mitra?",
-      answer: "Tidak ada biaya pendaftaran atau biaya bulanan untuk menjadi mitra Savora. Kami hanya menerapkan biaya layanan kecil per transaksi yang berhasil untuk keberlanjutan platform."
+      answer: "Tidak ada biaya pendaftaran atau biaya bulanan untuk menjadi mitra SavePlate. Kami hanya menerapkan biaya layanan kecil per transaksi yang berhasil untuk keberlanjutan platform."
     },
     {
       question: "Dokumen apa saja yang perlu disiapkan?",
@@ -59,18 +59,18 @@ export default function MitraPage() {
   return (
     <div className="mitra-page">
       {/* Navbar global (reuse existing) */}
-      <SavoraNavbar />
+      <SavePlateNavbar />
 
       {/* Hero Section — Kutipan inspiratif dengan bg kuning */}
       <section className="mitra-hero">
         <div className="mitra-hero-container">
           <blockquote className="mitra-hero-quote">
             <span className="mitra-quote-dark">
-              "Bersama Savora, setiap langkah kecil menjadi kontribusi nyata
+              &quot;Bersama SavePlate, setiap langkah kecil menjadi kontribusi nyata
               dalam menyelamatkan{" "}
             </span>
             <span className="mitra-quote-green">
-              makanan, mengurangi limbah, dan membangun masa depan."
+              makanan, mengurangi limbah, dan membangun masa depan.&quot;
             </span>
           </blockquote>
         </div>
@@ -151,7 +151,7 @@ export default function MitraPage() {
                   <span className="mitra-check-icon">✓</span> Manajemen Pickup Terjadwal
                 </li>
                 <li>
-                  <span className="mitra-check-icon">✓</span> Verifikasi Badge "Mitra Berdampak"
+                  <span className="mitra-check-icon">✓</span> Verifikasi Badge &quot;Mitra Berdampak&quot;
                 </li>
               </ul>
               <Link href="/gabung-mitra-pengolah">
@@ -178,7 +178,7 @@ export default function MitraPage() {
             <div className="mitra-step-item">
               <div className="mitra-step-circle mitra-step-active">1</div>
               <h3 className="mitra-step-title">Daftar</h3>
-              <p className="mitra-step-desc">Buat akun di platform Savora</p>
+              <p className="mitra-step-desc">Buat akun di platform SavePlate</p>
             </div>
 
             {/* Step 2 - Lengkapi Profil */}
@@ -199,7 +199,7 @@ export default function MitraPage() {
             <div className="mitra-step-item">
               <div className="mitra-step-circle">4</div>
               <h3 className="mitra-step-title">Verifikasi</h3>
-              <p className="mitra-step-desc">Review oleh tim Savora</p>
+              <p className="mitra-step-desc">Review oleh tim SavePlate</p>
             </div>
 
             {/* Step 5 - Menjadi Mitra */}
@@ -217,7 +217,7 @@ export default function MitraPage() {
         <div className="mitra-requirements-container">
           <h2 className="mitra-requirements-title">Persyaratan Menjadi Mitra</h2>
           <p className="mitra-requirements-subtitle">
-            Pastikan Anda memenuhi persyaratan berikut sebelum mendaftar sebagai mitra Savora.
+            Pastikan Anda memenuhi persyaratan berikut sebelum mendaftar sebagai mitra SavePlate.
           </p>
 
           <div className="mitra-requirements-grid">
@@ -250,7 +250,7 @@ export default function MitraPage() {
                 </li>
                 <li>
                   <span className="mitra-check-icon">✓</span>
-                  Bersedia diverifikasi oleh tim Savora
+                  Bersedia diverifikasi oleh tim SavePlate
                 </li>
               </ul>
             </div>
@@ -476,7 +476,7 @@ export default function MitraPage() {
       <footer className="beranda-footer">
         <div className="beranda-footer-container">
           <div className="beranda-footer-column-brand">
-            <div className="beranda-footer-wordmark">Savora</div>
+            <div className="beranda-footer-wordmark">SavePlate</div>
             <p className="beranda-footer-mission">
               Misi kami sederhana: Tidak boleh ada makanan enak yang terbuang sia-sia.
               Bergabunglah dengan ribuan penyelamat makanan lainnya di seluruh Indonesia.
@@ -541,7 +541,7 @@ export default function MitraPage() {
         </div>
 
         <div className="beranda-footer-bottom">
-          <span>© 2026 Savora Platform. Proudly Made In Indonesia for the Earth.</span>
+          <span>© 2026 SavePlate Platform. Proudly Made In Indonesia for the Earth.</span>
           <div className="beranda-footer-bottom-links">
             <span>SECURITY</span>
             <span>SITEMAP</span>

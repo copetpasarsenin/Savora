@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/models"
 )
 
 func TestNewAdvertisementUsesPackagePricing(t *testing.T) {

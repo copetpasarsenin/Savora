@@ -11,12 +11,15 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
-	"github.com/savora/backend/database"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/database"
+	"github.com/saveplate/backend/models"
 )
 
 // setupTestDB initializes test database connection for UMKM tests
 func setupUMKMTestDB(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping DB integration test in -short mode")
+	}
 	if database.DB == nil {
 		godotenv.Load("../.env")
 		database.ConnectDB()
@@ -47,7 +50,7 @@ func setupUMKMTestDB(t *testing.T) {
 }
 
 // cleanupUMKMTestData removes test data after test
-func cleanupUMKMTestData(t *testing.T, userID, umkmID uint) {
+func cleanupUMKMTestData(_ *testing.T, userID, umkmID uint) {
 	if database.DB != nil {
 		if umkmID > 0 {
 			database.DB.Delete(&models.UMKMProfile{}, umkmID)

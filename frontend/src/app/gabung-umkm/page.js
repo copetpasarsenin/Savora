@@ -120,7 +120,7 @@ export default function GabungUMKMPage() {
           <div style={{ fontSize: "48px", color: "var(--success-color)", marginBottom: "1rem" }}>✓</div>
           <h2 style={{ color: "var(--text-main)", marginBottom: "1rem" }}>Pendaftaran Berhasil!</h2>
           <p style={{ color: "var(--text-muted)", marginBottom: "2rem" }}>
-            Terima kasih telah mendaftar sebagai UMKM Savora. Aplikasi Anda akan diverifikasi oleh tim kami dalam 3-7 hari kerja.
+            Terima kasih telah mendaftar sebagai UMKM SavePlate. Aplikasi Anda akan diverifikasi oleh tim kami dalam 3-7 hari kerja.
             Anda akan menerima notifikasi melalui email.
           </p>
           <Link href="/dashboard" style={{ color: "var(--primary-color)", textDecoration: "none", fontWeight: "500" }}>
@@ -293,7 +293,7 @@ export default function GabungUMKMPage() {
                   style={{ marginRight: "0.75rem", marginTop: "0.25rem", cursor: "pointer" }}
                 />
                 <span style={{ color: "var(--text-main)", fontSize: "14px" }}>
-                  Saya menyetujui Syarat & Ketentuan serta Kebijakan Privasi Savora.
+                  Saya menyetujui Syarat & Ketentuan serta Kebijakan Privasi SavePlate.
                 </span>
               </label>
             </div>

@@ -141,7 +141,7 @@ export default function RegisterMitraDonasiPage() {
             Pendaftaran Berhasil!
           </Typography>
           <Typography style={{ color: 'var(--text-muted)', marginBottom: '20px', lineHeight: '1.6' }}>
-            Terima kasih telah mendaftar sebagai Mitra Donasi Savora.
+            Terima kasih telah mendaftar sebagai Mitra Donasi SavePlate.
             Akun Anda akan diverifikasi oleh admin dalam 1-2 hari kerja.
             Anda akan menerima notifikasi melalui email setelah verifikasi selesai.
           </Typography>
@@ -186,7 +186,7 @@ export default function RegisterMitraDonasiPage() {
             marginBottom: '20px'
           }}>
             <span style={{ color: "var(--primary-color)", fontSize: "28px" }}>⚲</span>
-            <span style={{ fontWeight: 700, fontSize: '1.5rem', color: 'var(--text-main)' }}>Savora</span>
+            <span style={{ fontWeight: 700, fontSize: '1.5rem', color: 'var(--text-main)' }}>SavePlate</span>
           </Link>
           <Typography variant="h2" style={{ marginTop: '10px', fontSize: '1.5rem', color: 'var(--text-main)' }}>
             Daftar Mitra Donasi

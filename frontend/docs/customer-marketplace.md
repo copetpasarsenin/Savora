@@ -18,7 +18,7 @@ Route customer:
 2. Customer melihat Food Score live, Rescue Time, dan badge keamanan keyword pada tiap kartu.
 3. Customer membuka detail dan memeriksa Food Score panel, assessment, serta ulasan dengan keyword yang disorot.
 4. Customer memilih jumlah porsi dan menekan **Selamatkan sekarang** selagi Rescue Time masih berjalan.
-5. Handoff berikutnya adalah modul Checkout/Order Tracking untuk pembayaran cashless via Midtrans Sandbox.
+5. Handoff berikutnya adalah modul Checkout/Order Tracking untuk pembayaran cashless via Xendit Sandbox.
 
 ## Kontrak API
 

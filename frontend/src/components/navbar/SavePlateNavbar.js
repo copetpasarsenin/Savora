@@ -20,7 +20,7 @@ import NotificationBell from "@/components/organisms/NotificationBell";
 const SHOW_LOCATION = true;
 
 /**
- * SavoraNavbar — Navbar global 2-state (guest vs logged-in)
+ * SavePlateNavbar — Navbar global 2-state (guest vs logged-in)
  *
  * State GUEST: [Logo+Nav] [Lokasi] [Keranjang] [Masuk] [Daftar]
  * State LOGGED-IN: [Logo+Nav] [Lokasi demo] [Keranjang] [Notifikasi] [Avatar+dropdown]
@@ -30,7 +30,7 @@ const SHOW_LOCATION = true;
  * - Styling baru (inline) HANYA untuk elemen baru: avatar, dropdown
  * - Hindari hydration mismatch: render guest dulu, update setelah mount
  */
-export default function SavoraNavbar() {
+export default function SavePlateNavbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { count } = useCart();
@@ -40,8 +40,14 @@ export default function SavoraNavbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [prevPathname, setPrevPathname] = useState(pathname);
   const [address, setAddress] = useState("");
   const [addressDropdownOpen, setAddressDropdownOpen] = useState(false);
+
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    if (dropdownOpen) setDropdownOpen(false);
+  }
 
   // Ref untuk dropdown (click outside detection)
   const dropdownRef = useRef(null);
@@ -49,32 +55,37 @@ export default function SavoraNavbar() {
 
   // Mount: cek auth & get user (C5a)
   useEffect(() => {
-    setMounted(true);
+    let active = true;
     const loggedIn = isAuthenticated();
-    setIsLoggedIn(loggedIn);
-    if (loggedIn) {
-      const userData = getUser();
-      setUser(userData);
-    }
+    const userData = loggedIn ? getUser() : null;
+    queueMicrotask(() => {
+      if (!active) return;
+      setMounted(true);
+      setIsLoggedIn(loggedIn);
+      if (userData) setUser(userData);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Load address dari localStorage dengan namespace per-akun setelah mounted
   useEffect(() => {
-    if (mounted) {
-      // Migrasi data lama sekali jalan (dari kunci global ke namespace per-akun)
-      migrateOldData("savora_address");
+    if (!mounted) return;
+    let active = true;
+    // Migrasi data lama sekali jalan (dari kunci global ke namespace per-akun)
+    migrateOldData("saveplate_address");
 
-      const savedAddress = readUserData("savora_address");
-      if (savedAddress) {
-        setAddress(savedAddress);
-      }
+    const savedAddress = readUserData("saveplate_address");
+    if (savedAddress) {
+      queueMicrotask(() => {
+        if (active) setAddress(savedAddress);
+      });
     }
+    return () => {
+      active = false;
+    };
   }, [mounted]);
-
-  // Close dropdown saat route change (C5b)
-  useEffect(() => {
-    setDropdownOpen(false);
-  }, [pathname]);
 
   // Close dropdown saat klik di luar (C5b)
   useEffect(() => {
@@ -149,7 +160,7 @@ export default function SavoraNavbar() {
     const input = e.target.elements.addressInput;
     if (input && input.value.trim()) {
       const newAddress = input.value.trim();
-      writeUserData("savora_address", newAddress);
+      writeUserData("saveplate_address", newAddress);
       setAddress(newAddress);
       setAddressDropdownOpen(false);
     }
@@ -170,10 +181,10 @@ export default function SavoraNavbar() {
           <Link href="/" className="beranda-brand">
             <img
               src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png"
-              alt="Savora Logo"
+              alt="SavePlate Logo"
               className="beranda-logo-img"
             />
-            <span className="beranda-brand-text">Savora</span>
+            <span className="beranda-brand-text">SavePlate</span>
           </Link>
           <nav className="beranda-nav">
             <Link href="/">Home</Link>
@@ -219,10 +230,10 @@ export default function SavoraNavbar() {
           <Link href="/" className="beranda-brand">
             <img
               src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png"
-              alt="Savora Logo"
+              alt="SavePlate Logo"
               className="beranda-logo-img"
             />
-            <span className="beranda-brand-text">Savora</span>
+            <span className="beranda-brand-text">SavePlate</span>
           </Link>
 
           {/* Nav Links */}
@@ -544,10 +555,10 @@ export default function SavoraNavbar() {
         <Link href="/" className="beranda-brand">
           <img
             src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png"
-            alt="Savora Logo"
+            alt="SavePlate Logo"
             className="beranda-logo-img"
           />
-          <span className="beranda-brand-text">Savora</span>
+          <span className="beranda-brand-text">SavePlate</span>
         </Link>
 
         {/* Nav Links */}

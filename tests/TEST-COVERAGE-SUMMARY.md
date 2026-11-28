@@ -1,4 +1,4 @@
-# Playwright E2E Test Suite - Savora
+# Playwright E2E Test Suite - SavePlate
 ## Test Coverage Summary
 
 **Total Test Files:** 7 files  
@@ -9,10 +9,10 @@
 
 ## Test Files Created
 
-### ✅ 1. savora-happy-path.spec.js (6.2 KB)
+### ✅ 1. saveplate-happy-path.spec.js (6.2 KB)
 **Owner:** Nadi Azzada Akbar  
 **Coverage:** Core happy path  
-- E2E-01: Customer Checkout → Midtrans Payment → Paid
+- E2E-01: Customer Checkout → Xendit Payment → Paid
 - E2E-02: UMKM Prepare Order → Validate Pickup Code
 - E2E-03: Customer Submit Review with Keywords
 
@@ -20,7 +20,7 @@
 
 ---
 
-### ✅ 2. savora-edge-cases.spec.js (4.3 KB)
+### ✅ 2. saveplate-edge-cases.spec.js (4.3 KB)
 **Coverage:** Error handling & edge cases  
 - E2E-04: Payment EXPIRED → Stock Returned
 - E2E-05: Invalid Pickup Code Rejected
@@ -32,7 +32,7 @@
 
 ---
 
-### 🆕 3. savora-auth-rbac.spec.js (9.9 KB)
+### 🆕 3. saveplate-auth-rbac.spec.js (9.9 KB)
 **Coverage:** Authentication & RBAC (PRD REVISI #22)  
 **Test Count:** 9 scenarios
 
@@ -55,7 +55,7 @@
 
 ---
 
-### 🆕 4. savora-food-trust-score.spec.js (17 KB)
+### 🆕 4. saveplate-food-trust-score.spec.js (17 KB)
 **Coverage:** FTI + Food Score Decay + Dynamic Discount (PRD Section 12, 13)  
 **Test Count:** 12 scenarios
 
@@ -78,16 +78,16 @@
 
 ---
 
-### 🆕 5. savora-midtrans-admin.spec.js (16 KB)
-**Coverage:** Midtrans Webhook + Admin Moderation (PRD FR-14, FR-12, REVISI #28, #37)  
+### 🆕 5. saveplate-admin.spec.js (16 KB)
+**Coverage:** Xendit Webhook + Admin Moderation (PRD FR-14, FR-12, REVISI #28, #37, #40)  
 **Test Count:** 12 scenarios
 
-#### Midtrans Webhook Signature (5 tests)
-- MIDTRANS-01: Valid Signature → Payment Updated
-- MIDTRANS-02: Invalid Signature → Rejected
-- MIDTRANS-03: No Signature → Rejected
-- MIDTRANS-04: Settlement → Pickup Code Generated
-- MIDTRANS-05: Expire → Order Expired, Stock Returned
+#### Xendit Webhook Verification (5 tests)
+- XENDIT-01: Valid Callback Token → Payment Updated
+- XENDIT-02: Invalid Callback Token → Ignored Safely
+- XENDIT-03: Missing Callback Token → Rejected (400)
+- XENDIT-04: PAID → Pickup Code Generated
+- XENDIT-05: EXPIRED → Order Expired, Stock Returned
 
 #### Admin Verification (2 tests)
 - ADMIN-01: Admin Verify UMKM → Can Publish
@@ -106,7 +106,7 @@
 
 ---
 
-### 🆕 6. savora-marketplace-review.spec.js (18 KB)
+### 🆕 6. saveplate-marketplace-review.spec.js (18 KB)
 **Coverage:** Marketplace Filter + Review Validation + Keywords (PRD FR-05, FR-09, FR-16)  
 **Test Count:** 13 scenarios
 
@@ -133,7 +133,7 @@
 
 ---
 
-### 🆕 7. savora-comprehensive.spec.js (12 KB)
+### 🆕 7. saveplate-comprehensive.spec.js (12 KB)
 **Coverage:** Complete Order Flow + Help Ticket + Waste Log (PRD FR-10, FR-11)  
 **Test Count:** 7 scenarios
 
@@ -158,8 +158,8 @@
 - TEST_ACCOUNTS (customer, umkm, admin, mitra_donasi)
 - login(page, role)
 - getAuthToken(page)
-- generateMidtransSignature()
-- triggerMidtransWebhook()
+- generateXenditInvoice()
+- triggerXenditWebhook()
 - API helpers (apiGet, apiPost, apiPatch)
 - UI helpers (waitForElement, expectVisible, etc.)
 
@@ -182,9 +182,9 @@
 | Food Score Decay | food-trust-score.spec.js | FSD-01 | ✅ |
 | Dynamic Discount | food-trust-score.spec.js | DD-01-03 | ✅ |
 | Marketplace Filter | marketplace-review.spec.js | MKT-01-06 | ✅ |
-| Checkout Cashless Midtrans | happy-path.spec.js | E2E-01 | ✅ |
-| Midtrans Webhook Valid | midtrans-admin.spec.js | MIDTRANS-01 | ✅ |
-| Midtrans Webhook Invalid → Reject | midtrans-admin.spec.js | MIDTRANS-02-03 | ✅ |
+| Checkout Cashless Xendit | happy-path.spec.js | E2E-01 | ✅ |
+| Xendit Webhook Valid | saveplate-admin.spec.js | XENDIT-01 | ✅ |
+| Xendit Webhook Invalid → Reject/Ignore | saveplate-admin.spec.js | XENDIT-02-03 | ✅ |
 | Pickup Validation | happy-path.spec.js | E2E-02 | ✅ |
 | Invalid Pickup Code | edge-cases.spec.js | E2E-05 | ✅ |
 | No-show | edge-cases.spec.js | E2E-04 | ✅ |
@@ -193,8 +193,8 @@
 | Review Before Completed → Reject | marketplace-review.spec.js | REVIEW-01 | ✅ |
 | Help Ticket | comprehensive.spec.js | FLOW-02-04 | ✅ |
 | Waste Log | comprehensive.spec.js | WASTE-01-03 | ✅ |
-| Admin Verify UMKM | midtrans-admin.spec.js | ADMIN-01 | ✅ |
-| Admin Moderasi Listing | midtrans-admin.spec.js | ADMIN-03-04 | ✅ |
+| Admin Verify UMKM | saveplate-admin.spec.js | ADMIN-01 | ✅ |
+| Admin Moderasi Listing | saveplate-admin.spec.js | ADMIN-03-04 | ✅ |
 | Marketplace Error State | marketplace-review.spec.js | MKT-01 | ✅ |
 
 **Coverage:** 25/25 PRD scenarios ✅ **100%**
@@ -210,13 +210,13 @@ npx playwright test
 
 ### Run Specific File
 ```bash
-npx playwright test tests/e2e/savora-auth-rbac.spec.js
+npx playwright test tests/e2e/saveplate-auth-rbac.spec.js
 ```
 
 ### Run by Tag/Grep
 ```bash
 npx playwright test --grep "RBAC"
-npx playwright test --grep "MIDTRANS"
+npx playwright test --grep "XENDIT"
 ```
 
 ### Debug Mode
@@ -237,7 +237,7 @@ npx playwright test --headed
 ```bash
 BASE_URL=http://localhost:3000
 API_URL=http://localhost:8000
-MIDTRANS_SERVER_KEY=test_server_key_12345
+XENDIT_CALLBACK_TOKEN=test_xendit_callback_token
 ```
 
 ### Test Accounts Required in Database
@@ -277,7 +277,7 @@ npx playwright show-report
 
 - Test helpers di `test-helpers.js` untuk reusability
 - Semua test menggunakan data-testid selector sebisa mungkin
-- Midtrans signature verification sesuai PRD 14.6
+- Xendit x-callback-token verification sesuai PRD 14.6
 - Food Score Decay formula sesuai PRD 12.6 (γ=0.65)
 - Keyword threshold sesuai PRD 12.7 (≥3 GAWAT dari ≥2 customer)
 

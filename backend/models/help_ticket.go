@@ -11,8 +11,8 @@ const (
 	CategoryUMKMNotResponsive        = "UMKM tidak merespons"
 	CategoryPickupIssue              = "Terjadi kendala saat pickup"
 	CategoryOrderCancelled           = "Order dibatalkan sepihak"
-	CategoryPaymentSuccessNoCode     = "Pembayaran Midtrans sandbox berhasil tetapi pickup code tidak muncul"
-	CategoryPaymentFailedOrExpired   = "Pembayaran Midtrans sandbox gagal/expired atau status tidak berubah"
+	CategoryPaymentSuccessNoCode     = "Pembayaran Xendit sandbox berhasil tetapi pickup code tidak muncul"
+	CategoryPaymentFailedOrExpired   = "Pembayaran Xendit sandbox gagal/expired atau status tidak berubah"
 )
 
 // HelpTicketStatus enum values

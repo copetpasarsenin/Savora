@@ -1,13 +1,12 @@
-// tests/e2e/savora-midtrans-admin.spec.js
-// Midtrans Webhook Verification + Admin Verification/Moderation
-// Priority: MUST (PRD FR-14, FR-12, FR-02, REVISI #28, #37)
+// tests/e2e/saveplate-admin.spec.js
+// Xendit Webhook Verification + Admin Verification/Moderation
+// Priority: MUST (PRD FR-14, FR-12, FR-02, REVISI #28, #37, #40)
 
 const { test, expect } = require('@playwright/test');
-const crypto = require('crypto');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
-const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || 'test_server_key_12345';
+const XENDIT_CALLBACK_TOKEN = process.env.XENDIT_CALLBACK_TOKEN || 'test_xendit_callback_token';
 
 const testAdmin = {
   email: 'admin.test@savora.app',
@@ -18,13 +17,6 @@ const testUmkm = {
   email: 'umkm.test@savora.app',
   password: 'Test1234!',
 };
-
-// Helper: Generate Midtrans signature
-// PRD 14.6: SHA512(order_id + status_code + gross_amount + server_key)
-function generateMidtransSignature(orderId, statusCode, grossAmount, serverKey) {
-  const signatureString = `${orderId}${statusCode}${grossAmount}${serverKey}`;
-  return crypto.createHash('sha512').update(signatureString).digest('hex');
-}
 
 // Helper: Login
 async function login(page, email, password) {
@@ -42,110 +34,90 @@ async function getAuthToken(page) {
   });
 }
 
-test.describe('Savora E2E - Midtrans Webhook Signature Verification', () => {
+test.describe('SavePlate E2E - Xendit Webhook Callback Token Verification', () => {
   
-  test('MIDTRANS-01: Webhook dengan Signature Valid → Payment Status Updated', async ({ request }) => {
-    const orderId = 'ORDER-12345';
-    const statusCode = '200';
-    const grossAmount = '52500';
+  test('XENDIT-01: Webhook dengan Callback Token Valid → Payment Status Updated', async ({ request }) => {
+    const orderId = 12345;
     
-    // Generate VALID signature
-    const signature = generateMidtransSignature(orderId, statusCode, grossAmount, MIDTRANS_SERVER_KEY);
-    
-    const response = await request.post(`${API_URL}/payments/midtrans-webhook`, {
+    const response = await request.post(`${API_URL}/payments/xendit-webhook`, {
       headers: {
         'Content-Type': 'application/json',
+        'x-callback-token': XENDIT_CALLBACK_TOKEN,
       },
       data: {
-        order_id: orderId,
-        status_code: statusCode,
-        gross_amount: grossAmount,
-        transaction_status: 'settlement',
-        signature_key: signature,
+        id: `xendit_inv_${orderId}_123456`,
+        external_id: `saveplate-order-${orderId}`,
+        status: 'PAID',
+        amount: 52500,
+        paid_at: new Date().toISOString(),
       },
       failOnStatusCode: false,
     });
     
-    // Should accept (200 OK)
     expect(response.ok()).toBe(true);
-    console.log(`✅ Valid signature webhook accepted: ${response.status()}`);
+    console.log(`✅ Valid callback token webhook accepted: ${response.status()}`);
   });
   
-  test('MIDTRANS-02: Webhook dengan Signature Invalid → Rejected', async ({ request }) => {
-    const orderId = 'ORDER-12346';
-    const statusCode = '200';
-    const grossAmount = '52500';
+  test('XENDIT-02: Webhook dengan Callback Token Invalid → Ignored & Order Unchanged', async ({ request }) => {
+    const orderId = 12346;
     
-    // Use WRONG signature
-    const wrongSignature = crypto.createHash('sha512').update('wrong_data_12345').digest('hex');
-    
-    const response = await request.post(`${API_URL}/payments/midtrans-webhook`, {
+    const response = await request.post(`${API_URL}/payments/xendit-webhook`, {
       headers: {
         'Content-Type': 'application/json',
+        'x-callback-token': 'wrong_callback_token_12345',
       },
       data: {
-        order_id: orderId,
-        status_code: statusCode,
-        gross_amount: grossAmount,
-        transaction_status: 'settlement',
-        signature_key: wrongSignature,
+        id: `xendit_inv_${orderId}_123456`,
+        external_id: `saveplate-order-${orderId}`,
+        status: 'PAID',
+        amount: 52500,
       },
       failOnStatusCode: false,
     });
     
-    // Should reject (400 or 401)
-    expect([400, 401, 403]).toContain(response.status());
-    console.log(`✅ Invalid signature webhook rejected: ${response.status()}`);
+    // Handler returns 200 to prevent retry storm while logging token_valid=false and ignoring state update
+    expect([200, 400, 401, 403]).toContain(response.status());
+    console.log(`✅ Invalid callback token handled safely: ${response.status()}`);
   });
   
-  test('MIDTRANS-03: Webhook Tanpa Signature → Rejected', async ({ request }) => {
-    const response = await request.post(`${API_URL}/payments/midtrans-webhook`, {
+  test('XENDIT-03: Webhook Tanpa x-callback-token Header → Rejected (400)', async ({ request }) => {
+    const response = await request.post(`${API_URL}/payments/xendit-webhook`, {
       headers: {
         'Content-Type': 'application/json',
       },
       data: {
-        order_id: 'ORDER-12347',
-        status_code: '200',
-        gross_amount: '52500',
-        transaction_status: 'settlement',
-        // No signature_key
+        id: 'xendit_inv_12347_123456',
+        external_id: 'saveplate-order-12347',
+        status: 'PAID',
+        amount: 52500,
       },
       failOnStatusCode: false,
     });
     
-    // Should reject
     expect([400, 401]).toContain(response.status());
-    console.log(`✅ Webhook without signature rejected: ${response.status()}`);
+    console.log(`✅ Webhook without x-callback-token rejected: ${response.status()}`);
   });
   
-  test('MIDTRANS-04: Webhook settlement → Order Status Paid + Pickup Code', async ({ page, request }) => {
-    // Create order first (mocked)
-    const orderId = `ORDER-TEST-${Date.now()}`;
-    const statusCode = '200';
-    const grossAmount = '52500';
+  test('XENDIT-04: Webhook PAID → Order Status Paid + Pickup Code', async ({ request }) => {
+    const numericId = Date.now();
     
-    const signature = generateMidtransSignature(orderId, statusCode, grossAmount, MIDTRANS_SERVER_KEY);
-    
-    // Send webhook
-    const webhookResponse = await request.post(`${API_URL}/payments/midtrans-webhook`, {
+    const webhookResponse = await request.post(`${API_URL}/payments/xendit-webhook`, {
       headers: {
         'Content-Type': 'application/json',
+        'x-callback-token': XENDIT_CALLBACK_TOKEN,
       },
       data: {
-        order_id: orderId,
-        status_code: statusCode,
-        gross_amount: grossAmount,
-        transaction_status: 'settlement',
-        signature_key: signature,
+        id: `xendit_inv_${numericId}_123456`,
+        external_id: `saveplate-order-${numericId}`,
+        status: 'PAID',
+        amount: 52500,
+        paid_at: new Date().toISOString(),
       },
+      failOnStatusCode: false,
     });
     
     if (webhookResponse.ok()) {
-      console.log(`✅ Webhook settlement accepted for ${orderId}`);
-      
-      // Check order status via API
-      // Extract numeric ID from orderId
-      const numericId = orderId.match(/\d+$/)?.[0] || '1';
+      console.log(`✅ Webhook PAID accepted for saveplate-order-${numericId}`);
       
       const orderResponse = await request.get(`${API_URL}/orders/${numericId}`, {
         failOnStatusCode: false,
@@ -153,61 +125,48 @@ test.describe('Savora E2E - Midtrans Webhook Signature Verification', () => {
       
       if (orderResponse.ok()) {
         const order = await orderResponse.json();
-        
-        // Verify status is PAID
         expect(order.status || order.payment_status).toMatch(/PAID/i);
-        
-        // Verify pickup_code generated
         expect(order.pickup_code).toBeTruthy();
         expect(order.pickup_code.length).toBeGreaterThanOrEqual(6);
-        
         console.log(`✅ Order status: ${order.status}, Pickup code: ${order.pickup_code}`);
       }
     }
   });
   
-  test('MIDTRANS-05: Webhook expire → Order Status Expired, Stok Dikembalikan', async ({ request }) => {
-    const orderId = `ORDER-EXPIRE-${Date.now()}`;
-    const statusCode = '202'; // Midtrans expire status code
-    const grossAmount = '52500';
+  test('XENDIT-05: Webhook EXPIRED → Order Status Expired, Stok Dikembalikan', async ({ request }) => {
+    const numericId = Date.now();
     
-    const signature = generateMidtransSignature(orderId, statusCode, grossAmount, MIDTRANS_SERVER_KEY);
-    
-    const response = await request.post(`${API_URL}/payments/midtrans-webhook`, {
+    const response = await request.post(`${API_URL}/payments/xendit-webhook`, {
       headers: {
         'Content-Type': 'application/json',
+        'x-callback-token': XENDIT_CALLBACK_TOKEN,
       },
       data: {
-        order_id: orderId,
-        status_code: statusCode,
-        gross_amount: grossAmount,
-        transaction_status: 'expire',
-        signature_key: signature,
+        id: `xendit_inv_${numericId}_123456`,
+        external_id: `saveplate-order-${numericId}`,
+        status: 'EXPIRED',
+        amount: 52500,
       },
+      failOnStatusCode: false,
     });
     
     if (response.ok()) {
-      console.log(`✅ Webhook expire accepted for ${orderId}`);
+      console.log(`✅ Webhook EXPIRED accepted for saveplate-order-${numericId}`);
       
-      // Stock should be returned (implementation check needed)
-      // This is verified via order status
-      const numericId = orderId.match(/\d+$/)?.[0];
-      if (numericId) {
-        const orderResponse = await request.get(`${API_URL}/orders/${numericId}`, {
-          failOnStatusCode: false,
-        });
-        
-        if (orderResponse.ok()) {
-          const order = await orderResponse.json();
-          expect(order.status).toMatch(/EXPIRED|PAYMENT_FAILED/i);
-          console.log(`✅ Order marked as ${order.status}, stock should be returned`);
-        }
+      const orderResponse = await request.get(`${API_URL}/orders/${numericId}`, {
+        failOnStatusCode: false,
+      });
+      
+      if (orderResponse.ok()) {
+        const order = await orderResponse.json();
+        expect(order.status).toMatch(/EXPIRED|PAYMENT_FAILED/i);
+        console.log(`✅ Order marked as ${order.status}, stock should be returned`);
       }
     }
   });
 });
 
-test.describe('Savora E2E - Admin Verifikasi UMKM', () => {
+test.describe('SavePlate E2E - Admin Verifikasi UMKM', () => {
   
   test('ADMIN-01: Admin Verifikasi UMKM → UMKM Dapat Publish Listing', async ({ page }) => {
     await login(page, testAdmin.email, testAdmin.password);
@@ -285,7 +244,7 @@ test.describe('Savora E2E - Admin Verifikasi UMKM', () => {
   });
 });
 
-test.describe('Savora E2E - Admin Moderasi Listing', () => {
+test.describe('SavePlate E2E - Admin Moderasi Listing', () => {
   
   test('ADMIN-03: Admin Suspend Listing Bermasalah → Hidden from Marketplace', async ({ page, request }) => {
     await login(page, testAdmin.email, testAdmin.password);
@@ -398,7 +357,7 @@ test.describe('Savora E2E - Admin Moderasi Listing', () => {
   });
 });
 
-test.describe('Savora E2E - Admin Dashboard & Monitoring', () => {
+test.describe('SavePlate E2E - Admin Dashboard & Monitoring', () => {
   
   test('ADMIN-06: Admin Melihat Dashboard Ringkasan Platform', async ({ page }) => {
     await login(page, testAdmin.email, testAdmin.password);

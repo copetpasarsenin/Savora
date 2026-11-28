@@ -1,10 +1,15 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
+	"net/http/httptest"
 	"testing"
+	"time"
 
-	"github.com/savora/backend/services"
+	"github.com/gofiber/fiber/v2"
+	"github.com/saveplate/backend/models"
+	"github.com/saveplate/backend/services"
 )
 
 // TestCreateOrderRequest_Validation menguji validasi request sesuai handler logic
@@ -194,5 +199,130 @@ func TestCreateOrderRequest_JSONParsing(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestUpdateOrderStatus_BlocksCompletedBypass(t *testing.T) {
+	app := fiber.New()
+	h := NewOrderHandler(nil)
+	app.Patch("/orders/:id/status", func(c *fiber.Ctx) error {
+		c.Locals("user", &JWTClaims{UserID: 7, Role: models.RoleUmkm})
+		return h.UpdateOrderStatus(c)
+	})
+
+	req := httptest.NewRequest("PATCH", "/orders/1/status", bytes.NewBufferString(`{"status":"COMPLETED"}`))
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := app.Test(req)
+	if err != nil {
+		t.Fatalf("app.Test error: %v", err)
+	}
+	if resp.StatusCode != 400 {
+		t.Fatalf("status = %d, want 400 when attempting COMPLETED bypass", resp.StatusCode)
+	}
+}
+
+func TestValidatePickupEligibility(t *testing.T) {
+	now := time.Now()
+	future := now.Add(2 * time.Hour)
+	past := now.Add(-1 * time.Minute)
+	code := "SAVE1234"
+
+	base := models.Order{
+		Status:         models.OrderReadyForPickup,
+		PaymentStatus:  models.PaymentPaid,
+		PickupCode:     &code,
+		PickupDeadline: &future,
+	}
+
+	if err := validatePickupEligibility(base, "  save1234 ", now); err != nil {
+		t.Fatalf("expected valid case-insensitive trimmed code to pass, got: %v", err)
+	}
+
+	// Wrong code
+	if err := validatePickupEligibility(base, "WRONG999", now); err == nil {
+		t.Fatal("expected wrong pickup code to fail")
+	}
+
+	// Expired deadline (P2 enforcement)
+	expired := base
+	expired.PickupDeadline = &past
+	if err := validatePickupEligibility(expired, code, now); err == nil {
+		t.Fatal("expected pickup past deadline to fail")
+	}
+
+	// Unpaid order
+	unpaid := base
+	unpaid.PaymentStatus = models.PaymentPending
+	if err := validatePickupEligibility(unpaid, code, now); err == nil {
+		t.Fatal("expected unpaid order to fail")
+	}
+
+	// Second verification attempt (already COMPLETED — P3 idempotence)
+	alreadyDone := base
+	alreadyDone.Status = models.OrderCompleted
+	if err := validatePickupEligibility(alreadyDone, code, now); err == nil {
+		t.Fatal("expected second pickup verification on COMPLETED order to fail")
+	}
+}
+
+func TestOrderOwnershipAndPickupCodeMasking(t *testing.T) {
+	code := "SECRET99"
+	order := models.Order{
+		ID:         1,
+		CustomerID: 10,
+		PickupCode: &code,
+		Product:    models.Product{ID: 5, UmkmID: 20},
+	}
+
+	ownerUMKM := &JWTClaims{UserID: 20, Role: models.RoleUmkm}
+	otherUMKM := &JWTClaims{UserID: 99, Role: models.RoleUmkm}
+	ownerCust := &JWTClaims{UserID: 10, Role: models.RoleCustomer}
+	otherCust := &JWTClaims{UserID: 11, Role: models.RoleCustomer}
+	admin := &JWTClaims{UserID: 1, Role: models.RoleAdmin}
+
+	if !canAccessOrder(ownerUMKM, order, false) || canAccessOrder(otherUMKM, order, false) {
+		t.Fatal("UMKM ownership check failed")
+	}
+	if !canAccessOrder(ownerCust, order, true) || canAccessOrder(ownerCust, order, false) || canAccessOrder(otherCust, order, true) {
+		t.Fatal("Customer ownership check failed")
+	}
+	if !canAccessOrder(admin, order, false) {
+		t.Fatal("Admin access check failed")
+	}
+
+	// Masking: UMKM tidak boleh menerima pickup_code; customer tetap menerima
+	custCopy := order
+	maskOrderForRole(models.RoleCustomer, &custCopy)
+	if custCopy.PickupCode == nil || *custCopy.PickupCode != code {
+		t.Fatal("customer must retain pickup_code")
+	}
+	umkmCopy := order
+	maskOrderForRole(models.RoleUmkm, &umkmCopy)
+	if umkmCopy.PickupCode != nil {
+		t.Fatal("UMKM must not receive pickup_code")
+	}
+}
+
+func TestProductWeightValidationAndOwnership(t *testing.T) {
+	if err := validateProductInput("Nasi Kotak", 5, 350); err != nil {
+		t.Fatalf("expected valid product input, got: %v", err)
+	}
+	if err := validateProductInput("Nasi Kotak", 5, 0); err == nil {
+		t.Fatal("expected weight=0 to fail")
+	}
+	if err := validateProductInput("Nasi Kotak", 5, -100); err == nil {
+		t.Fatal("expected negative weight to fail")
+	}
+	if err := validateProductInput("", 5, 300); err == nil {
+		t.Fatal("expected empty name to fail")
+	}
+	if !canManageProduct(&JWTClaims{UserID: 5, Role: models.RoleUmkm}, 5) {
+		t.Fatal("owner UMKM should manage product")
+	}
+	if canManageProduct(&JWTClaims{UserID: 6, Role: models.RoleUmkm}, 5) {
+		t.Fatal("other UMKM must not manage product")
+	}
+	if !canManageProduct(&JWTClaims{UserID: 1, Role: models.RoleAdmin}, 5) {
+		t.Fatal("admin should manage product")
 	}
 }

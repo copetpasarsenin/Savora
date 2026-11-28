@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState } from "react";
 import Sidebar from "../organisms/Sidebar";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -8,16 +8,9 @@ import { isCustomerRoute } from "@/lib/routes";
 
 export default function DashboardLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isCustomerView, setIsCustomerView] = useState(false);
   const pathname = usePathname();
+  const isCustomerView = isCustomerRoute(pathname);
 
-  // Handle pathname changes after hydration to prevent mismatch
-  useEffect(() => {
-    setIsCustomerView(isCustomerRoute(pathname));
-  }, [pathname]);
-
-  // During hydration, render full layout to match server
-  // Client-side route changes will update isCustomerView via useEffect
   if (isCustomerView) {
     return <>{children}</>;
   }
@@ -28,9 +21,9 @@ export default function DashboardLayout({ children }) {
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-40 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 flex items-center justify-center overflow-hidden rounded-lg bg-emerald-50">
-            <img src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png" alt="Savora Logo" className="w-full h-full object-cover" />
+            <img src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png" alt="SavePlate Logo" className="w-full h-full object-cover" />
           </div>
-          <span className="font-bold text-slate-900 text-lg">Savora</span>
+          <span className="font-bold text-slate-900 text-lg">SavePlate</span>
         </div>
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)} 

@@ -11,6 +11,8 @@ import Badge from "@/components/atoms/Badge";
 import ProgressTargetBar from "@/components/molecules/ProgressTargetBar";
 import { useUmkm } from '@/context/UmkmContext';
 import { useAuthGuard } from '@/lib/useAuthGuard';
+import { getUser } from '@/lib/auth';
+import { apiGet } from '@/lib/api';
 
 import { fetchUmkmInsight, fetchSalesTrend } from "@/lib/analytics";
 import { fetchUMKMProducts } from "@/lib/products";
@@ -23,38 +25,47 @@ export default function DashboardPage() {
   const { umkmData } = useUmkm();
   const { loading: authLoading } = useAuthGuard(['UMKM'], { checkVerification: true });
   const [data, setData] = useState({
-    sales_today: 2450000,
-    sales_trend: 12.4,
-    active_orders: 12,
-    active_orders_trend: 3,
-    active_products: 34,
-    active_products_trend: -2.1,
-    monthly_revenue: 48750000,
-    monthly_revenue_trend: 18.7,
+    sales_today: 0,
+    sales_trend: 0,
+    active_orders: 0,
+    active_orders_trend: 0,
+    active_products: 0,
+    active_products_trend: 0,
+    monthly_revenue: 0,
+    monthly_revenue_trend: 0,
     food_rescue_score: 94,
     trust_score: 4.8,
     rating: 4.9,
   });
+  const [redistReport, setRedistReport] = useState(null);
 
   useEffect(() => {
     async function loadDashboardData() {
       try {
-        const insight = await fetchUmkmInsight(1);
-        const products = await fetchUMKMProducts(1);
-        const orders = await fetchUMKMOrders(1);
+        const umkmId = getUser()?.id || 1;
+        const [insight, products, orders, reportRes] = await Promise.all([
+          fetchUmkmInsight(umkmId).catch(() => ({ total_revenue: 0, avg_rating: 0 })),
+          fetchUMKMProducts(umkmId).catch(() => []),
+          fetchUMKMOrders().catch(() => []),
+          apiGet('/redistribution/report').catch(() => null),
+        ]);
 
-        const activeOrders = orders.filter(o => ["Menunggu", "Diproses", "Siap Diambil"].includes(o.status)).length;
+        const activeOrders = orders.filter(o => ["Menunggu", "Menunggu Pembayaran", "Diproses", "Siap Diambil"].includes(o.status)).length;
         const activeProducts = products.filter(p => p.status === "Aktif").length;
 
         setData(prev => ({
           ...prev,
-          sales_today: insight.total_revenue > 0 ? insight.total_revenue / 30 : prev.sales_today,
-          active_orders: activeOrders || prev.active_orders,
-          active_products: activeProducts || prev.active_products,
-          monthly_revenue: insight.total_revenue || prev.monthly_revenue,
+          sales_today: insight.total_revenue > 0 ? insight.total_revenue / 30 : 0,
+          active_orders: activeOrders,
+          active_products: activeProducts,
+          monthly_revenue: insight.total_revenue || 0,
           trust_score: insight.avg_rating || prev.trust_score,
           rating: insight.avg_rating || prev.rating,
         }));
+
+        if (reportRes?.success && reportRes?.data) {
+          setRedistReport(reportRes.data);
+        }
       } catch (err) {
         console.error("Dashboard data load error:", err);
       }
@@ -286,58 +297,112 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Dampak Food Rescue */}
+        {/* Laporan Redistribusi Verified-Gram (Algoritma 1: C1–C7) */}
         <div className="card" style={{ marginTop: '20px' }}>
-          <h3 style={{ marginBottom: '20px' }}>Dampak Food Rescue</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <h3 style={{ margin: 0 }}>Laporan Redistribusi Verified-Gram</h3>
+              <div style={{ fontSize: '0.75rem', color: '#6B7280', marginTop: '4px' }}>
+                Hanya pesanan berbayar yang telah melalui verifikasi kode pickup (C1–C7) yang dihitung ke berat terverifikasi.
+              </div>
+            </div>
+            <Badge type="success">Evidence-Gated (L3)</Badge>
+          </div>
           <div className="grid-4">
             <div style={{ padding: '15px', backgroundColor: '#F0FDF4', borderRadius: '10px', border: '1px solid #DCFCE7' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#16A34A', marginBottom: '10px' }}>
                 <Package size={18} />
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>234 kg</div>
-              <div style={{ fontSize: '0.75rem', color: '#4B5563', marginBottom: '5px' }}>Makanan Diselamatkan</div>
-              <div style={{ fontSize: '0.75rem', color: '#16A34A', fontWeight: 600 }}>+18 kg hari ini</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
+                {(redistReport?.verified_weight_grams ?? 0).toLocaleString('id-ID')} g
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#4B5563', marginBottom: '5px' }}>Berat Terverifikasi (Wd)</div>
+              <div style={{ fontSize: '0.75rem', color: '#16A34A', fontWeight: 600 }}>
+                {((redistReport?.verified_weight_kg ?? 0)).toFixed(2)} kg terdistribusi
+              </div>
             </div>
             
-            <div style={{ padding: '15px', backgroundColor: '#F0FDF4', borderRadius: '10px', border: '1px solid #DCFCE7' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#16A34A', marginBottom: '10px' }}>
+            <div style={{ padding: '15px', backgroundColor: '#FFFBEB', borderRadius: '10px', border: '1px solid #FEF3C7' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D97706', marginBottom: '10px' }}>
                 <Leaf size={18} />
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>89 kg</div>
-              <div style={{ fontSize: '0.75rem', color: '#4B5563', marginBottom: '5px' }}>Food Waste Dicegah</div>
-              <div style={{ fontSize: '0.75rem', color: '#16A34A', fontWeight: 600 }}>+7 kg hari ini</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
+                {(redistReport?.phantom_rescue_grams ?? 0).toLocaleString('id-ID')} g
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#4B5563', marginBottom: '5px' }}>Belum Terverifikasi (Wc − Wd)</div>
+              <div style={{ fontSize: '0.75rem', color: '#D97706', fontWeight: 600 }}>
+                {redistReport?.obr_percent != null ? `OBR +${redistReport.obr_percent.toFixed(2)}%` : 'OBR —'}
+              </div>
             </div>
 
             <div style={{ padding: '15px', backgroundColor: '#EFF6FF', borderRadius: '10px', border: '1px solid #DBEAFE' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#DBEAFE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563EB', marginBottom: '10px' }}>
-                <Wind size={18} />
+                <ShieldCheck size={18} />
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>156 kg</div>
-              <div style={{ fontSize: '0.75rem', color: '#4B5563', marginBottom: '5px' }}>Emisi CO₂ Berkurang</div>
-              <div style={{ fontSize: '0.75rem', color: '#2563EB', fontWeight: 600 }}>Setara 14 pohon</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
+                {redistReport?.eligible_count ?? 0} / {redistReport?.claimed_count ?? 0}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#4B5563', marginBottom: '5px' }}>Cakupan Bukti (EC = |E|/|C|)</div>
+              <div style={{ fontSize: '0.75rem', color: '#2563EB', fontWeight: 600 }}>
+                {redistReport?.ec != null ? `${(redistReport.ec * 100).toFixed(1)}% terverifikasi` : 'Belum ada pesanan berbayar'}
+              </div>
             </div>
 
             <div style={{ padding: '15px', backgroundColor: '#F5F3FF', borderRadius: '10px', border: '1px solid #EDE9FE' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#EDE9FE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7C3AED', marginBottom: '10px' }}>
                 <Users size={18} />
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>412</div>
-              <div style={{ fontSize: '0.75rem', color: '#4B5563', marginBottom: '5px' }}>Pelanggan Dilayani</div>
-              <div style={{ fontSize: '0.75rem', color: '#7C3AED', fontWeight: 600 }}>+23 pelanggan bulan ini</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
+                {redistReport?.eligible_portions ?? 0} porsi
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#4B5563', marginBottom: '5px' }}>Porsi Terverifikasi</div>
+              <div style={{ fontSize: '0.75rem', color: '#7C3AED', fontWeight: 600 }}>
+                Dari {redistReport?.total_count ?? 0} total pesanan
+              </div>
             </div>
           </div>
           
-          <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#ECFDF5', borderRadius: '10px', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 600, color: '#065F46' }}>
-                <Award size={18} /> Menuju Badge Platinum Rescuer
-              </div>
-              <div style={{ fontWeight: 700, color: '#065F46' }}>234 / 300 kg</div>
-            </div>
-            <div style={{ width: '100%', height: '8px', backgroundColor: '#D1FAE5', borderRadius: '4px', overflow: 'hidden' }}>
-              <div style={{ width: '78%', height: '100%', backgroundColor: '#10B981' }}></div>
-            </div>
-            <div style={{ fontSize: '0.75rem', color: '#047857', marginTop: '8px' }}>Hemat 66 kg lagi untuk naik ke level Platinum! 🎯 Kamu hampir di sana.</div>
+          {/* Audit Trail Ringkas per Pesanan */}
+          <div style={{ marginTop: '20px', border: '1px solid #E5E7EB', borderRadius: '10px', overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#F9FAFB', textAlign: 'left', color: '#4B5563' }}>
+                  <th style={{ padding: '10px 12px' }}>Order</th>
+                  <th style={{ padding: '10px 12px' }}>Produk</th>
+                  <th style={{ padding: '10px 12px' }}>Snapshot × Qty</th>
+                  <th style={{ padding: '10px 12px' }}>Status</th>
+                  <th style={{ padding: '10px 12px' }}>Kelayakan (C1–C7)</th>
+                  <th style={{ padding: '10px 12px', textAlign: 'right' }}>Kontribusi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(redistReport?.items || []).slice(0, 8).map((item) => (
+                  <tr key={item.order_id} style={{ borderTop: '1px solid #F3F4F6' }}>
+                    <td style={{ padding: '10px 12px', fontWeight: 600 }}>#{item.order_id}</td>
+                    <td style={{ padding: '10px 12px' }}>{item.product_name || `Produk #${item.product_id}`}</td>
+                    <td style={{ padding: '10px 12px' }}>{item.weight_per_portion_snapshot} g × {item.quantity}</td>
+                    <td style={{ padding: '10px 12px' }}>{item.status} ({item.payment_status})</td>
+                    <td style={{ padding: '10px 12px' }}>
+                      {item.eligible ? (
+                        <span style={{ color: '#16A34A', fontWeight: 600 }}>ELIGIBLE</span>
+                      ) : (
+                        <span style={{ color: '#DC2626' }}>{(item.failed_conditions || []).join(', ') || 'Ditolak'}</span>
+                      )}
+                    </td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 600 }}>
+                      {item.weight_contribution_grams.toLocaleString('id-ID')} g
+                    </td>
+                  </tr>
+                ))}
+                {(!redistReport?.items || redistReport.items.length === 0) && (
+                  <tr>
+                    <td colSpan={6} style={{ padding: '16px', textAlign: 'center', color: '#6B7280' }}>
+                      Belum ada rekaman pesanan untuk diaudit.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 

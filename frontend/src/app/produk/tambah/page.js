@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useAuthGuard } from "@/lib/useAuthGuard";
 import { apiFetch } from "@/lib/api";
+import { getUser } from "@/lib/auth";
 import {
   LayoutDashboard,
   Package,
@@ -388,10 +389,10 @@ function Sidebar() {
       <div className="px-5 py-5 border-b border-sidebar-border">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
-            <img src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png" alt="Savora Logo" className="w-full h-full object-cover" />
+            <img src="https://dbbjtxjfytgfqkwqwokm.supabase.co/storage/v1/object/public/savora_img/logo_1784833935441.png" alt="SavePlate Logo" className="w-full h-full object-cover" />
           </div>
           <div>
-            <div className="text-sm font-bold text-foreground" style={{ fontFamily: "Manrope, sans-serif" }}>Savora</div>
+            <div className="text-sm font-bold text-foreground" style={{ fontFamily: "Manrope, sans-serif" }}>SavePlate</div>
             <div className="text-[10px] text-muted-foreground leading-none">Food Rescue Platform</div>
           </div>
         </div>
@@ -625,6 +626,8 @@ function Input({
   onChange,
   placeholder,
   prefix,
+  suffix,
+  min,
   type = "text",
 }) {
   return (
@@ -634,11 +637,15 @@ function Input({
       )}
       <input
         type={type}
+        min={min}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="flex-1 px-3 py-2.5 text-sm bg-transparent outline-none placeholder:text-muted-foreground/60"
       />
+      {suffix && (
+        <span className="px-3 text-sm text-muted-foreground border-l border-border bg-muted py-2.5">{suffix}</span>
+      )}
     </div>
   );
 }
@@ -1149,8 +1156,8 @@ function Step1Form({
                 <FormField label="Jumlah Produk">
                   <QuantityControl value={form.quantity} onChange={(v) => set("quantity", v)} />
                 </FormField>
-                <FormField label="Berat">
-                  <Input value={form.weight} onChange={(v) => set("weight", v)} placeholder="500g" />
+                <FormField label="Berat per Porsi (gram) *" hint="Wajib > 0 g untuk pencatatan verified-gram">
+                  <Input type="number" min="1" value={form.weight} onChange={(v) => set("weight", v)} placeholder="350" suffix="g" />
                 </FormField>
                 <FormField label="Porsi">
                   <Input value={form.portion} onChange={(v) => set("portion", v)} placeholder="1–2 porsi" />
@@ -1191,8 +1198,8 @@ function Step1Form({
                 <FormField label="Jumlah Box">
                   <QuantityControl value={form.quantity} onChange={(v) => set("quantity", v)} />
                 </FormField>
-                <FormField label="Estimasi Berat">
-                  <Input value={form.mysteryEstWeight} onChange={(v) => set("mysteryEstWeight", v)} placeholder="800g – 1kg" />
+                <FormField label="Berat per Box (gram) *" hint="Wajib > 0 g (satuan gram)">
+                  <Input type="number" min="1" value={form.mysteryEstWeight} onChange={(v) => set("mysteryEstWeight", v)} placeholder="800" suffix="g" />
                 </FormField>
                 <FormField label="Estimasi Porsi">
                   <Input value={form.mysteryEstPortion} onChange={(v) => set("mysteryEstPortion", v)} placeholder="2–3 Orang" />
@@ -1658,7 +1665,7 @@ function Step2Assessment({
               {data.confirmSafe && <Check className="w-3 h-3 text-white" />}
             </div>
             <p className="text-sm text-foreground leading-relaxed">
-              Saya memastikan makanan masih aman dan layak dikonsumsi sesuai standar Savora Food Rescue Platform.
+              Saya memastikan makanan masih aman dan layak dikonsumsi sesuai standar SavePlate Food Rescue Platform.
             </p>
           </label>
         </div>
@@ -1968,7 +1975,7 @@ function Step3Results({
                 <p className="text-sm font-semibold text-primary mb-1">Insight Otomatis</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {trustResult.status === "Fresh"
-                    ? "Produk dalam kondisi prima! Segera publikasikan untuk mendapatkan eksposur maksimal di platform Savora."
+                    ? "Produk dalam kondisi prima! Segera publikasikan untuk mendapatkan eksposur maksimal di platform SavePlate."
                     : trustResult.status === "Layak Dijual"
                     ? "Produk masih memiliki daya tarik yang baik dan layak untuk dipublikasikan. Potensi terjual tinggi."
                     : trustResult.status === "Segera Dijual"
@@ -2007,7 +2014,7 @@ function Step3Results({
               </p>
               <p className="text-xs text-muted-foreground">
                 {trustResult.canPublish
-                  ? "Semua data telah diverifikasi dan produk memenuhi standar Savora Food Rescue Platform."
+                  ? "Semua data telah diverifikasi dan produk memenuhi standar SavePlate Food Rescue Platform."
                   : "Produk tidak memenuhi standar kelayakan. Pertimbangkan jalur recovery lain."}
               </p>
             </div>
@@ -2063,7 +2070,7 @@ function SuccessModal({ onClose }) {
           Produk Berhasil Dipublikasikan!
         </h3>
         <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-          Produk kamu sudah tampil di platform Savora dan siap ditemukan pembeli.
+          Produk kamu sudah tampil di platform SavePlate dan siap ditemukan pembeli.
         </p>
         <div className="flex gap-3">
           <button
@@ -2173,18 +2180,30 @@ export default function App() {
         console.log("✅ Gambar berhasil diupload:", uploadedPhotoUrl);
       }
       
-      // Prepare payload sesuai model Product backend
+      // Validasi berat satuan wajib > 0 gram (berlaku untuk produk reguler & mystery box)
+      const rawWeight = form.productType === "mystery" ? form.mysteryEstWeight : form.weight;
+      const weightGrams = parseFloat(rawWeight);
+      if (!Number.isFinite(weightGrams) || weightGrams <= 0) {
+        throw new Error("Berat per porsi/box wajib diisi dengan angka lebih dari 0 gram.");
+      }
+
+      const currentUser = getUser();
+      const productName = form.productType === "mystery" ? (form.mysteryName || form.name) : form.name;
+      const productCategory = form.productType === "mystery" ? (form.mysteryCategory || form.category) : form.category;
+
+      // Prepare payload sesuai model Product backend (umkm_id juga ditegakkan dari JWT di backend)
       const payload = {
-        umkm_id: 1, // TODO: Ganti dengan umkm_id dari session/auth
-        name: form.name,
-        category: form.category,
-        description: form.description,
+        umkm_id: currentUser?.id || 1,
+        name: productName,
+        category: productCategory,
+        description: form.description || form.mysteryContents || "",
         photo_url: uploadedPhotoUrl || form.photoUrl || "",
         original_price: parseFloat(form.normalPrice.replace(/\D/g, "")) || 0,
         rescue_price: parseFloat(form.rescuePrice.replace(/\D/g, "")) || 0,
+        min_price: parseFloat((form.minimumPrice || "").replace(/\D/g, "")) || 0,
         stock: form.quantity,
-        weight_per_portion: parseFloat(form.weight) || 0,
-        pickup_address: "Alamat UMKM", // TODO: Ambil dari profil UMKM
+        weight_per_portion: weightGrams,
+        pickup_address: currentUser?.address || "Alamat UMKM",
         packaging_condition: assessment.packaging || "Baik",
         storage_method: assessment.storage || "Sesuai",
         production_time: form.productionTime ? (() => {

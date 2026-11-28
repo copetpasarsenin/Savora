@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Savora — Riwayat & Impact",
+  title: "SavePlate — Riwayat & Impact",
   description: "Dashboard riwayat order dan dampak personal customer.",
 };
 

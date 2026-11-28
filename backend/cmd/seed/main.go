@@ -6,8 +6,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 	"github.com/joho/godotenv"
-	"github.com/savora/backend/database"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/database"
+	"github.com/saveplate/backend/models"
 )
 
 func main() {
@@ -38,7 +38,7 @@ func main() {
 		log.Fatalf("❌ Failed to hash admin password: %v", err)
 	}
 	adminUser := &models.User{
-		Name:     "Admin Savora",
+		Name:     "Admin SavePlate",
 		Email:    "admin@savora.com",
 		Role:     models.RoleAdmin,
 		Status:   models.StatusActive,
@@ -217,7 +217,7 @@ func main() {
 			AdvertiserType: models.AdvertiserTypeUMKM,
 			Title:          "Promo Nasi Goreng Spesial - Diskon 40%",
 			ImageURL:       "https://via.placeholder.com/800x400?text=Promo+Nasi+Goreng",
-			TargetURL:      "https://savora.com/warung-bu-lestari",
+			TargetURL:      "https://saveplate.com/warung-bu-lestari",
 			DurationDays:   7,
 			Price:          100000,
 			ServiceFee:     5000, // 5% dari 100000
@@ -228,7 +228,7 @@ func main() {
 			AdvertiserType: models.AdvertiserTypeUMKM,
 			Title:          "Paket Hemat Ayam Geprek + Minuman",
 			ImageURL:       "https://via.placeholder.com/800x400?text=Paket+Hemat",
-			TargetURL:      "https://savora.com/warung-bu-lestari",
+			TargetURL:      "https://saveplate.com/warung-bu-lestari",
 			DurationDays:   14,
 			Price:          200000,
 			ServiceFee:     10000,
@@ -265,7 +265,7 @@ func main() {
 			AdvertiserType: models.AdvertiserTypeUMKM,
 			Title:          "Kue Basah Tradisional - Hanya 5rb",
 			ImageURL:       "https://via.placeholder.com/800x400?text=Kue+Basah",
-			TargetURL:      "https://savora.com/warung-bu-lestari",
+			TargetURL:      "https://saveplate.com/warung-bu-lestari",
 			DurationDays:   3,
 			Price:          50000,
 			ServiceFee:     2500,

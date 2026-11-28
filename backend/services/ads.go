@@ -8,7 +8,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/models"
 )
 
 // AdPackage — paket iklan berdurasi tetap yang bisa dibeli UMKM.

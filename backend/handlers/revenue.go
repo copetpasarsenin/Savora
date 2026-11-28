@@ -9,8 +9,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jung-kurt/gofpdf"
-	"github.com/savora/backend/database"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/database"
+	"github.com/saveplate/backend/models"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -36,10 +36,11 @@ func GetRevenueHandler(c *fiber.Ctx) error {
 
 	for _, rev := range revenues {
 		totalServiceFee += rev.ServiceFeeAmount
-		if rev.SourceType == models.RevenueSourceOrder {
+		switch rev.SourceType {
+		case models.RevenueSourceOrder:
 			totalFromOrders += rev.ServiceFeeAmount
 			orderCount++
-		} else if rev.SourceType == models.RevenueSourceAdvertisement {
+		case models.RevenueSourceAdvertisement:
 			totalFromAds += rev.ServiceFeeAmount
 			adCount++
 		}
@@ -140,7 +141,7 @@ func ExportRevenueHandler(c *fiber.Ctx) error {
 }
 
 // exportRevenueCSV generates CSV export
-func exportRevenueCSV(c *fiber.Ctx, revenues []models.PlatformRevenue, startDate, endDate string) error {
+func exportRevenueCSV(c *fiber.Ctx, revenues []models.PlatformRevenue, _, _ string) error {
 	// Set headers untuk download
 	filename := fmt.Sprintf("revenue_export_%s.csv", time.Now().Format("20060102_150405"))
 	c.Set("Content-Type", "text/csv")
@@ -195,7 +196,7 @@ func exportRevenueCSV(c *fiber.Ctx, revenues []models.PlatformRevenue, startDate
 }
 
 // exportRevenueExcel generates Excel export
-func exportRevenueExcel(c *fiber.Ctx, revenues []models.PlatformRevenue, startDate, endDate string) error {
+func exportRevenueExcel(c *fiber.Ctx, revenues []models.PlatformRevenue, _, _ string) error {
 	// Create new Excel file
 	f := excelize.NewFile()
 	defer func() {
@@ -308,7 +309,7 @@ func exportRevenuePDF(c *fiber.Ctx, revenues []models.PlatformRevenue, startDate
 
 	// Set font
 	pdf.SetFont("Arial", "B", 16)
-	pdf.Cell(0, 10, "Laporan Keuangan Platform Savora")
+	pdf.Cell(0, 10, "Laporan Keuangan Platform SavePlate")
 	pdf.Ln(12)
 
 	// Date range info

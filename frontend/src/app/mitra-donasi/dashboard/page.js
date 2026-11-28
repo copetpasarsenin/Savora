@@ -156,7 +156,7 @@ export default function MitraDashboardPage() {
     <>
       <TopHeader 
         title={`Dashboard Mitra ${isDonasi ? 'Donasi' : 'Pengolah'}`}
-        subtitle={mitraProfile?.org_name || user?.name || 'Mitra Savora'}
+        subtitle={mitraProfile?.org_name || user?.name || 'Mitra SavePlate'}
       />
 
       <div className="content-area">
@@ -170,7 +170,7 @@ export default function MitraDashboardPage() {
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-xl font-bold text-slate-900">
-                    {mitraProfile?.org_name || user?.name || 'Mitra Savora'}
+                    {mitraProfile?.org_name || user?.name || 'Mitra SavePlate'}
                   </h2>
                   {mitraProfile?.verification_status?.toUpperCase() === 'APPROVED' && (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -356,7 +356,7 @@ export default function MitraDashboardPage() {
               </div>
               <h3 className="text-lg font-bold">Progress Penyelamatan Makanan Bulan Ini</h3>
               <p className="text-xs text-slate-300 mt-1 max-w-xl">
-                Bersama Savora, Anda telah membantu menyelamatkan {dashboardStats?.total_portions || 0} porsi makanan dari pemborosan dan mengurangi jejak emisi karbon.
+                Bersama SavePlate, Anda telah membantu menyelamatkan {dashboardStats?.total_portions || 0} porsi makanan dari pemborosan dan mengurangi jejak emisi karbon.
               </p>
             </div>
             

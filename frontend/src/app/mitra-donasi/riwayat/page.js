@@ -61,9 +61,16 @@ export default function RiwayatMitraPage() {
   const [usingDemoData, setUsingDemoData] = useState(false);
 
   useEffect(() => {
+    let active = true;
     const currentUser = isAuthenticated() ? getUser() : null;
-    setUser(currentUser || { name: 'Mitra Demo', role: 'MITRA_DONASI' });
-    loadHistory();
+    queueMicrotask(() => {
+      if (!active) return;
+      setUser(currentUser || { name: 'Mitra Demo', role: 'MITRA_DONASI' });
+      loadHistory();
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   async function loadHistory() {

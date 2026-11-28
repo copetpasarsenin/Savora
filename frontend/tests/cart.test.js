@@ -332,7 +332,7 @@ test("saveCart menyimpan items ke localStorage", () => {
   saveCart(items);
 
   // Kunci menggunakan namespace "guest" karena tidak ada user login
-  const stored = mockStorage.getItem("savora_cart_guest");
+  const stored = mockStorage.getItem("saveplate_cart_guest");
   assert.equal(stored, JSON.stringify(items));
 
   delete global.window;
@@ -342,7 +342,7 @@ test("loadCart membaca items dari localStorage", () => {
   const mockStorage = createMockLocalStorage();
   const items = [{ id: 1, name: "Test", qty: 2 }];
   // Kunci menggunakan namespace "guest" karena tidak ada user login
-  mockStorage.setItem("savora_cart_guest", JSON.stringify(items));
+  mockStorage.setItem("saveplate_cart_guest", JSON.stringify(items));
 
   global.window = { localStorage: mockStorage };
 
@@ -366,7 +366,7 @@ test("loadCart return array kosong jika localStorage kosong", () => {
 
 test("loadCart return array kosong jika JSON rusak", () => {
   const mockStorage = createMockLocalStorage();
-  mockStorage.setItem("savora_cart", "{invalid json");
+  mockStorage.setItem("saveplate_cart", "{invalid json");
 
   global.window = { localStorage: mockStorage };
 
@@ -379,7 +379,7 @@ test("loadCart return array kosong jika JSON rusak", () => {
 
 test("loadCart return array kosong jika data bukan array", () => {
   const mockStorage = createMockLocalStorage();
-  mockStorage.setItem("savora_cart", JSON.stringify({ not: "array" }));
+  mockStorage.setItem("saveplate_cart", JSON.stringify({ not: "array" }));
 
   global.window = { localStorage: mockStorage };
 

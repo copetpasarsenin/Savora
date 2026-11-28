@@ -445,7 +445,7 @@ export function normalizeMarketplaceProduct(raw) {
     ...defaultMetadata,
     ...base,
     id: String(base.id),
-    name: base.name || "Rescue Deal Savora",
+    name: base.name || "Rescue Deal SavePlate",
     category: base.category || "Lainnya",
     original_price: originalPrice,
     rescue_price: rescuePrice,

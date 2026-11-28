@@ -13,8 +13,7 @@ import {
   AD_STATUS,
 } from "@/lib/umkmAds";
 import { fetchUMKMProducts, fallbackProducts } from "@/lib/products";
-
-const UMKM_ID = 1;
+import { getUser } from "@/lib/auth";
 
 const formatRupiah = (number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(number || 0);
@@ -22,7 +21,7 @@ const formatRupiah = (number) =>
 // Badge type mengikuti komponen atoms/Badge (success / warning / critical / dll).
 const statusBadgeType = (status) => {
   if (status === AD_STATUS.Aktif.key) return "success";
-  if (status === AD_STATUS.Kadaluarsa.key) return "critical";
+  if (status === AD_STATUS.Kedaluwarsa?.key || status === "Kadaluarsa") return "critical";
   return "warning"; // Draft
 };
 
@@ -53,13 +52,14 @@ export default function PromosiPage() {
         setPackages(pkgs);
         if (pkgs.length > 0) setPackageId(pkgs[0].id);
         
-        const prods = await fetchUMKMProducts(UMKM_ID);
+        const umkmId = getUser()?.id || 1;
+        const prods = await fetchUMKMProducts(umkmId);
         if (!active) return;
         const activeProds = prods.filter(p => p.status === "Aktif" || p.status === "Active");
         setProducts(activeProds);
         if (activeProds.length > 0) setProductId(String(activeProds[0].id));
         
-        const fetchedAds = await fetchUmkmAds(UMKM_ID);
+        const fetchedAds = await fetchUmkmAds(umkmId);
         if (!active) return;
         setAds(fetchedAds);
       } catch (err) {
@@ -90,7 +90,7 @@ export default function PromosiPage() {
     
     try {
       const newAd = await createUmkmAd({
-        umkm_id: UMKM_ID,
+        umkm_id: getUser()?.id || 1,
         product_id: Number(productId),
         package_id: packageId,
       });

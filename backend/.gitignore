@@ -11,9 +11,9 @@
 *xendit*.secret
 
 # Build artifacts
-savora-backend
-savora-backend.exe
-savora-backend-verify.exe
+saveplate-backend
+saveplate-backend.exe
+saveplate-backend-verify.exe
 *.exe
 *.dll
 *.so

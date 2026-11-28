@@ -81,7 +81,7 @@ export default function GabungMitraPengolahPage() {
           <div style={{ fontSize: "48px", color: "var(--success-color)", marginBottom: "1rem" }}>✓</div>
           <h2 style={{ color: "var(--text-main)", marginBottom: "1rem" }}>Pendaftaran Berhasil!</h2>
           <p style={{ color: "var(--text-muted)", marginBottom: "2rem" }}>
-            Terima kasih telah mendaftar sebagai Mitra Pengolah Savora. Aplikasi Anda akan diverifikasi oleh tim kami dalam 3-7 hari kerja.
+            Terima kasih telah mendaftar sebagai Mitra Pengolah SavePlate. Aplikasi Anda akan diverifikasi oleh tim kami dalam 3-7 hari kerja.
             Anda akan menerima notifikasi melalui email.
           </p>
           <Link href="/mitra" style={{ color: "var(--primary-color)", textDecoration: "none", fontWeight: "500" }}>
@@ -104,7 +104,7 @@ export default function GabungMitraPengolahPage() {
             Gabung Sebagai Mitra Pengolah
           </h1>
           <p style={{ color: "var(--text-muted)", fontSize: "16px" }}>
-            Bergabunglah dengan ekosistem Savora untuk menerima suplai bahan organik berkualitas secara konsisten.
+            Bergabunglah dengan ekosistem SavePlate untuk menerima suplai bahan organik berkualitas secara konsisten.
           </p>
         </div>
 
@@ -295,7 +295,7 @@ export default function GabungMitraPengolahPage() {
                 required
                 rows="4"
                 style={{ width: "100%", padding: "0.75rem", border: "1px solid var(--border-color)", borderRadius: "8px", fontSize: "16px", resize: "vertical" }}
-                placeholder="Ceritakan tentang organisasi Anda, pengalaman, dan tujuan bergabung dengan Savora"
+                placeholder="Ceritakan tentang organisasi Anda, pengalaman, dan tujuan bergabung dengan SavePlate"
               />
             </div>
 
@@ -316,7 +316,7 @@ export default function GabungMitraPengolahPage() {
                   style={{ marginRight: "0.75rem", marginTop: "0.25rem", cursor: "pointer" }}
                 />
                 <span style={{ color: "var(--text-main)", fontSize: "14px" }}>
-                  Saya menyatakan data yang saya isi adalah benar dan menyetujui Syarat & Ketentuan serta Kebijakan Privasi Savora.
+                  Saya menyatakan data yang saya isi adalah benar dan menyetujui Syarat & Ketentuan serta Kebijakan Privasi SavePlate.
                 </span>
               </label>
             </div>
@@ -346,7 +346,7 @@ export default function GabungMitraPengolahPage() {
         {/* Info Box */}
         <div style={{ marginTop: "1.5rem", padding: "1rem", background: "var(--secondary-color)", borderRadius: "8px", border: "1px solid var(--primary-color)" }}>
           <p style={{ color: "var(--text-main)", fontSize: "14px", margin: 0 }}>
-            <strong>Catatan:</strong> Setelah mengirim pendaftaran, tim Savora akan melakukan verifikasi dalam 3-7 hari kerja.
+            <strong>Catatan:</strong> Setelah mengirim pendaftaran, tim SavePlate akan melakukan verifikasi dalam 3-7 hari kerja.
             Anda akan menerima notifikasi email mengenai status verifikasi.
           </p>
         </div>

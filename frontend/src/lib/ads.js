@@ -58,8 +58,8 @@ export function normalizeAd(raw) {
   return {
     id: String(base.id ?? base.ad_id ?? base.sponsor ?? "ad"),
     type,
-    sponsor: base.sponsor || base.vendor || "Sponsor Savora",
-    headline: base.headline || base.title || "Dukung UMKM lokal di Savora",
+    sponsor: base.sponsor || base.vendor || "Sponsor SavePlate",
+    headline: base.headline || base.title || "Dukung UMKM lokal di SavePlate",
     cta: base.cta || (type === "umkm" ? "Lihat produk" : "Pelajari"),
     href,
     // Tautan pihak ketiga terbuka di tab baru; tautan internal tetap same-tab.

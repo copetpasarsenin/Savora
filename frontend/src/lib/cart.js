@@ -10,7 +10,7 @@
 
 import { readUserData, writeUserData, migrateOldData } from "./userStorage.js";
 
-const STORAGE_KEY = "savora_cart";
+const STORAGE_KEY = "saveplate_cart";
 
 /**
  * Tambah item ke keranjang. Jika sudah ada, tambahkan qty (clamp ke stock).

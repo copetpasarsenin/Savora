@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/savora/backend/handlers"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/handlers"
+	"github.com/saveplate/backend/models"
 )
 
 // RequireAdmin middleware ensures only ADMIN role can access the route

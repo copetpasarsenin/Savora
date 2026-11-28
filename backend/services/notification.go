@@ -3,7 +3,7 @@ package services
 import (
 	"fmt"
 
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/models"
 )
 
 // CreateNotification - helper untuk membuat notifikasi in-app

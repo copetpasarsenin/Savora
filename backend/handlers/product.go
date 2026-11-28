@@ -1,13 +1,39 @@
 package handlers
 
 import (
+	"encoding/json"
+	"errors"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/savora/backend/services"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/models"
+	"github.com/saveplate/backend/services"
 )
+
+func validateProductInput(name string, stock int, weightPerPortion float64) error {
+	if strings.TrimSpace(name) == "" {
+		return errors.New("Nama produk wajib diisi")
+	}
+	if stock < 0 {
+		return errors.New("Stok produk tidak boleh negatif")
+	}
+	if weightPerPortion <= 0 {
+		return errors.New("Berat per porsi wajib diisi dan harus lebih dari 0 gram")
+	}
+	return nil
+}
+
+func canManageProduct(claims *JWTClaims, productUmkmID uint) bool {
+	if claims == nil {
+		return false
+	}
+	roleUpper := strings.ToUpper(claims.Role)
+	if roleUpper == models.RoleAdmin {
+		return true
+	}
+	return roleUpper == models.RoleUmkm && productUmkmID == claims.UserID
+}
 
 // GetProductsByUMKM returns all products for a UMKM excluding Expired/Limbah status
 // (for active product management - expired products are archived automatically)
@@ -41,10 +67,33 @@ func GetActiveMarketplaceProducts(c *fiber.Ctx) error {
 
 // CreateProduct
 func CreateProduct(c *fiber.Ctx) error {
+	userLocal := c.Locals("user")
+	if userLocal == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized: token tidak valid"})
+	}
+	claims := userLocal.(*JWTClaims)
+	roleUpper := strings.ToUpper(claims.Role)
+	if roleUpper != models.RoleUmkm && roleUpper != models.RoleAdmin {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Forbidden: hanya UMKM atau Admin yang dapat membuat produk"})
+	}
+
 	product := new(models.Product)
 
 	if err := c.BodyParser(product); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot parse JSON"})
+	}
+
+	if err := validateProductInput(product.Name, product.Stock, product.WeightPerPortion); err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Paksa umkm_id dari JWT untuk role UMKM agar tidak bisa spoof milik UMKM lain
+	if roleUpper == models.RoleUmkm {
+		product.UmkmID = claims.UserID
+	}
+
+	if strings.TrimSpace(product.Status) == "" {
+		product.Status = models.ProductStatusAktif
 	}
 
 	product.FoodTrustStatus = CalculateFoodTrustStatus(product)
@@ -84,6 +133,12 @@ func CreateProduct(c *fiber.Ctx) error {
 
 // UpdateProduct
 func UpdateProduct(c *fiber.Ctx) error {
+	userLocal := c.Locals("user")
+	if userLocal == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized: token tidak valid"})
+	}
+	claims := userLocal.(*JWTClaims)
+
 	id := c.Params("id")
 	var product models.Product
 
@@ -91,20 +146,41 @@ func UpdateProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Product not found"})
 	}
 
+	if !canManageProduct(claims, product.UmkmID) {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Forbidden: Anda tidak berhak mengubah produk ini"})
+	}
+
 	var updateData models.Product
 	if err := c.BodyParser(&updateData); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot parse JSON"})
 	}
 
+	// Validasi berat: wajib > 0 bila dikirim, atau produk lama belum punya berat valid
+	var rawBody map[string]json.RawMessage
+	_ = json.Unmarshal(c.Body(), &rawBody)
+	if _, sent := rawBody["weight_per_portion"]; sent {
+		if updateData.WeightPerPortion <= 0 {
+			return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Berat per porsi wajib diisi dan harus lebih dari 0 gram"})
+		}
+	} else if product.WeightPerPortion <= 0 {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Berat per porsi wajib diisi dan harus lebih dari 0 gram"})
+	}
+	if updateData.Stock < 0 {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": "Stok produk tidak boleh negatif"})
+	}
+
+	// Jaga kepemilikan UMKM tidak bisa diubah lewat payload
+	updateData.UmkmID = product.UmkmID
 	updateData.FoodTrustStatus = CalculateFoodTrustStatus(&updateData)
 
 	if updateData.FoodTrustStatus == "Tidak Layak Konsumsi" && product.Status != models.ProductStatusLimbah {
 		updateData.Status = models.ProductStatusLimbah
 	}
 
+	prevStatus := product.Status
 	services.GetDB().Model(&product).Updates(updateData)
 
-	if updateData.Status == models.ProductStatusLimbah && product.Status != models.ProductStatusLimbah {
+	if updateData.Status == models.ProductStatusLimbah && prevStatus != models.ProductStatusLimbah {
 		estimatedWeight := float64(product.Stock) * product.WeightPerPortion / 1000.0
 		wasteLog := models.WasteLog{
 			UmkmID:          product.UmkmID,
@@ -130,11 +206,21 @@ func UpdateProduct(c *fiber.Ctx) error {
 
 // DeleteProduct
 func DeleteProduct(c *fiber.Ctx) error {
+	userLocal := c.Locals("user")
+	if userLocal == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized: token tidak valid"})
+	}
+	claims := userLocal.(*JWTClaims)
+
 	id := c.Params("id")
 	var product models.Product
 
 	if err := services.GetDB().First(&product, id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Product not found"})
+	}
+
+	if !canManageProduct(claims, product.UmkmID) {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Forbidden: Anda tidak berhak menghapus produk ini"})
 	}
 
 	// Delete product - may fail if referenced by orders (foreign key constraint)

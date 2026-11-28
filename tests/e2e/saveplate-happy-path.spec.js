@@ -1,4 +1,4 @@
-// tests/e2e/savora-happy-path.spec.js
+// tests/e2e/saveplate-happy-path.spec.js
 // Happy Path E2E Tests: Order → Payment → Pickup → Review
 // Owner: Nadi Azzada Akbar
 
@@ -50,7 +50,7 @@ async function triggerXenditWebhook(orderId, status = 'PAID') {
   }
 }
 
-test.describe('Savora E2E - Happy Path', () => {
+test.describe('SavePlate E2E - Happy Path', () => {
   test.beforeEach(async ({ page }) => {
     await page.context().clearCookies();
   });

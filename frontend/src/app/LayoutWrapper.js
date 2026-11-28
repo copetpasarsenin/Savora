@@ -22,9 +22,16 @@ export default function LayoutWrapper({ children }) {
 
   // Check user role AFTER hydration to prevent mismatch
   useEffect(() => {
+    let active = true;
     const user = getUser()
-    setIsUserUmkm(String(user?.role || '').toUpperCase() === 'UMKM')
-    setIsHydrated(true)
+    queueMicrotask(() => {
+      if (!active) return
+      setIsUserUmkm(String(user?.role || '').toUpperCase() === 'UMKM')
+      setIsHydrated(true)
+    })
+    return () => {
+      active = false
+    }
   }, [])
 
   // Daftar path yang TIDAK menggunakan DashboardLayout (punya layout sendiri atau standalone)

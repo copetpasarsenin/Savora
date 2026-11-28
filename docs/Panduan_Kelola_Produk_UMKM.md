@@ -1,9 +1,9 @@
-# Panduan Singkat Kelola Produk UMKM (Savora)
+# Panduan Singkat Kelola Produk UMKM (SavePlate)
 
-Dokumen ini merupakan panduan singkat untuk membantu pemilik UMKM mengelola produk makanan (rescue deal) pada platform Savora.
+Dokumen ini merupakan panduan singkat untuk membantu pemilik UMKM mengelola produk makanan (rescue deal) pada platform SavePlate.
 
 ## 1. Menambah Produk Baru
-1. Buka halaman Dashboard Savora dan navigasi ke menu **Produk** di bilah kiri.
+1. Buka halaman Dashboard SavePlate dan navigasi ke menu **Produk** di bilah kiri.
 2. Klik tombol **+ Tambah Produk** di sudut kanan atas.
 3. Isi detail produk meliputi:
    - **Nama Produk:** Contoh "Nasi Kotak Ayam Bakar".

@@ -1,14 +1,13 @@
-// tests/e2e/savora-comprehensive.spec.js
+// tests/e2e/saveplate-comprehensive.spec.js
 // Comprehensive Integration Tests: Order Flow, Payment, Help Ticket, Waste Log
 // Part 1: Setup helpers + Order flow to Help Ticket
 // Priority: MUST (PRD FR-10, FR-11, Section 23)
 
 const { test, expect } = require('@playwright/test');
-const crypto = require('crypto');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
-const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || 'test_server_key_12345';
+const XENDIT_CALLBACK_TOKEN = process.env.XENDIT_CALLBACK_TOKEN || 'test_xendit_callback_token';
 
 const testCustomer = {
   email: 'customer.test@savora.app',
@@ -36,32 +35,25 @@ async function getAuthToken(page) {
   });
 }
 
-// Helper: Generate Midtrans signature (PRD 14.6)
-function generateMidtransSignature(orderId, statusCode, grossAmount, serverKey) {
-  const signatureString = `${orderId}${statusCode}${grossAmount}${serverKey}`;
-  return crypto.createHash('sha512').update(signatureString).digest('hex');
-}
-
-// Helper: Trigger Midtrans webhook
-async function triggerMidtransWebhook(request, orderId, statusCode = '200', grossAmount = '52500') {
-  const signature = generateMidtransSignature(orderId, statusCode, grossAmount, MIDTRANS_SERVER_KEY);
-  
-  return await request.post(`${API_URL}/payments/midtrans-webhook`, {
+// Helper: Trigger Xendit webhook (PRD 14.6)
+async function triggerXenditWebhook(request, orderId, status = 'PAID', amount = 52500) {
+  return await request.post(`${API_URL}/payments/xendit-webhook`, {
     headers: {
       'Content-Type': 'application/json',
+      'x-callback-token': XENDIT_CALLBACK_TOKEN,
     },
     data: {
-      order_id: orderId,
-      status_code: statusCode,
-      gross_amount: grossAmount,
-      transaction_status: statusCode === '200' ? 'settlement' : 'expire',
-      signature_key: signature,
+      id: `xendit_inv_${orderId}_123456`,
+      external_id: `saveplate-order-${orderId}`,
+      status: status,
+      amount: amount,
+      paid_at: status === 'PAID' ? new Date().toISOString() : undefined,
     },
     failOnStatusCode: false,
   });
 }
 
-test.describe('Savora E2E - Complete Order to Help Ticket Flow', () => {
+test.describe('SavePlate E2E - Complete Order to Help Ticket Flow', () => {
   
   test('FLOW-01: Customer Order → Payment → Pickup Code Generated', async ({ page, context }) => {
     // Customer checkout
@@ -84,22 +76,22 @@ test.describe('Savora E2E - Complete Order to Help Ticket Flow', () => {
     await expect(serviceFee.first()).toBeVisible({ timeout: 5000 });
     
     // Pay button
-    await page.click('button:has-text("Bayar"), button:has-text("Midtrans"), [data-testid="btn-pay"]');
+    await page.click('button:has-text("Bayar"), button:has-text("Xendit"), [data-testid="btn-pay"]');
     await page.waitForTimeout(2000);
     
     // Get order ID from URL
     const url = page.url();
-    const orderIdMatch = url.match(/pesanan[\/\\]?(\d+)/i);
-    const orderId = orderIdMatch ? `ORDER-${orderIdMatch[1]}` : `ORDER-${Date.now()}`;
+    const orderIdMatch = url.match(/(?:pesanan|orders)[\/\\]?(\d+)/i);
+    const orderId = orderIdMatch ? orderIdMatch[1] : `${Date.now()}`;
     
     console.log(`✅ Order created: ${orderId}`);
     
     // Simulate webhook payment
-    const webhookResponse = await triggerMidtransWebhook(
+    const webhookResponse = await triggerXenditWebhook(
       page.context().request,
       orderId,
-      '200',
-      '52500'
+      'PAID',
+      52500
     );
     
     expect(webhookResponse.ok()).toBe(true);
@@ -220,7 +212,7 @@ test.describe('Savora E2E - Complete Order to Help Ticket Flow', () => {
   });
 });
 
-test.describe('Savora E2E - UMKM Waste Log', () => {
+test.describe('SavePlate E2E - UMKM Waste Log', () => {
   
   test('WASTE-01: UMKM Create Waste Log Entry', async ({ page }) => {
     await login(page, testUmkm.email, testUmkm.password);

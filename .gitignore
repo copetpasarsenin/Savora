@@ -1,5 +1,6 @@
 # Project Archives
 savora.zip
+saveplate.zip
 
 # graphify knowledge graph output
 /graphify-out
@@ -17,6 +18,7 @@ frontend/.env.local
 *.sqlite
 *.sqlite3
 savora.db
+saveplate.db
 
 # Node.js Dependencies
 node_modules/
@@ -41,6 +43,8 @@ build/
 # Go Build Outputs
 backend/savora-backend
 backend/savora-backend.exe
+backend/saveplate-backend
+backend/saveplate-backend.exe
 backend/tmp/
 
 # General Logs
@@ -82,4 +86,3 @@ backend/check_*.go
 PROPOSAL AMBA.docx
 Template Proposal CODE 6.0 (2).pdf
 .claude
-.gitignore

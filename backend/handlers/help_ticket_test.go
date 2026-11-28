@@ -11,12 +11,15 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
-	"github.com/savora/backend/database"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/database"
+	"github.com/saveplate/backend/models"
 )
 
 // setupHelpTicketTestDB initializes test database connection
 func setupHelpTicketTestDB(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping DB integration test in -short mode")
+	}
 	if database.DB == nil {
 		godotenv.Load("../.env")
 		database.ConnectDB()
@@ -63,7 +66,7 @@ func setupHelpTicketTestDB(t *testing.T) {
 }
 
 // cleanupHelpTicketTestData removes test data after test
-func cleanupHelpTicketTestData(t *testing.T, ticketID uint, orderID uint, userIDs ...uint) {
+func cleanupHelpTicketTestData(_ *testing.T, ticketID uint, orderID uint, userIDs ...uint) {
 	if database.DB != nil {
 		if ticketID > 0 {
 			database.DB.Exec("DELETE FROM help_tickets WHERE id = ?", ticketID)
@@ -103,7 +106,7 @@ func TestCreateHelpTicket_OrderStatusChange(t *testing.T) {
 	var orderID uint
 	err := database.DB.Raw(`
 		INSERT INTO orders (product_id, customer_id, customer_name, quantity, total_amount, payment_method, payment_status, status)
-		VALUES (1, ?, 'Customer Test', 1, 50000, 'MIDTRANS_SANDBOX', 'PAID', 'Selesai')
+		VALUES (1, ?, 'Customer Test', 1, 50000, 'XENDIT_SANDBOX', 'PAID', 'Selesai')
 		RETURNING id
 	`, customerUser.ID).Row().Scan(&orderID)
 

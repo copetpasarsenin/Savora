@@ -11,12 +11,15 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
-	"github.com/savora/backend/database"
-	"github.com/savora/backend/models"
+	"github.com/saveplate/backend/database"
+	"github.com/saveplate/backend/models"
 )
 
 // setupAdvertisementTestDB initializes test database connection
 func setupAdvertisementTestDB(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping DB integration test in -short mode")
+	}
 	if database.DB == nil {
 		godotenv.Load("../.env")
 		database.ConnectDB()
@@ -48,7 +51,7 @@ func setupAdvertisementTestDB(t *testing.T) {
 }
 
 // cleanupAdvertisementTestData removes test data after test
-func cleanupAdvertisementTestData(t *testing.T, adID uint, revenueID uint, userIDs ...uint) {
+func cleanupAdvertisementTestData(_ *testing.T, adID uint, revenueID uint, userIDs ...uint) {
 	if database.DB != nil {
 		if adID > 0 {
 			database.DB.Delete(&models.Advertisement{}, adID)

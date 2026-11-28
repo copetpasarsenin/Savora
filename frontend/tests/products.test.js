@@ -6,6 +6,7 @@
 import { describe, it, beforeEach, mock } from 'node:test';
 import assert from 'node:assert';
 import { validateProductDates, isoToDatetimeLocal, datetimeLocalToISO, detectExpiryExtension } from '../src/lib/dateValidation.js';
+import { normalizeProduct } from '../src/lib/products.js';
 
 describe('Date Validation Helpers', () => {
   describe('validateProductDates', () => {
@@ -98,6 +99,18 @@ describe('Date Validation Helpers', () => {
     it('should handle null values', () => {
       const result = detectExpiryExtension(null, null);
       assert.strictEqual(result.extended, false);
+    });
+  });
+
+  describe('normalizeProduct weight_per_portion', () => {
+    it('should preserve numeric weight_per_portion from backend payload', () => {
+      const normalized = normalizeProduct({ id: 7, name: 'Nasi Box', weight_per_portion: 350, stock: 5 });
+      assert.strictEqual(normalized.weight_per_portion, 350);
+    });
+
+    it('should default missing weight_per_portion to 0 (fail-closed)', () => {
+      const normalized = normalizeProduct({ id: 8, name: 'Roti' });
+      assert.strictEqual(normalized.weight_per_portion, 0);
     });
   });
 });
