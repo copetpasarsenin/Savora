@@ -347,7 +347,7 @@ export default function CartPage() {
                   >
                     <strong style={{ display: "block", marginBottom: "4px" }}>Info Checkout</strong>
                     Checkout diproses per item (1 order = 1 produk). Item pertama akan diproses saat Anda klik
-                    "Checkout Sekarang", item lainnya tetap ada di keranjang untuk checkout berikutnya.
+                    &quot;Checkout Sekarang&quot;, item lainnya tetap ada di keranjang untuk checkout berikutnya.
                   </div>
                 )}
 

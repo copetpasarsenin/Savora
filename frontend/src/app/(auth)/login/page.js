@@ -31,12 +31,18 @@ export default function LoginPage() {
 
   // F1: Cek query param registered=1 via window.location.search (CSR-safe, tanpa Suspense)
   useEffect(() => {
+    let active = true;
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('registered') === '1') {
-        setShowRegisteredBanner(true);
+        queueMicrotask(() => {
+          if (active) setShowRegisteredBanner(true);
+        });
       }
     }
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleChange = (e) => {

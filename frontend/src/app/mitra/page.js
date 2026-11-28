@@ -66,11 +66,11 @@ export default function MitraPage() {
         <div className="mitra-hero-container">
           <blockquote className="mitra-hero-quote">
             <span className="mitra-quote-dark">
-              "Bersama SavePlate, setiap langkah kecil menjadi kontribusi nyata
+              &quot;Bersama SavePlate, setiap langkah kecil menjadi kontribusi nyata
               dalam menyelamatkan{" "}
             </span>
             <span className="mitra-quote-green">
-              makanan, mengurangi limbah, dan membangun masa depan."
+              makanan, mengurangi limbah, dan membangun masa depan.&quot;
             </span>
           </blockquote>
         </div>
@@ -151,7 +151,7 @@ export default function MitraPage() {
                   <span className="mitra-check-icon">✓</span> Manajemen Pickup Terjadwal
                 </li>
                 <li>
-                  <span className="mitra-check-icon">✓</span> Verifikasi Badge "Mitra Berdampak"
+                  <span className="mitra-check-icon">✓</span> Verifikasi Badge &quot;Mitra Berdampak&quot;
                 </li>
               </ul>
               <Link href="/gabung-mitra-pengolah">

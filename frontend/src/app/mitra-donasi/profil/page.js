@@ -38,11 +38,26 @@ function ProfilMitraContent() {
     confirm_password: '',
   });
 
-  useEffect(() => {
-    const currentUser = isAuthenticated() ? getUser() : null;
-    setUser(currentUser || { name: 'Mitra Demo', role: 'MITRA_DONASI' });
-    loadProfile();
-  }, []);
+  function loadDemoProfile() {
+    const demoProfile = {
+      org_name: 'Yayasan Pangan Nusantara',
+      phone: '081234567890',
+      address: 'Jl. Mangga Dua No. 45, Jakarta Utara',
+      description: 'Organisasi penyalur donasi makanan surplus untuk masyarakat yang membutuhkan',
+      document_url: '',
+      category: 'donasi',
+      verification_status: 'APPROVED',
+    };
+    setMitraProfile(demoProfile);
+    setFormData({
+      org_name: demoProfile.org_name,
+      phone: demoProfile.phone,
+      address: demoProfile.address,
+      description: demoProfile.description,
+      document_url: demoProfile.document_url,
+      category: demoProfile.category,
+    });
+  }
 
   async function loadProfile() {
     setLoading(true);
@@ -80,26 +95,18 @@ function ProfilMitraContent() {
     }
   }
 
-  function loadDemoProfile() {
-    const demoProfile = {
-      org_name: 'Yayasan Pangan Nusantara',
-      phone: '081234567890',
-      address: 'Jl. Mangga Dua No. 45, Jakarta Utara',
-      description: 'Organisasi penyalur donasi makanan surplus untuk masyarakat yang membutuhkan',
-      document_url: '',
-      category: 'donasi',
-      verification_status: 'APPROVED',
-    };
-    setMitraProfile(demoProfile);
-    setFormData({
-      org_name: demoProfile.org_name,
-      phone: demoProfile.phone,
-      address: demoProfile.address,
-      description: demoProfile.description,
-      document_url: demoProfile.document_url,
-      category: demoProfile.category,
+  useEffect(() => {
+    let active = true;
+    const currentUser = isAuthenticated() ? getUser() : null;
+    queueMicrotask(() => {
+      if (!active) return;
+      setUser(currentUser || { name: 'Mitra Demo', role: 'MITRA_DONASI' });
+      loadProfile();
     });
-  }
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

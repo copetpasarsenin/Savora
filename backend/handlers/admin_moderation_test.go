@@ -17,6 +17,9 @@ import (
 
 // setupModerationTestDB initializes test database connection
 func setupModerationTestDB(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping DB integration test in -short mode")
+	}
 	if database.DB == nil {
 		godotenv.Load("../.env")
 		database.ConnectDB()

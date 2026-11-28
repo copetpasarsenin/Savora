@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { isAuthenticated, getUser } from '@/lib/auth';
 import TopHeader from '@/components/organisms/TopHeader';
@@ -23,26 +23,34 @@ export default function PenawaranMitraPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [offers, setOffers] = useState([]);
-  const [filteredOffers, setFilteredOffers] = useState([]);
   const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [usingDemoData, setUsingDemoData] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
 
   useEffect(() => {
+    let active = true;
     const currentUser = isAuthenticated() ? getUser() : null;
-    setUser(currentUser || { name: 'Mitra Demo', role: 'MITRA_DONASI' });
-    loadOffers();
+    queueMicrotask(() => {
+      if (!active) return;
+      setUser(currentUser || { name: 'Mitra Demo', role: 'MITRA_DONASI' });
+      loadOffers();
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Re-fetch when status filter changes (for API mode)
   useEffect(() => {
     if (!usingDemoData) {
-      loadOffers();
+      queueMicrotask(() => {
+        loadOffers();
+      });
     }
   }, [statusFilter]);
 
-  useEffect(() => {
+  const filteredOffers = useMemo(() => {
     let filtered = offers;
 
     // In demo mode, filter locally by status
@@ -51,19 +59,20 @@ export default function PenawaranMitraPage() {
     }
 
     if (searchQuery) {
+      const q = searchQuery.toLowerCase();
       filtered = filtered.filter((offer) => {
         const donorName = offer.donor?.name || '';
         const foodName = offer.food_name || '';
         const address = offer.pickup_address || '';
         return (
-          donorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          foodName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          address.toLowerCase().includes(searchQuery.toLowerCase())
+          donorName.toLowerCase().includes(q) ||
+          foodName.toLowerCase().includes(q) ||
+          address.toLowerCase().includes(q)
         );
       });
     }
 
-    setFilteredOffers(filtered);
+    return filtered;
   }, [offers, statusFilter, searchQuery, usingDemoData]);
 
   async function loadOffers() {

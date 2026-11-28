@@ -28,11 +28,12 @@ func SetupRoutes(app *fiber.App) {
 	// api.Get("/orders/umkm/:umkm_id", handlers.GetOrdersByUMKM)
 	// api.Put("/orders/:id/status", handlers.UpdateOrderStatus)
 
-	// Notifications
-	api.Get("/notifications/user/:user_id", handlers.GetNotificationsByUser)
-	api.Get("/notifications/unread/:user_id", handlers.GetUnreadCount)
-	api.Put("/notifications/:id/read", handlers.MarkAsRead)
-	api.Put("/notifications/read-all/:user_id", handlers.MarkAllAsRead)
+	// Notifications (protected)
+	notifications := api.Group("/notifications", middleware.AuthMiddleware)
+	notifications.Get("/user/:user_id", handlers.GetNotificationsByUser)
+	notifications.Get("/unread/:user_id", handlers.GetUnreadCount)
+	notifications.Put("/:id/read", handlers.MarkAsRead)
+	notifications.Put("/read-all/:user_id", handlers.MarkAllAsRead)
 
 	// Analytics
 	// TODO(pemilik modul): handler tidak ditemukan — main tidak compile sejak e4cd920, wiring perlu diperbaiki pemilik modul
@@ -63,8 +64,8 @@ func SetupRoutes(app *fiber.App) {
 	// Dynamic Discount
 	api.Post("/discount/calculate", handlers.CalculateDynamicDiscount)
 
-	// Upload Image
-	api.Post("/upload/image", handlers.UploadImage)
+	// Upload Image (protected)
+	api.Post("/upload/image", middleware.AuthMiddleware, handlers.UploadImage)
 
 	// Mitra Donasi Routes (protected - wajib login + role MITRA_DONASI)
 	mitraDonasi := api.Group("/mitra-donasi", middleware.AuthMiddleware, middleware.RequireRole(models.RoleMitraDonasi))

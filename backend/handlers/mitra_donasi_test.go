@@ -17,6 +17,9 @@ import (
 
 // setupTestDB initializes test database connection
 func setupTestDB(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping DB integration test in -short mode")
+	}
 	// Connect to database if not already connected
 	if database.DB == nil {
 		// Load .env file untuk DATABASE_URL

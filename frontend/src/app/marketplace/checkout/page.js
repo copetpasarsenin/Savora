@@ -182,25 +182,28 @@ function CheckoutSkeleton() {
 
 function CheckoutForm({ product, quantity, onSubmit, initialData }) {
   const [formData, setFormData] = useState({
-    billingName: "",
-    billingEmail: "",
-    billingPhone: "",
+    billingName: initialData?.name || "",
+    billingEmail: initialData?.email || "",
+    billingPhone: initialData?.phone || "",
     customerNote: "",
   });
+  const [prevInitialKey, setPrevInitialKey] = useState(
+    `${initialData?.name || ""}|${initialData?.email || ""}|${initialData?.phone || ""}`
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Auto-fill form dengan data profil user
-  useEffect(() => {
-    if (initialData) {
-      setFormData((prev) => ({
-        ...prev,
-        billingName: initialData.name || prev.billingName,
-        billingEmail: initialData.email || prev.billingEmail,
-        billingPhone: initialData.phone || prev.billingPhone,
-      }));
-    }
-  }, [initialData]);
+  // Auto-fill form saat profil user baru dimuat
+  const currentInitialKey = `${initialData?.name || ""}|${initialData?.email || ""}|${initialData?.phone || ""}`;
+  if (currentInitialKey !== prevInitialKey) {
+    setPrevInitialKey(currentInitialKey);
+    setFormData((prev) => ({
+      ...prev,
+      billingName: initialData?.name || prev.billingName,
+      billingEmail: initialData?.email || prev.billingEmail,
+      billingPhone: initialData?.phone || prev.billingPhone,
+    }));
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -387,21 +390,27 @@ function CheckoutPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const [countdownTarget] = useState(() => new Date(Date.now() + 15 * 60 * 1000));
 
   const productId = searchParams?.get("product_id");
   const initialQty = parseInt(searchParams?.get("qty")) || 1;
 
   useEffect(() => {
-    if (!productId) {
-      setError("Product ID tidak valid");
-      setLoading(false);
-      return;
-    }
+    let active = true;
 
     const loadProduct = async () => {
+      if (!productId) {
+        if (active) {
+          setError("Product ID tidak valid");
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
         setLoading(true);
         const data = await fetchMarketplaceProduct(productId);
+        if (!active) return;
         if (!data || !data.product) {
           setError("Produk tidak ditemukan");
           return;
@@ -410,13 +419,16 @@ function CheckoutPageContent() {
         setQuantity(Math.max(1, initialQty));
       } catch (err) {
         console.error("Failed to load product:", err);
-        setError("Gagal memuat produk");
+        if (active) setError("Gagal memuat produk");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     loadProduct();
+    return () => {
+      active = false;
+    };
   }, [productId, initialQty]);
 
   // Fetch user profile untuk auto-fill form
@@ -593,7 +605,7 @@ function CheckoutPageContent() {
                 phone: userProfile?.customer_profile?.phone || "",
               }}
             />
-            <CountdownTimer targetDate={new Date(Date.now() + 15 * 60 * 1000)} />
+            <CountdownTimer targetDate={countdownTarget} />
           </div>
         </div>
       </main>

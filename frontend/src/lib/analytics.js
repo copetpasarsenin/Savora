@@ -5,6 +5,7 @@
 // src/lib/ads.js, agar UI tetap jalan saat backend belum tersedia.
 
 import { baseUrl } from './apiBase.js';
+import { getToken } from './auth.js';
 
 const DEFAULT_UMKM_ID = 1;
 
@@ -142,11 +143,16 @@ export async function fetchWasteLogs(umkmId = DEFAULT_UMKM_ID) {
  * Catat Waste Log baru.
  */
 export async function createWasteLog(payload) {
+	const token = getToken();
+	const headers = {
+		"Content-Type": "application/json",
+	};
+	if (token) {
+		headers.Authorization = `Bearer ${token}`;
+	}
 	const response = await fetch(`${baseUrl()}/api/waste-logs`, {
 		method: "POST",
-		headers: {
-			"Content-Type": "application/json"
-		},
+		headers,
 		body: JSON.stringify(payload)
 	});
 	if (!response.ok) {

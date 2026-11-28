@@ -37,6 +37,7 @@ function MarketplaceContent() {
   const [ads, setAds] = useState([]);
   const [adsSource, setAdsSource] = useState("api");
   const [elapsed, setElapsed] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
   const sortDropdownRef = useRef(null);
 
   // Fetch products
@@ -49,10 +50,16 @@ function MarketplaceContent() {
 
   // Read category from query params on mount
   useEffect(() => {
+    let active = true;
     const categoryParam = searchParams.get("category");
     if (categoryParam && categoryParam !== "Semua") {
-      setSelectedCategory(categoryParam);
+      queueMicrotask(() => {
+        if (active) setSelectedCategory(categoryParam);
+      });
     }
+    return () => {
+      active = false;
+    };
   }, [searchParams]);
 
   // Fetch ads
@@ -64,7 +71,10 @@ function MarketplaceContent() {
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(() => setElapsed((e) => e + 1), 1000);
+    const timer = setInterval(() => {
+      setElapsed((e) => e + 1);
+      setNow(Date.now());
+    }, 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -184,7 +194,6 @@ function MarketplaceContent() {
 
   const nearbyProducts = products.slice(0, 12);
   // Pilih produk rekomendasi dengan logika adaptif untuk katalog kecil
-  const now = Date.now();
   const recommendedBase = selectRecommendedProducts(products, { now, elapsedSeconds: elapsed });
   // Inject ads hanya jika: mode api DAN ada iklan (fallback tidak pernah dirender)
   const shouldShowAds = adsSource === 'api' && ads.length > 0;
@@ -509,7 +518,6 @@ function MarketplaceContent() {
           ) : null}
           <div className="beranda-products-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
             {nearbyProducts.map((product) => {
-              const now = Date.now();
               const { score, remainingSeconds } = computeProductScore(product, now, elapsed);
               const badge = getFoodScoreBadge(score);
               const timerColor = remainingSeconds < 3600 ? "#ba1a1a" : remainingSeconds < 10800 ? "#f59e0b" : "#16a34a";
@@ -698,7 +706,6 @@ function MarketplaceContent() {
 
               // Render regular product card (same as nearbyProducts)
               const product = item;
-              const now = Date.now();
               const { score, remainingSeconds } = computeProductScore(product, now, elapsed);
               const badge = getFoodScoreBadge(score);
               const timerColor = remainingSeconds < 3600 ? "#ba1a1a" : remainingSeconds < 10800 ? "#f59e0b" : "#16a34a";

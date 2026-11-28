@@ -17,6 +17,9 @@ import (
 
 // setupTestDB initializes test database connection for UMKM tests
 func setupUMKMTestDB(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping DB integration test in -short mode")
+	}
 	if database.DB == nil {
 		godotenv.Load("../.env")
 		database.ConnectDB()

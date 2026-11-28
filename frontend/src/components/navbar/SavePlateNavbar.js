@@ -40,8 +40,14 @@ export default function SavePlateNavbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [prevPathname, setPrevPathname] = useState(pathname);
   const [address, setAddress] = useState("");
   const [addressDropdownOpen, setAddressDropdownOpen] = useState(false);
+
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    if (dropdownOpen) setDropdownOpen(false);
+  }
 
   // Ref untuk dropdown (click outside detection)
   const dropdownRef = useRef(null);
@@ -49,32 +55,37 @@ export default function SavePlateNavbar() {
 
   // Mount: cek auth & get user (C5a)
   useEffect(() => {
-    setMounted(true);
+    let active = true;
     const loggedIn = isAuthenticated();
-    setIsLoggedIn(loggedIn);
-    if (loggedIn) {
-      const userData = getUser();
-      setUser(userData);
-    }
+    const userData = loggedIn ? getUser() : null;
+    queueMicrotask(() => {
+      if (!active) return;
+      setMounted(true);
+      setIsLoggedIn(loggedIn);
+      if (userData) setUser(userData);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Load address dari localStorage dengan namespace per-akun setelah mounted
   useEffect(() => {
-    if (mounted) {
-      // Migrasi data lama sekali jalan (dari kunci global ke namespace per-akun)
-      migrateOldData("saveplate_address");
+    if (!mounted) return;
+    let active = true;
+    // Migrasi data lama sekali jalan (dari kunci global ke namespace per-akun)
+    migrateOldData("saveplate_address");
 
-      const savedAddress = readUserData("saveplate_address");
-      if (savedAddress) {
-        setAddress(savedAddress);
-      }
+    const savedAddress = readUserData("saveplate_address");
+    if (savedAddress) {
+      queueMicrotask(() => {
+        if (active) setAddress(savedAddress);
+      });
     }
+    return () => {
+      active = false;
+    };
   }, [mounted]);
-
-  // Close dropdown saat route change (C5b)
-  useEffect(() => {
-    setDropdownOpen(false);
-  }, [pathname]);
 
   // Close dropdown saat klik di luar (C5b)
   useEffect(() => {

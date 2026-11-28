@@ -48,6 +48,7 @@ function PaymentTimer({ expiresAt, onExpired }) {
 
   useEffect(() => {
     if (!expiresAt) return;
+    let active = true;
 
     const calculateTimeLeft = () => {
       const now = new Date();
@@ -64,13 +65,18 @@ function PaymentTimer({ expiresAt, onExpired }) {
       return { minutes, seconds, expired: false };
     };
 
-    setTimeLeft(calculateTimeLeft());
+    queueMicrotask(() => {
+      if (active) setTimeLeft(calculateTimeLeft());
+    });
 
     const interval = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, [expiresAt, onExpired]);
 
   if (!timeLeft || timeLeft.expired) {
@@ -270,9 +276,9 @@ export default function PaymentPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [polling, setPolling] = useState(false);
 
   const orderId = parseInt(params?.id);
+  const polling = Boolean(order && !loading && order.paymentStatus === "PENDING");
 
   // Load order detail
   const loadOrder = async () => {
@@ -291,24 +297,31 @@ export default function PaymentPage() {
 
   // Initial load
   useEffect(() => {
-    if (!orderId) {
-      setError("Order ID tidak valid");
-      setLoading(false);
-      return;
-    }
+    let active = true;
 
     const init = async () => {
+      if (!orderId) {
+        if (active) {
+          setError("Order ID tidak valid");
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
         setLoading(true);
         await loadOrder();
       } catch (err) {
         // Error already handled in loadOrder
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     init();
+    return () => {
+      active = false;
+    };
   }, [orderId]);
 
   // Polling for payment status updates
@@ -317,11 +330,8 @@ export default function PaymentPage() {
 
     // Only poll if payment is pending
     if (order.paymentStatus !== "PENDING") {
-      setPolling(false);
       return;
     }
-
-    setPolling(true);
 
     // Poll every 3 seconds
     const pollInterval = setInterval(async () => {
@@ -330,7 +340,6 @@ export default function PaymentPage() {
         // Stop polling if payment is no longer pending
         if (updated.paymentStatus !== "PENDING") {
           clearInterval(pollInterval);
-          setPolling(false);
         }
       } catch (err) {
         console.error("Polling error:", err);
@@ -340,7 +349,6 @@ export default function PaymentPage() {
 
     return () => {
       clearInterval(pollInterval);
-      setPolling(false);
     };
   }, [order?.paymentStatus, loading]);
 

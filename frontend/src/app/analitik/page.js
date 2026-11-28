@@ -60,7 +60,9 @@ export default function AnalitikPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const section = new URLSearchParams(window.location.search).get("section");
-    if (section && section.toLowerCase() === "insight") setView("Insight");
+    if (section && section.toLowerCase() === "insight") {
+      queueMicrotask(() => setView("Insight"));
+    }
   }, []);
 
   if (authLoading) {
@@ -568,7 +570,7 @@ export default function AnalitikPage() {
                 </div>
                 {ks.badge === "Gawat" && (
                   <div style={{ marginTop: '15px', padding: '10px', backgroundColor: '#FEE2E2', borderRadius: '8px', borderLeft: '4px solid #EF4444', fontSize: '0.875rem', color: '#991B1B' }}>
-                    <strong>Peringatan!</strong> Ditemukan banyak laporan "Basi / Bau" dari beberapa pelanggan. Segera periksa kualitas bahan dan kurangi porsi harian!
+                    <strong>Peringatan!</strong> Ditemukan banyak laporan &quot;Basi / Bau&quot; dari beberapa pelanggan. Segera periksa kualitas bahan dan kurangi porsi harian!
                   </div>
                 )}
               </div>

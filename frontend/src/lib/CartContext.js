@@ -21,8 +21,15 @@ export function CartProvider({ children }) {
 
   // Hydration-safe: baca localStorage hanya setelah mount di client
   useEffect(() => {
-    setItems(loadCart());
-    setIsHydrated(true);
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      setItems(loadCart());
+      setIsHydrated(true);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Persist ke localStorage setiap kali items berubah (kecuali saat hydration pertama)

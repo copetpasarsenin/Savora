@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, Suspense } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Search, ChevronDown } from "lucide-react";
@@ -61,8 +61,7 @@ function TentangInner() {
     return initial;
   });
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [fadeState, setFadeState] = useState("in"); // "in" | "out"
 
   // Refs
@@ -145,23 +144,18 @@ function TentangInner() {
   }
 
   // ---- Search ----
-  useEffect(() => {
+  const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) {
-      setSearchResults([]);
-      setShowSearchResults(false);
-      return;
-    }
-
+    if (!q) return [];
     const allArticles = getAllArticles();
-    const matches = allArticles.filter(
+    return allArticles.filter(
       (a) =>
         a.title.toLowerCase().includes(q) ||
         a.searchText.toLowerCase().includes(q)
     );
-    setSearchResults(matches);
-    setShowSearchResults(true);
   }, [searchQuery]);
+
+  const showSearchResults = isSearchOpen && searchQuery.trim().length > 0;
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -170,7 +164,7 @@ function TentangInner() {
         searchWrapperRef.current &&
         !searchWrapperRef.current.contains(e.target)
       ) {
-        setShowSearchResults(false);
+        setIsSearchOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -179,7 +173,7 @@ function TentangInner() {
 
   function handleSearchResultClick(articleId) {
     setSearchQuery("");
-    setShowSearchResults(false);
+    setIsSearchOpen(false);
     navigateToArticle(articleId);
   }
 
@@ -253,9 +247,13 @@ function TentangInner() {
               placeholder="Mencari..."
               className="tentang-search-input"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchQuery(val);
+                setIsSearchOpen(Boolean(val.trim()));
+              }}
               onFocus={() => {
-                if (searchQuery.trim()) setShowSearchResults(true);
+                if (searchQuery.trim()) setIsSearchOpen(true);
               }}
               aria-label="Cari artikel bantuan"
               id="tentang-search"

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState } from "react";
 import Sidebar from "../organisms/Sidebar";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -8,16 +8,9 @@ import { isCustomerRoute } from "@/lib/routes";
 
 export default function DashboardLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isCustomerView, setIsCustomerView] = useState(false);
   const pathname = usePathname();
+  const isCustomerView = isCustomerRoute(pathname);
 
-  // Handle pathname changes after hydration to prevent mismatch
-  useEffect(() => {
-    setIsCustomerView(isCustomerRoute(pathname));
-  }, [pathname]);
-
-  // During hydration, render full layout to match server
-  // Client-side route changes will update isCustomerView via useEffect
   if (isCustomerView) {
     return <>{children}</>;
   }

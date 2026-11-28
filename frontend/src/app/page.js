@@ -29,6 +29,7 @@ export default function BerandaPage() {
   const { count } = useCart();
   const [products, setProducts] = useState([]);
   const [elapsed, setElapsed] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -38,7 +39,10 @@ export default function BerandaPage() {
   }, []);
 
   useEffect(() => {
-    const timer = setInterval(() => setElapsed((e) => e + 1), 1000);
+    const timer = setInterval(() => {
+      setElapsed((e) => e + 1);
+      setNow(Date.now());
+    }, 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -247,7 +251,6 @@ export default function BerandaPage() {
               </div>
             ) : (
               topProducts.map((product) => {
-                const now = Date.now();
                 const { score, remainingSeconds } = computeProductScore(product, now, elapsed);
                 const badge = getFoodScoreBadge(score);
                 const timerColor = remainingSeconds < 3600 ? "#ba1a1a" : remainingSeconds < 10800 ? "#f59e0b" : "#16a34a";

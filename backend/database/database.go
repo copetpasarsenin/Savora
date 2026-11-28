@@ -64,12 +64,16 @@ func ConnectDB() {
 			&models.Payment{},            // P1 MVP - payment transactions
 			&models.PaymentLog{},         // P1 MVP - payment audit log
 			&models.Review{},
+			&models.ReviewKeyword{},
+			&models.KeywordScore{},
 			&models.Advertisement{},      // Task 5: Iklan
 			&models.AdMetrics{},          // Task 5: Iklan Metrics
 			&models.PlatformRevenue{},    // Task 5 & 6: Revenue Platform
 			&models.HelpTicket{},         // Task 7: Help Center
 			&models.Notification{},       // P2 Should Have - in-app notifications
 			&models.WasteLog{},           // P2 Should Have - waste tracking
+			&models.DonationOffer{},      // Mitra Donasi: donation offers
+			&models.DonationHistory{},    // Mitra Donasi: donation history
 		)
 		if err != nil {
 			log.Fatal("Failed to migrate database:", err)

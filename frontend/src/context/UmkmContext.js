@@ -30,22 +30,29 @@ export function UmkmProvider({ children }) {
   });
 
   useEffect(() => {
+    let active = true;
     const user = getUser();
     if (!user) return;
-    setUmkmData((prev) => ({
-      ...prev,
-      users: {
-        id: user.id ?? prev.users.id,
-        name: user.name || prev.users.name,
-        email: user.email || prev.users.email,
-      },
-      umkm_profiles: {
-        ...prev.umkm_profiles,
-        business_name: user.business_name || user.name || prev.umkm_profiles.business_name,
-        address: user.address || prev.umkm_profiles.address,
-      },
-      phone: user.phone || prev.phone,
-    }));
+    queueMicrotask(() => {
+      if (!active) return;
+      setUmkmData((prev) => ({
+        ...prev,
+        users: {
+          id: user.id ?? prev.users.id,
+          name: user.name || prev.users.name,
+          email: user.email || prev.users.email,
+        },
+        umkm_profiles: {
+          ...prev.umkm_profiles,
+          business_name: user.business_name || user.name || prev.umkm_profiles.business_name,
+          address: user.address || prev.umkm_profiles.address,
+        },
+        phone: user.phone || prev.phone,
+      }));
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (

@@ -33,25 +33,25 @@ export default function AdminSidebar({ onClose }) {
   });
 
   useEffect(() => {
+    async function fetchBadgeCounts() {
+      try {
+        const data = await apiFetch('/admin/reports/summary');
+        if (data.success && data.data?.summary) {
+          const s = data.data.summary;
+          setBadgeCounts({
+            verifikasi: (s.umkm_pending_count || 0) + (s.mitra_pending_count || 0),
+            moderasiListing: s.listing_moderasi_count || 0,
+            iklan: s.iklan_pending_count || 0,
+            helpCenter: s.tiket_help_baru_count || 0
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch badge counts:', err);
+      }
+    }
+
     fetchBadgeCounts();
   }, []);
-
-  async function fetchBadgeCounts() {
-    try {
-      const data = await apiFetch('/admin/reports/summary');
-      if (data.success && data.data?.summary) {
-        const s = data.data.summary;
-        setBadgeCounts({
-          verifikasi: (s.umkm_pending_count || 0) + (s.mitra_pending_count || 0),
-          moderasiListing: s.listing_moderasi_count || 0,
-          iklan: s.iklan_pending_count || 0,
-          helpCenter: s.tiket_help_baru_count || 0
-        });
-      }
-    } catch (err) {
-      console.error('Failed to fetch badge counts:', err);
-    }
-  }
 
   // Menu struktur sesuai spec §1
   const menuGroups = [

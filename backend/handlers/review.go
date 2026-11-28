@@ -19,10 +19,16 @@ func NewReviewHandler() *ReviewHandler {
 // CreateReview - POST /reviews (Customer submit review setelah order completed)
 func (h *ReviewHandler) CreateReview(c *fiber.Ctx) error {
 	db := services.GetDB()
-	
-	// TODO: Extract customerID dari JWT
-	customerID := uint(1)
-	
+
+	userLocal := c.Locals("user")
+	if userLocal == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Token tidak valid",
+		})
+	}
+	claims := userLocal.(*JWTClaims)
+	customerID := claims.UserID
+
 	var req services.CreateReviewRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(400).JSON(fiber.Map{

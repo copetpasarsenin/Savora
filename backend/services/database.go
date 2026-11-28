@@ -58,6 +58,7 @@ func InitDB() error {
 			&models.CustomerProfile{},
 			&models.UMKMProfile{},
 			&models.MitraDonasiProfile{},
+			&models.MitraPengolahApplication{},
 
 			// Core products & orders
 			&models.Product{},
@@ -75,6 +76,7 @@ func InitDB() error {
 
 			// Perluasan: ads, help, waste, notifications
 			&models.Advertisement{},
+			&models.AdMetrics{},
 			&models.WasteLog{},
 			&models.HelpTicket{},
 			&models.Notification{},
